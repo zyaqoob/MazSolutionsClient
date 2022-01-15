@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clients;
+package restful;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
 /**
- * Jersey REST client generated for REST resource:ExamFacadeREST
- * [entities.exam]<br>
+ * Jersey REST client generated for REST resource:SubjectFacadeREST
+ * [entities.subject]<br>
  * USAGE:
  * <pre>
- *        NewJerseyClient client = new NewJerseyClient();
+ *        SubjectRESTClient client = new SubjectRESTClient();
  *        Object response = client.XXX(...);
  *        // do whatever with response
  *        client.close();
@@ -22,21 +22,15 @@ import javax.ws.rs.client.WebTarget;
  *
  * @author z332h
  */
-public class ExamRESTClient {
+public class SubjectRESTClient {
 
     private WebTarget webTarget;
     private Client client;
     private static final String BASE_URI = "http://localhost:32099/MazSolutionsServer/webresources";
 
-    public ExamRESTClient() {
+    public SubjectRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
-        webTarget = client.target(BASE_URI).path("entities.exam");
-    }
-
-    public <T> T findExamsByStudent(Class<T> responseType, String name) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{name}));
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+        webTarget = client.target(BASE_URI).path("entities.subject");
     }
 
     public String countREST() throws ClientErrorException {
@@ -61,13 +55,37 @@ public class ExamRESTClient {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public <T> T findAllExam(Class<T> responseType) throws ClientErrorException {
+    public <T> T findSubjectsByStudent(Class<T> responseType, String fullName) throws ClientErrorException {
         WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{fullName}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    public <T> T findSubjectsByCourse(Class<T> responseType, String name) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("course/{0}", new Object[]{name}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    public <T> T findSubjectByExam(Class<T> responseType, String id) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("exam/{0}", new Object[]{id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void create(Object requestEntity) throws ClientErrorException {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+    }
+
+    public <T> T findAllSubject(Class<T> responseType) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    public <T> T findSubjectsByTeacherCourse(Class<T> responseType, String name) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("teacherCourse/{0}", new Object[]{name}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public <T> T findAll(Class<T> responseType) throws ClientErrorException {
@@ -77,18 +95,6 @@ public class ExamRESTClient {
 
     public void remove(String id) throws ClientErrorException {
         webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
-    }
-
-    public <T> T findExamsBySubject(Class<T> responseType, String name) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("subject/{0}", new Object[]{name}));
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-    }
-
-    public <T> T findExamByExamSession(Class<T> responseType, String id) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        resource = resource.path(java.text.MessageFormat.format("examSession/{0}", new Object[]{id}));
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
     public void close() {

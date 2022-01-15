@@ -3,7 +3,4 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-/**
- * Package that contains the RESTful of clients.
- */
-package clients;
+package view;
