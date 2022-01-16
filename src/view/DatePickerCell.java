@@ -5,6 +5,7 @@
  */
 package view;
 
+import classes.Teacher;
 import classes.User;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
@@ -13,7 +14,7 @@ import javafx.scene.control.TableCell;
  *
  * @author Aitor
  */
-public class DatePickerCell extends TableCell<User, String> {
+public class DatePickerCell extends TableCell<Teacher, String> {
 
     private DatePicker datePicker;
 
@@ -36,6 +37,7 @@ public class DatePickerCell extends TableCell<User, String> {
 
     @Override
     public void cancelEdit() {
+        setGraphic(null);
         super.cancelEdit();
     }
 }

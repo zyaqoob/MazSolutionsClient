@@ -31,6 +31,8 @@ public class TeacherCourse implements Serializable {
     private Set<TeacherCourseSubject> teacherCourseSubjects;
     //Teacher of the TeacherCourse
     private Teacher teacher;
+    
+    private String name;
     /**
      * Method that returns the class that contains the id's of TeacherCourse.
      * @return idTeacherCourseId;
@@ -45,6 +47,15 @@ public class TeacherCourse implements Serializable {
     public void setIdTeacherCourseId(Long idTeacherCourse) {
         this.idTeacherCourse = idTeacherCourse;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    
     /**
      * Method that returns the date start of the TeacherCourse.
      * @return dateStart

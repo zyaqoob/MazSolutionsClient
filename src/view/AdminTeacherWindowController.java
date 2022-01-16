@@ -5,11 +5,14 @@
  */
 package view;
 
+import classes.Teacher;
+import classes.TeacherCourse;
 import classes.User;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +39,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javax.ws.rs.core.GenericType;
+import restful.TeacherCourseRESTClient;
 import restful.UserRESTClient;
 
 /**
@@ -78,27 +82,32 @@ public class AdminTeacherWindowController {
     private ImageView ivX;
 
     @FXML
-    private TableView<User> tblTeachers;
+    private TableView<Teacher> tblTeachers;
 
     @FXML
-    private TableColumn<User, String> tbcFullName;
+    private TableColumn<Teacher, String> tbcFullName;
 
     @FXML
-    private TableColumn<User, String> tbcUsername;
+    private TableColumn<Teacher, String> tbcUsername;
 
     @FXML
-    private TableColumn<User, String> tbcEmail;
+    private TableColumn<Teacher, String> tbcEmail;
 
     @FXML
-    private TableColumn<User, String> tbcTelephone;
+    private TableColumn<Teacher, String> tbcTelephone;
 
     @FXML
-    private TableColumn<User, String> tbcBirthDate;
+    private TableColumn<Teacher, String> tbcBirthDate;
 
     @FXML
-    private TableColumn<User, String> tbcCourse;
+    private TableColumn<Teacher, String> tbcCourse;
+    
+    @FXML
+    private TableColumn<Teacher, Float> tbcSalary;
 
-    private ObservableList<User> teachersData;
+    private ObservableList<Teacher> teachersData;
+    
+    private ObservableList<TeacherCourse>teacherCourses;
 
     public void initStage(Parent root) {
         //LOGGER.info("Stage initiated");
@@ -112,38 +121,38 @@ public class AdminTeacherWindowController {
         tbcEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         tbcTelephone.setCellValueFactory(new PropertyValueFactory<>("telephone"));
         tbcBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
-        tbcCourse.setCellValueFactory(new PropertyValueFactory<>("teacherCourses"));     
+        tbcCourse.setCellValueFactory(new PropertyValueFactory<>("teacherCourses")); 
+        tbcSalary.setCellValueFactory(new PropertyValueFactory<>("salary"));
         tblTeachers.setEditable(true);
         ivTick.setVisible(false);
         ivX.setVisible(false);
         UserRESTClient rest = new UserRESTClient();
-        teachersData = FXCollections.observableArrayList(rest.findAll_XML(new GenericType<List<User>>() {
+        teachersData = FXCollections.observableArrayList(rest.findAll_XML(new GenericType<List<Teacher>>() {
+        }));
+        teacherCourses=FXCollections.observableArrayList(new TeacherCourseRESTClient().findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
         }));
         //Table column FullName editable with textField
-        tbcFullName.setCellFactory(TextFieldTableCell.<User>forTableColumn());
+        tbcFullName.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcFullName.setOnEditCommit(
-                (CellEditEvent<User, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     ((User) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setFullName(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
                 });
-        tbcFullName.setOnEditCancel((CellEditEvent<User, String> t) -> {
-            tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
-        });
         //Table column Username editable with textField
-        tbcUsername.setCellFactory(TextFieldTableCell.<User>forTableColumn());
+        tbcUsername.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcUsername.setOnEditCommit(
-                (CellEditEvent<User, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     ((User) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setLogin(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcEmail);
                 });
         //Table column Email editable with textField
-        tbcEmail.setCellFactory(TextFieldTableCell.<User>forTableColumn());
+        tbcEmail.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcEmail.setOnEditCommit(
-                (CellEditEvent<User, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     ((User) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setEmail(t.getNewValue());
                     //tblTeachers.getColumns().add(tbcEmail);
@@ -151,9 +160,9 @@ public class AdminTeacherWindowController {
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
                 });
         //Table column Telephone editable with textField
-        tbcTelephone.setCellFactory(TextFieldTableCell.<User>forTableColumn());
+        tbcTelephone.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcTelephone.setOnEditCommit(
-                (CellEditEvent<User, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     if (!t.getNewValue().matches("[0-9]{9}")) {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid telephone value", ButtonType.OK);
                         alert.show();
@@ -179,25 +188,32 @@ public class AdminTeacherWindowController {
          * //throw new UnsupportedOperationException("Not supported yet."); //To
          * change body of generated methods, choose Tools | Templates. } });*
          */
-        Callback<TableColumn<User, String>, TableCell<User, String>> dateCellFactory
-                = (TableColumn<User, String> param) -> new DatePickerCell();
+        Callback<TableColumn<Teacher, String>, TableCell<Teacher, String>> dateCellFactory
+                = (TableColumn<Teacher, String> param) -> new DatePickerCell();
         tbcBirthDate.setCellFactory(dateCellFactory);
         tbcBirthDate.setOnEditCommit(
-                (TableColumn.CellEditEvent<User, String> t) -> {
+                (TableColumn.CellEditEvent<Teacher, String> t) -> {
                     ((User) t.getTableView().getItems()
                             .get(t.getTablePosition().getRow()))
                             .setBirthDate(new Date(t.getNewValue()));
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
                 });
-        tbcCourse.setCellFactory(ChoiceBoxTableCell.<User>forTableColumn());
+        ObservableList<String>name;
+        List<String>stringnames=new ArrayList<>();
+        for(int i=0;i<teacherCourses.size();i++){
+           stringnames.add(i,teacherCourses.get(i).getName());
+           //name.add(t.getName());
+        }
+        name=FXCollections.observableArrayList(stringnames);
+        tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
         tblTeachers.setItems(teachersData);
         btnCreate.setOnAction(this::creation);
         stage.show();
     }
 
     public void creation(ActionEvent action) {
-        teachersData.add(new User());
+        teachersData.add(new Teacher());
         tblTeachers.getSelectionModel().select(teachersData.size() - 1);
         tblTeachers.getFocusModel().focus(teachersData.size() - 1, tbcFullName);
         tblTeachers.edit(teachersData.size() - 1, tbcFullName);

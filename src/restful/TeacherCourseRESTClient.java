@@ -8,6 +8,7 @@ package restful;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Jersey REST client generated for REST resource:TeacherCourseFacadeREST
@@ -26,7 +27,7 @@ public class TeacherCourseRESTClient {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:32099/MazSolutionsServer/webresources";
+    private static final String BASE_URI = "http://localhost:46293/MazSolutionsServer/webresources";
 
     public TeacherCourseRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -55,7 +56,7 @@ public class TeacherCourseRESTClient {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public <T> T findAllTeacherCourses(Class<T> responseType) throws ClientErrorException {
+    public <T> T findAllTeacherCourses(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
