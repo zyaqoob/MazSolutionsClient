@@ -10,21 +10,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import view.AdminTeacherWindowController;
 
 /**
  *
  * @author z332h
  */
-public class MazSolutionsClient extends Application {
+public class ApplicationMaz extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
-        
-        Scene scene = new Scene(root);
-        
-        stage.setScene(scene);
-        stage.show();
+       FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
+       Parent root = (Parent) loader.load();
+       AdminTeacherWindowController a = loader.getController();
+       a.initStage(root);
     }
 
     /**
