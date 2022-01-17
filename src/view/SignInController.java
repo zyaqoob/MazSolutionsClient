@@ -157,7 +157,7 @@ public class SignInController {
     }
 
     public void handlePasswordRecoverAction(ActionEvent action) {
-        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+       
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/password_recover_window.fxml"));
         Stage passwordRecoverStage = new Stage();
         try {
@@ -170,5 +170,6 @@ public class SignInController {
             alert.show();
         }
     }
+    
 
 }
