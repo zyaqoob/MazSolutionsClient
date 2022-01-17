@@ -47,68 +47,68 @@ import restful.UserRESTClient;
  * @author Aitor
  */
 public class AdminTeacherWindowController {
-
+    
     @FXML
     private Label lblStudents;
-
+    
     @FXML
     private Label lblTeachers;
-
+    
     @FXML
     private Label lblSubjects;
-
+    
     @FXML
     private Label lblCourses;
-
+    
     @FXML
     private Label lblTeacherCourses;
-
+    
     @FXML
     private Button btnCreate;
-
+    
     @FXML
     private Button btnDelete;
-
+    
     @FXML
     private Button btnPrint;
-
+    
     @FXML
     private ImageView ivSearch;
-
+    
     @FXML
     private ImageView ivTick;
-
+    
     @FXML
     private ImageView ivX;
-
+    
     @FXML
     private TableView<Teacher> tblTeachers;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcFullName;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcUsername;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcEmail;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcTelephone;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcBirthDate;
-
+    
     @FXML
     private TableColumn<Teacher, String> tbcCourse;
     
     @FXML
-    private TableColumn<Teacher, Float> tbcSalary;
-
+    private TableColumn<Teacher, String> tbcSalary;
+    
     private ObservableList<Teacher> teachersData;
     
-    private ObservableList<TeacherCourse>teacherCourses;
-
+    private ObservableList<TeacherCourse> teacherCourses;
+    
     public void initStage(Parent root) {
         //LOGGER.info("Stage initiated");
         Stage stage = new Stage();
@@ -116,20 +116,22 @@ public class AdminTeacherWindowController {
         stage.setScene(scene);
         stage.setTitle("SignIn");
         stage.setResizable(false);
+        
         tbcFullName.setCellValueFactory(new PropertyValueFactory<>("fullName"));
         tbcUsername.setCellValueFactory(new PropertyValueFactory<>("login"));
         tbcEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         tbcTelephone.setCellValueFactory(new PropertyValueFactory<>("telephone"));
         tbcBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
-        tbcCourse.setCellValueFactory(new PropertyValueFactory<>("teacherCourses")); 
+        tbcCourse.setCellValueFactory(new PropertyValueFactory<>("teacherCourses"));        
         tbcSalary.setCellValueFactory(new PropertyValueFactory<>("salary"));
         tblTeachers.setEditable(true);
         ivTick.setVisible(false);
         ivX.setVisible(false);
+        btnDelete.setDisable(true);
         UserRESTClient rest = new UserRESTClient();
         teachersData = FXCollections.observableArrayList(rest.findAll_XML(new GenericType<List<Teacher>>() {
         }));
-        teacherCourses=FXCollections.observableArrayList(new TeacherCourseRESTClient().findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
+        teacherCourses = FXCollections.observableArrayList(new TeacherCourseRESTClient().findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
         }));
         //Table column FullName editable with textField
         tbcFullName.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
@@ -140,6 +142,10 @@ public class AdminTeacherWindowController {
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
                 });
+        tbcFullName.setOnEditCancel((CellEditEvent<Teacher, String> t) -> {
+            tblTeachers.refresh();
+            btnCreate.setDisable(false);
+        });
         //Table column Username editable with textField
         tbcUsername.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcUsername.setOnEditCommit(
@@ -199,19 +205,34 @@ public class AdminTeacherWindowController {
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
                 });
-        ObservableList<String>name;
-        List<String>stringnames=new ArrayList<>();
-        for(int i=0;i<teacherCourses.size();i++){
-           stringnames.add(i,teacherCourses.get(i).getName());
-           //name.add(t.getName());
+       /* tbcSalary.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
+        tbcSalary.setOnEditCommit(
+                (CellEditEvent<Teacher, String> t) -> {
+                    if (!t.getNewValue().matches("[0-9]?{5}")) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid salary value", ButtonType.OK);
+                        alert.show();
+                    } else {
+                        ((Teacher) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setSalary(Float.valueOf(t.getNewValue()));
+                        tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
+                        // tblTeachers.getColumns().add(tbcTelephone);
+                    }
+                });*/
+        ObservableList<String> name;
+        List<String> stringnames = new ArrayList<>();
+        for (int i = 0; i < teacherCourses.size(); i++) {
+            stringnames.add(i, teacherCourses.get(i).getName());
+            //name.add(t.getName());
         }
-        name=FXCollections.observableArrayList(stringnames);
+        name = FXCollections.observableArrayList(stringnames);
         tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
         tblTeachers.setItems(teachersData);
         btnCreate.setOnAction(this::creation);
+        btnDelete.setOnAction(this::delete);
+        
         stage.show();
     }
-
+    
     public void creation(ActionEvent action) {
         teachersData.add(new Teacher());
         tblTeachers.getSelectionModel().select(teachersData.size() - 1);
@@ -220,5 +241,8 @@ public class AdminTeacherWindowController {
         ivTick.setVisible(true);
         ivX.setVisible(true);
         btnCreate.setDisable(true);
+    }
+    public void delete(ActionEvent action){
+        
     }
 }

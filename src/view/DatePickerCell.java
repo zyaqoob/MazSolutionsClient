@@ -34,7 +34,10 @@ public class DatePickerCell extends TableCell<Teacher, String> {
             setGraphic(datePicker);
         }
     }
-
+    public void updateItem(){
+        
+    }
+    
     @Override
     public void cancelEdit() {
         setGraphic(null);

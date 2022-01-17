@@ -5,6 +5,7 @@
  */
 package restful;
 
+import interfaces.TeacherManager;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -22,7 +23,7 @@ import javax.ws.rs.client.WebTarget;
  *
  * @author z332h
  */
-public class TeacherRESTClient {
+public class TeacherRESTClient implements TeacherManager{
 
     private WebTarget webTarget;
     private Client client;
