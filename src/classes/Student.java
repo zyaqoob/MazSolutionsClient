@@ -9,6 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -18,30 +21,46 @@ import javax.xml.bind.annotation.XmlTransient;
  *
  * @author Miguel Ángel Sánchez
  */
-
 @XmlRootElement
 public class Student extends User implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     /**
      * Year when the Student is registered.
+     *
+     * @param year
+     * @param sessions
+     * @param course
      */
-    private Date year;
+    public Student(Date year, ObservableList<ExamSession> sessions, Course course) {
+        this.year = new SimpleObjectProperty<>(year);
+        this.sessions = new SimpleListProperty<>(sessions);
+        this.course = new SimpleObjectProperty<>(course);
+    }
+
+    public Student() {
+        this.year = new SimpleObjectProperty<>();
+        this.sessions = new SimpleListProperty<>();
+        this.course = new SimpleObjectProperty<>();
+    }
+
+    private SimpleObjectProperty<Date> year;
     /**
      * Examn sessions where the student are being evaluated.
      */
-    private Set<ExamSession> sessions;
+    private SimpleListProperty<ExamSession> sessions;
     /**
      * Course where the student is registered.
      */
-    private Course course;
+    private SimpleObjectProperty<Course> course;
 
     /**
      *
      * @return This method returns the year of the student.
      */
     public Date getYear() {
-        return year;
+        return year.get();
     }
 
     /**
@@ -49,23 +68,23 @@ public class Student extends User implements Serializable {
      * @param year This method set the year of the student.
      */
     public void setYear(Date year) {
-        this.year = year;
+        this.year.set(year);
     }
 
     /**
      *
      * @return This method returns a Set with the exam sessions of the student.
      */
-    public Set<ExamSession> getSessions() {
-        return sessions;
+    public ObservableList<ExamSession> getSessions() {
+        return sessions.get();
     }
 
     /**
      *
      * @param sessions This method set the sessions of the student.
      */
-    public void setSessions(Set<ExamSession> sessions) {
-        this.sessions = sessions;
+    public void setSessions(ObservableList<ExamSession> sessions) {
+        this.sessions.set(sessions);
     }
 
     /**
@@ -74,7 +93,7 @@ public class Student extends User implements Serializable {
      */
     @XmlTransient
     public Course getCourse() {
-        return course;
+        return course.get();
     }
 
     /**
@@ -82,7 +101,7 @@ public class Student extends User implements Serializable {
      * @param course This method set a course.
      */
     public void setCourse(Course course) {
-        this.course = course;
+        this.course.set(course);
     }
 
     /**

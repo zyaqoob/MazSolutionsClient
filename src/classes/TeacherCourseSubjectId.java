@@ -7,6 +7,7 @@ package classes;
 
 import java.io.Serializable;
 import java.util.Objects;
+import javafx.beans.property.SimpleLongProperty;
 
 /**
  *
@@ -16,41 +17,55 @@ import java.util.Objects;
  * Class that contains the id's of the CourseSubject.
  */
 public class TeacherCourseSubjectId implements Serializable {
+
     /**
      * The id of the teacherCourse
+     * @param idTeacherCourse
+     * @param idSubject
      */
-    private Long idTeacherCourse;
+    public TeacherCourseSubjectId(Long idTeacherCourse,Long idSubject) {
+        this.idTeacherCourse=new SimpleLongProperty(idTeacherCourse);
+        this.idSubject=new SimpleLongProperty(idSubject);
+    }
+
+    public TeacherCourseSubjectId() {
+        this.idTeacherCourse=new SimpleLongProperty();
+        this.idSubject=new SimpleLongProperty();
+    }
+
+    
+    private SimpleLongProperty idTeacherCourse;
     /**
      * The id of the subject
      */
-    private Long idSubject;
+    private SimpleLongProperty idSubject;
     /**
      * Method that return the idTeacherCourse.
      * @return idTeacherCourse
      */
     public Long getIdTeacherCourse() {
-        return idTeacherCourse;
+        return idTeacherCourse.get();
     }
     /**
      * Method that set the value of the idTeacherCourse
      * @param idTeacherCourse 
      */
     public void setIdTeacherCourse(Long idTeacherCourse) {
-        this.idTeacherCourse = idTeacherCourse;
+        this.idTeacherCourse.set(idTeacherCourse);
     }
     /**
      * Method that return the idSubject.
      * @return idSubject
      */
     public Long getIdSubject() {
-        return idSubject;
+        return idSubject.get();
     }
     /**
      * Method that set the value of the idSubject
      * @param idSubject 
      */
     public void setIdSubject(Long idSubject) {
-        this.idSubject = idSubject;
+        this.idSubject.set(idSubject);
     }
      /**
      * Integer representation for TeacherCourseSubjectId instance.

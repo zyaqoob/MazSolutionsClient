@@ -9,124 +9,173 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 /**
  *
  * @author Aitor Ruiz de Gauna
  */
 /**
- *Entity that has the info of the courses of the Teacher.
+ * Entity that has the info of the courses of the Teacher.
  */
 @XmlRootElement
 public class TeacherCourse implements Serializable {
 
+    public TeacherCourse(Long idTeacherCourse, Date dateStart, Date dateEnd, ObservableList<TeacherCourseSubject> teacherCourseSubjects,
+            Teacher teacher, String name) {
+        this.idTeacherCourse = new SimpleLongProperty(idTeacherCourse);
+        this.dateStart = new SimpleObjectProperty<>(dateStart);
+        this.dateEnd = new SimpleObjectProperty<>(dateEnd);
+        this.teacherCourseSubjects = new SimpleListProperty<>(teacherCourseSubjects);
+        this.teacher = new SimpleObjectProperty<>(teacher);
+        this.name = new SimpleStringProperty(name);
+    }
+
+    public TeacherCourse() {
+        this.idTeacherCourse = new SimpleLongProperty();
+        this.dateStart = new SimpleObjectProperty<>();
+        this.dateEnd = new SimpleObjectProperty<>();
+        this.teacherCourseSubjects = new SimpleListProperty<>();
+        this.teacher = new SimpleObjectProperty<>();
+        this.name = new SimpleStringProperty();
+    }
+
     private static final long serialVersionUID = 1L;
-    private Long idTeacherCourse;
+    private SimpleLongProperty idTeacherCourse;
     // Date when the TeacherCourse starts.
-    private Date dateStart;
+    private SimpleObjectProperty<Date> dateStart;
     // Date when the TeacherCourse ends.
-    private Date dateEnd;
+    private SimpleObjectProperty<Date> dateEnd;
     //Collection of the subject that the teacher has.
-    private Set<TeacherCourseSubject> teacherCourseSubjects;
+    private SimpleListProperty<TeacherCourseSubject> teacherCourseSubjects;
     //Teacher of the TeacherCourse
-    private Teacher teacher;
-    
-    private String name;
+    private SimpleObjectProperty<Teacher> teacher;
+
+    private SimpleStringProperty name;
+
     /**
      * Method that returns the class that contains the id's of TeacherCourse.
+     *
      * @return idTeacherCourseId;
      */
     public Long getIdTeacherCourse() {
-        return idTeacherCourse;
+        return idTeacherCourse.get();
     }
+
     /**
-     * Method that set the value of the object of the class TeacherCourseId that contains the id's of TeacherCourse.
-     * @param idTeacherCourse 
+     * Method that set the value of the object of the class TeacherCourseId that
+     * contains the id's of TeacherCourse.
+     *
+     * @param idTeacherCourse
      */
-    public void setIdTeacherCourseId(Long idTeacherCourse) {
-        this.idTeacherCourse = idTeacherCourse;
+    public void setIdTeacherCourse(Long idTeacherCourse) {
+        this.idTeacherCourse.set(idTeacherCourse);
     }
 
     public String getName() {
-        return name;
+        return name.get();
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-    
-    /**
-     * Method that returns the date start of the TeacherCourse.
-     * @return dateStart
-     */
-    public Date getDateStart() {
-        return dateStart;
-    }
-    /**
-     * Method that set the value of the dateStart of the TeacherCourse.
-     * @param dateStart 
-     */
-    public void setDateStart(Date dateStart) {
-        this.dateStart = dateStart;
-    }
-    /**
-     * Method that return the value of the dateEnd of TeacherCourse.
-     * @return 
-     */
-    public Date getDateEnd() {
-        return dateEnd;
-    }
-    /**
-     * Method that set the value of the dateEnd of TeacherCourse.
-     * @param dateEnd 
-     */
-    public void setDateEnd(Date dateEnd) {
-        this.dateEnd = dateEnd;
-    }
-    /**
-     * Method that return the value of the collection of subjects of TeacherCourse.
-     * @return 
-     */
-    @XmlTransient
-    public Set<TeacherCourseSubject> getTeacherCourseSubjects() {    
-        return teacherCourseSubjects;
-    }
-    /**
-     * Method that set the value of the collection of subjects of TeacherCourse.
-     * @param teacherCourseSubjects 
-     */
-    public void setTeacherCourseSubjects(Set<TeacherCourseSubject> teacherCourseSubjects) {    
-        this.teacherCourseSubjects = teacherCourseSubjects;
+        this.name.set(name);
     }
 
     /**
-     * Method that return the value of the collection of teachers of TeacherCourse.
+     * Method that returns the date start of the TeacherCourse.
+     *
+     * @return dateStart
+     */
+    public Date getDateStart() {
+        return dateStart.get();
+    }
+
+    /**
+     * Method that set the value of the dateStart of the TeacherCourse.
+     *
+     * @param dateStart
+     */
+    public void setDateStart(Date dateStart) {
+        this.dateStart.set(dateStart);
+    }
+
+    /**
+     * Method that return the value of the dateEnd of TeacherCourse.
+     *
+     * @return
+     */
+    public Date getDateEnd() {
+        return dateEnd.get();
+    }
+
+    /**
+     * Method that set the value of the dateEnd of TeacherCourse.
+     *
+     * @param dateEnd
+     */
+    public void setDateEnd(Date dateEnd) {
+        this.dateEnd.set(dateEnd);
+    }
+
+    /**
+     * Method that return the value of the collection of subjects of
+     * TeacherCourse.
+     *
+     * @return
+     */
+    @XmlTransient
+    public ObservableList<TeacherCourseSubject> getTeacherCourseSubjects() {
+        return teacherCourseSubjects.get();
+    }
+
+    /**
+     * Method that set the value of the collection of subjects of TeacherCourse.
+     *
+     * @param teacherCourseSubjects
+     */
+    public void setTeacherCourseSubjects(ObservableList<TeacherCourseSubject> teacherCourseSubjects) {
+        this.teacherCourseSubjects.set(teacherCourseSubjects);
+    }
+
+    /**
+     * Method that return the value of the collection of teachers of
+     * TeacherCourse.
+     *
      * @return teacher
      */
     public Teacher getTeacher() {
-        return teacher;
+        return teacher.get();
     }
+
     /**
      * Method that set the value of the collection of subjects of TeacherCourse.
-     * @param teacher 
+     *
+     * @param teacher
      */
     public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+        this.teacher.set(teacher);
     }
+
     /**
      * Integer representation for TeacherCourse instance.
-     * @return 
+     *
+     * @return
      */
-    @Override   
+    @Override
     public int hashCode() {
         int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.idTeacherCourse);  
+        hash = 67 * hash + Objects.hashCode(this.idTeacherCourse);
         return hash;
     }
 
     /**
      * Method that compares if two objects of TeacherCourse are equals.
+     *
      * @param obj
      * @return boolean
      */
@@ -147,12 +196,14 @@ public class TeacherCourse implements Serializable {
         }
         return true;
     }
+
     /**
      * Method that return a String of the parameters of TeacherCourse.
+     *
      * @return String
      */
     @Override
     public String toString() {
-        return "TeacherCourse{" + "idTeacherCourseId=" + idTeacherCourse + ", dateStart=" + dateStart + ", dateEnd=" + dateEnd + ", subjects=" + teacherCourseSubjects+  ", teacher=" + teacher + '}';
+        return "TeacherCourse{" + "idTeacherCourseId=" + idTeacherCourse + ", dateStart=" + dateStart + ", dateEnd=" + dateEnd + ", subjects=" + teacherCourseSubjects + ", teacher=" + teacher + '}';
     }
 }

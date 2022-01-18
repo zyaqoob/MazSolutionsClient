@@ -7,6 +7,8 @@ package classes;
 
 import java.io.Serializable;
 import java.util.Objects;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -21,77 +23,97 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class CourseSubject implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     /**
      * Class that contains the id's of the CourseSubject entity.
+     * @param courseSubjectId
+     * @param totalHours
+     * @param course
+     * @param subject
      */
-    private CourseSubjectId courseSubjectId;
+    public CourseSubject(CourseSubjectId courseSubjectId, float totalHours,Course course,Subject subject) {
+        this.courseSubjectId=new SimpleObjectProperty<>(courseSubjectId);
+        this.totalHours=new SimpleFloatProperty(totalHours);
+        this.course=new SimpleObjectProperty<>(course);
+        this.subject= new SimpleObjectProperty<>(subject);
+    }
+
+    public CourseSubject() {
+        this.courseSubjectId=new SimpleObjectProperty<>();
+        this.totalHours=new SimpleFloatProperty();
+        this.course=new SimpleObjectProperty<>();
+        this.subject= new SimpleObjectProperty<>();
+    }
+
+    
+    private SimpleObjectProperty<CourseSubjectId> courseSubjectId;
     /**
      * Total Hours that the courseSubject has.
      */
-    private float totalHours;
+    private SimpleFloatProperty totalHours;
     /**
      * Course of the subject.
      */
-    private Course course;
+    private SimpleObjectProperty<Course> course;
     /**
      * Subject of the course.
      */
-    private Subject subject;
+    private SimpleObjectProperty<Subject> subject;
     /**
      * Method that return the id's of the entity.
      * @return courseSubjectId
      */
     public CourseSubjectId getCourseSubjectId() {
-        return courseSubjectId;
+        return courseSubjectId.get();
     }
     /**
      * Method that set the value of the id's.
      * @param courseSubjectId 
      */
     public void setCourseSubjectId(CourseSubjectId courseSubjectId) {
-        this.courseSubjectId = courseSubjectId;
+        this.courseSubjectId.set(courseSubjectId);
     }
     /**
      * Method that return the totalHours.
      * @return totalHours
      */
     public float getTotalHours() {
-        return totalHours;
+        return totalHours.get();
     }
     /**
      * Method that set the value of the totalHours
      * @param totalHours 
      */
     public void setTotalHours(float totalHours) {
-        this.totalHours = totalHours;
+        this.totalHours.set(totalHours);
     }
     /**
      * Method that return the course.
      * @return course
      */
     public Course getCourse() {
-        return course;
+        return course.get();
     }
     /**
      * Method that set the value of the course.
      * @param course 
      */
     public void setCourse(Course course) {
-        this.course = course;
+        this.course.set(course);
     }
     /**
      * Method that return the subject.
      * @return subject
      */
     public Subject getSubject() {
-        return subject;
+        return subject.get();
     }
     /**
      * Method that set the value of the subject.
      * @param subject 
      */
     public void setSubject(Subject subject) {
-        this.subject = subject;
+        this.subject.set(subject);
     }
     /**
      * Integer representation for CourseSubject instance.
@@ -118,19 +140,6 @@ public class CourseSubject implements Serializable {
             return false;
         }
         if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CourseSubject other = (CourseSubject) obj;
-        if (Float.floatToIntBits(this.totalHours) != Float.floatToIntBits(other.totalHours)) {
-            return false;
-        }
-        if (!Objects.equals(this.courseSubjectId, other.courseSubjectId)) {
-            return false;
-        }
-        if (!Objects.equals(this.course, other.course)) {
-            return false;
-        }
-        if (!Objects.equals(this.subject, other.subject)) {
             return false;
         }
         return true;

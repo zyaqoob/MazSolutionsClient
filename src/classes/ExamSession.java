@@ -8,6 +8,9 @@ package classes;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Objects;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -20,41 +23,68 @@ import javax.xml.bind.annotation.XmlTransient;
 public class ExamSession implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     /**
      * Field that identify ExamSession.
+     * @param idExamSession
+     * @param mark
+     * @param exam
+     * @param student
+     * @param dateTimeStart
+     * @param dateTimeEnd
      */
-    private Long idExamSession;
+    public ExamSession(Long idExamSession,int mark, Exam exam, Student student, 
+            Calendar dateTimeStart,Calendar dateTimeEnd) {
+        this.idExamSession=new SimpleLongProperty(idExamSession);
+        this.mark=new SimpleIntegerProperty(mark);
+        this.exam=new SimpleObjectProperty<>(exam);
+        this.student=new SimpleObjectProperty<>(student);
+        this.dateTimeStart=new SimpleObjectProperty<>(dateTimeStart);
+        this.dateTimeEnd=new SimpleObjectProperty<>(dateTimeEnd);
+    }
+
+    public ExamSession() {
+        this.idExamSession=new SimpleLongProperty();
+        this.mark=new SimpleIntegerProperty();
+        this.exam=new SimpleObjectProperty<>();
+        this.student=new SimpleObjectProperty<>();
+        this.dateTimeStart=new SimpleObjectProperty<>();
+        this.dateTimeEnd=new SimpleObjectProperty<>();
+    }
+    
+    
+    private SimpleLongProperty idExamSession;
     /**
      * Field that represent marks obtained.
      */
-    private int mark;
+    private SimpleIntegerProperty mark;
 
     /**
      * An object of Exam.
      */
-    private Exam exam;
+    private SimpleObjectProperty<Exam> exam;
 
     /**
      * An object of Student.
      */
-    private Student student;
+    private SimpleObjectProperty<Student> student;
 
     /**
      * Data and time start of the examSession.
      */
-    private Calendar dateTimeStart;
+    private SimpleObjectProperty<Calendar> dateTimeStart;
 
     /**
      * Data and time end of the examSession.
      */
-    private Calendar dateTimeEnd;
+    private SimpleObjectProperty<Calendar> dateTimeEnd;
 
     /**
      *
      * @return mark.
      */
     public int getMark() {
-        return mark;
+        return mark.get();
     }
 
     /**
@@ -63,7 +93,7 @@ public class ExamSession implements Serializable {
      * @param mark the mark to set
      */
     public void setMark(int mark) {
-        this.mark = mark;
+        this.mark.set(mark);
     }
 
     /**
@@ -71,7 +101,7 @@ public class ExamSession implements Serializable {
      * @return exam
      */
     public Exam getExam() {
-        return exam;
+        return exam.get();
     }
 
     /**
@@ -80,7 +110,7 @@ public class ExamSession implements Serializable {
      * @param exam the exam to set
      */
     public void setExam(Exam exam) {
-        this.exam = exam;
+        this.exam.set(exam);
     }
 
     /**
@@ -89,7 +119,7 @@ public class ExamSession implements Serializable {
      */
     @XmlTransient
     public Student getStudent() {
-        return student;
+        return student.get();
     }
 
     /**
@@ -98,7 +128,7 @@ public class ExamSession implements Serializable {
      * @param student the student to set.
      */
     public void setStudent(Student student) {
-        this.student = student;
+        this.student.set(student);
     }
 
     /**
@@ -106,7 +136,7 @@ public class ExamSession implements Serializable {
      * @return dateTimeStart.
      */
     public Calendar getDateTimeStart() {
-        return dateTimeStart;
+        return dateTimeStart.get();
     }
 
     /**
@@ -115,7 +145,7 @@ public class ExamSession implements Serializable {
      * @param dateTimeStart the dateTimeStart to set
      */
     public void setDateTimeStart(Calendar dateTimeStart) {
-        this.dateTimeStart = dateTimeStart;
+        this.dateTimeStart.set(dateTimeStart);
     }
 
     /**
@@ -123,7 +153,7 @@ public class ExamSession implements Serializable {
      * @return dateTimeEnd.
      */
     public Calendar getDateTimeEnd() {
-        return dateTimeEnd;
+        return dateTimeEnd.get();
     }
 
     /**
@@ -132,7 +162,7 @@ public class ExamSession implements Serializable {
      * @param dateTimeEnd the dateTimeEnd to set
      */
     public void setDateTimeEnd(Calendar dateTimeEnd) {
-        this.dateTimeEnd = dateTimeEnd;
+        this.dateTimeEnd.set(dateTimeEnd);
     }
 
     /**
@@ -140,7 +170,7 @@ public class ExamSession implements Serializable {
      * @return examSessionId
      */
     public Long getIdExamSession() {
-        return idExamSession;
+        return idExamSession.get();
     }
 
     /**
@@ -149,7 +179,7 @@ public class ExamSession implements Serializable {
      * @param idExamSession the examSessionId to set.
      */
     public void setIdExamSession(Long idExamSession) {
-        this.idExamSession = idExamSession;
+        this.idExamSession.set(idExamSession);
     }
 
     /**
@@ -161,7 +191,6 @@ public class ExamSession implements Serializable {
     public int hashCode() {
         int hash = 7;
         hash = 79 * hash + Objects.hashCode(this.idExamSession);
-        hash = 79 * hash + this.mark;
         hash = 79 * hash + Objects.hashCode(this.exam);
         hash = 79 * hash + Objects.hashCode(this.student);
         hash = 79 * hash + Objects.hashCode(this.dateTimeStart);

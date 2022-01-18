@@ -8,6 +8,8 @@ package classes;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Objects;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -19,38 +21,52 @@ import javax.xml.bind.annotation.XmlTransient;
 public class LastSignIn implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Long id;
+    private SimpleLongProperty id;
+
+    public LastSignIn(Long id,Calendar lastSignIn, User user) {
+        this.id=new SimpleLongProperty(id);
+        this.lastSignIn=new SimpleObjectProperty<>(lastSignIn);
+        this.user=new SimpleObjectProperty<>(user);
+    }
+
+    public LastSignIn() {
+        this.id=new SimpleLongProperty();
+        this.lastSignIn=new SimpleObjectProperty<>();
+        this.user=new SimpleObjectProperty<>();
+    }
     
-    private Calendar lastSignIn;
     
-    private User user;
+    
+    private SimpleObjectProperty<Calendar> lastSignIn;
+    
+    private SimpleObjectProperty<User> user;
     
     
     public Calendar getLastSignIn() {
-        return lastSignIn;
+        return lastSignIn.get();
     }
 
     public void setLastSignIn(Calendar lastSignIn) {
-        this.lastSignIn = lastSignIn;
+        this.lastSignIn.set(lastSignIn);
     }
     
     @XmlTransient
     public User getUser() {
-        return user;
+        return user.get();
     }
 
     public void setUser(User user) {
-        this.user = user;
+        this.user.set(user);
     }
     
     
 
     public Long getId() {
-        return id;
+        return id.get();
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.id.set(id);
     }
 
     @Override

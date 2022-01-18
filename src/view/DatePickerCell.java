@@ -7,6 +7,8 @@ package view;
 
 import classes.Teacher;
 import classes.User;
+import java.time.ZoneId;
+import java.util.Date;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 
@@ -14,7 +16,7 @@ import javafx.scene.control.TableCell;
  *
  * @author Aitor
  */
-public class DatePickerCell extends TableCell<Teacher, String> {
+public class DatePickerCell extends TableCell<Teacher, Date> {
 
     private DatePicker datePicker;
 
@@ -27,17 +29,33 @@ public class DatePickerCell extends TableCell<Teacher, String> {
             super.startEdit();
             datePicker = new DatePicker();
             datePicker.setOnAction((e) -> {
-                super.commitEdit(datePicker.getValue().toString());
-                //commitEdit(Date.from(datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                //super.commitEdit(datePicker.getValue().toString());
+                commitEdit(Date.from(datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             });
             setText(null);
             setGraphic(datePicker);
         }
     }
-    public void updateItem(){
-        
-    }
-    
+      @Override
+        public void updateItem(Date item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    if (datePicker != null) {
+                   //     datePicker.setValue();
+                    }
+                    setText(null);
+                    setGraphic(datePicker);
+                } else {
+                   // setText(item.getDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
+                    setGraphic(null);
+                }
+            }
+        }
     @Override
     public void cancelEdit() {
         setGraphic(null);

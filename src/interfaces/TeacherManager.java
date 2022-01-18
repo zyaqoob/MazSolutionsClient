@@ -6,6 +6,7 @@
 package interfaces;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.GenericType;
 
 /**
  *
@@ -29,11 +30,9 @@ public interface TeacherManager {
 
     public <T> T findTeachersByStudent(Class<T> responseType, String name) throws ClientErrorException;
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException;
+    public <T> T findAllTeacher(GenericType<T> responseType) throws ClientErrorException;
 
     public void remove(String id) throws ClientErrorException;
-
-    public <T> T findAllTeacher(Class<T> responseType) throws ClientErrorException;
     
     public void close();
 }

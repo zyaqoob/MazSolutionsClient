@@ -40,6 +40,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javax.ws.rs.core.GenericType;
 import restful.TeacherCourseRESTClient;
+import restful.TeacherRESTClient;
 import restful.UserRESTClient;
 
 /**
@@ -97,13 +98,13 @@ public class AdminTeacherWindowController {
     private TableColumn<Teacher, String> tbcTelephone;
     
     @FXML
-    private TableColumn<Teacher, String> tbcBirthDate;
+    private TableColumn<Teacher, Date> tbcBirthDate;
     
     @FXML
     private TableColumn<Teacher, String> tbcCourse;
     
     @FXML
-    private TableColumn<Teacher, String> tbcSalary;
+    private TableColumn<Teacher, Float> tbcSalary;
     
     private ObservableList<Teacher> teachersData;
     
@@ -128,8 +129,8 @@ public class AdminTeacherWindowController {
         ivTick.setVisible(false);
         ivX.setVisible(false);
         btnDelete.setDisable(true);
-        UserRESTClient rest = new UserRESTClient();
-        teachersData = FXCollections.observableArrayList(rest.findAll_XML(new GenericType<List<Teacher>>() {
+        TeacherRESTClient rest = new TeacherRESTClient();
+        teachersData = FXCollections.observableArrayList(rest.findAllTeacher(new GenericType<List<Teacher>>() {
         }));
         teacherCourses = FXCollections.observableArrayList(new TeacherCourseRESTClient().findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
         }));
@@ -194,14 +195,14 @@ public class AdminTeacherWindowController {
          * //throw new UnsupportedOperationException("Not supported yet."); //To
          * change body of generated methods, choose Tools | Templates. } });*
          */
-        Callback<TableColumn<Teacher, String>, TableCell<Teacher, String>> dateCellFactory
-                = (TableColumn<Teacher, String> param) -> new DatePickerCell();
+        Callback<TableColumn<Teacher, Date>, TableCell<Teacher, Date>> dateCellFactory
+                = (TableColumn<Teacher, Date> param) -> new DatePickerCell();
         tbcBirthDate.setCellFactory(dateCellFactory);
         tbcBirthDate.setOnEditCommit(
-                (TableColumn.CellEditEvent<Teacher, String> t) -> {
+                (TableColumn.CellEditEvent<Teacher, Date> t) -> {
                     ((User) t.getTableView().getItems()
                             .get(t.getTablePosition().getRow()))
-                            .setBirthDate(new Date(t.getNewValue()));
+                            .setBirthDate(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
                 });
