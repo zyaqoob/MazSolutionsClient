@@ -29,7 +29,7 @@ public class Teacher extends User implements Serializable {
      * @param salary
      * @param teacherCourses 
      */
-    public Teacher(float salary, ObservableList<TeacherCourse> teacherCourses) {
+    public Teacher(Float salary, ObservableList<TeacherCourse> teacherCourses) {
         this.salary=new SimpleFloatProperty(salary);
         this.teacherCourses=new SimpleListProperty<>(teacherCourses);
     }
@@ -54,7 +54,7 @@ public class Teacher extends User implements Serializable {
      *
      * @return salary.
      */
-    public float getSalary() {    
+    public Float getSalary() {    
         return salary.get();
     }
 
@@ -63,7 +63,7 @@ public class Teacher extends User implements Serializable {
      *
      * @param salary the salary to set.
      */
-    public void setSalary(float salary) {    
+    public void setSalary(Float salary) {    
         this.salary.set(salary);
     }
 
