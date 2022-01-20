@@ -5,15 +5,8 @@
  */
 package crypto;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
@@ -24,8 +17,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -40,21 +31,24 @@ import javax.crypto.NoSuchPaddingException;
 public class Crypto {
 
     public static String cifrar(String mensaje) {
-        PublicKey publicKey;
-        String path = Crypto.class.getResource("PublicKey.txt").getPath();
+        PublicKey publicKey = null;
+        byte[] key = null;
         KeyFactory keyFactory;
-        byte[] key = fileReader(path);
         byte[] encodedMessage = null;
         try {
+            InputStream is = Crypto.class.getResourceAsStream("PublicKey.key");
+            byte[] fileContent = new byte[is.available()];
+            is.read(fileContent, 0, is.available());
+            key = fileContent;
             keyFactory = KeyFactory.getInstance("RSA");
-            Cipher cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
             publicKey = keyFactory.generatePublic(spec);
+            Cipher cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
             encodedMessage = cipherRSA.doFinal(mensaje.getBytes());
 
             //fileWriter("mensajecifrado.txt", encodedMessage);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | IOException ex) {
             Logger.getLogger(Crypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         //We use the method covertStringToHex to get the hex value of the String
@@ -64,7 +58,7 @@ public class Crypto {
     public static String descifrar(String password) {
         //password=new String(hexStringToByteArray(password));
         KeyFactory factoriaRSA;
-        String path = Crypto.class.getResource("PrivateKey.txt").getPath();
+        String path = Crypto.class.getResource("PrivateKey.key").getPath();
         PrivateKey privateKey;
         Cipher cipher;
         String desc = null;
@@ -98,15 +92,14 @@ public class Crypto {
      */
     public static byte[] fileReader(String path) {
         byte ret[] = null;
-        File file = new File(path);
+
         try {
-            
-            ret = Files.readAllBytes(Paths.get(Crypto.class.getResource("PublicKey.txt").toURI()));
-            
-            
+            InputStream is = Crypto.class.getResourceAsStream("PublicKey.key");
+            byte[] fileContent = new byte[is.available()];
+            is.read(fileContent, 0, is.available());
+            ret = fileContent;
+
         } catch (IOException e) {
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(Crypto.class.getName()).log(Level.SEVERE, null, ex);
         }
         return ret;
     }
