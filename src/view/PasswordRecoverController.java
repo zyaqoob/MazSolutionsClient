@@ -65,8 +65,6 @@ public class PasswordRecoverController {
         String email = txtEmail.getText();
         User user = new User();
         if (checkEmailRegex(email)) {
-            //txtEmail.setText("");
-            //txtInfo.setVisible(true);
             UserRESTClient restUser = new UserRESTClient();
             restUser.findUserByEmail_XML(User.class, email);
 
