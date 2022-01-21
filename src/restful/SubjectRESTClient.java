@@ -26,7 +26,7 @@ public class SubjectRESTClient {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:32099/MazSolutionsServer/webresources";
+    private static final String BASE_URI = "http://localhost:38079/MazSolutionsServer/webresources";
 
     public SubjectRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();

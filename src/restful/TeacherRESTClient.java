@@ -28,7 +28,7 @@ public class TeacherRESTClient implements TeacherManager{
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:46293/MazSolutionsServer/webresources";
+    private static final String BASE_URI = "http://localhost:38079/MazSolutionsServer/webresources";
 
     public TeacherRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -93,7 +93,7 @@ public class TeacherRESTClient implements TeacherManager{
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException {
+    public void remove(Long id) throws ClientErrorException {
         webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
     }
     

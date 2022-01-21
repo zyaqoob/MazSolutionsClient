@@ -53,7 +53,7 @@ public class DatePickerCell extends TableCell<TeacherCourse, Date> {
             if (isEditing()) {
                 setText(null);
                 setGraphic(datePicker);
-            } else {
+            } else if(item!=null){
                 String date=dateFormatter.format(item);
                 setText(date);
                 setGraphic(null);

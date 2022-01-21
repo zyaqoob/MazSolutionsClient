@@ -28,7 +28,7 @@ public class TeacherCourseRESTClient implements TeacherCourseManager{
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:46293/MazSolutionsServer/webresources";
+    private static final String BASE_URI = "http://localhost:38079/MazSolutionsServer/webresources";
 
     public TeacherCourseRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
