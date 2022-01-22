@@ -41,7 +41,7 @@
    <center>
       <Pane prefHeight="474.0" prefWidth="778.0" BorderPane.alignment="CENTER">
          <children>
-            <TableView fx:id="tblStudent" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
+            <TableView fx:id="tblExamSession" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
                <columns>
                   <TableColumn fx:id="tcSubject" prefWidth="101.99996948242188" text="Subject" />
                   <TableColumn fx:id="tcExam" prefWidth="234.00001525878906" text="Exam" />
