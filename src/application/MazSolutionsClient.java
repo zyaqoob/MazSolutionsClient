@@ -33,8 +33,8 @@ public class MazSolutionsClient extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         
-        LOGGER.info("App started");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
+        
+        /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
         try {
 
             Parent root = (Parent) loader.load();
@@ -44,11 +44,11 @@ public class MazSolutionsClient extends Application {
 
         } catch (IOException ex) {
             Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-        }
-       /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+        }*/
+       FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
        Parent root = (Parent) loader.load();
        WindowStudentAdminController controller = loader.getController();
-       controller.initStage(root);*/
+       controller.initStage(root);
     }
 
     /**

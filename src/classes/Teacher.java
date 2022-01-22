@@ -8,6 +8,9 @@ package classes;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -20,22 +23,39 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Teacher extends User implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     /**
-     * Field that represent salary of the teacher.
+     * 
+     * @param salary
+     * @param teacherCourses 
      */
-    private float salary;
+    public Teacher(Float salary, ObservableList<TeacherCourse> teacherCourses) {
+        this.salary=new SimpleFloatProperty(salary);
+        this.teacherCourses=new SimpleListProperty<>(teacherCourses);
+    }
+
+    public Teacher() {
+        this.salary=new SimpleFloatProperty();
+        this.teacherCourses=new SimpleListProperty<>();
+    }
+    
+      /**
+     * Field that represent salary of the teacher.
+     * @param salary
+     */
+    private SimpleFloatProperty salary;
 
     /**
      * A collection of TeacherCourses.
      */
-    private Set<TeacherCourse> teacherCourses;
+    private SimpleListProperty<TeacherCourse> teacherCourses;
 
     /**
      *
      * @return salary.
      */
-    public float getSalary() {
-        return salary;
+    public Float getSalary() {    
+        return salary.get();
     }
 
     /**
@@ -43,8 +63,8 @@ public class Teacher extends User implements Serializable {
      *
      * @param salary the salary to set.
      */
-    public void setSalary(float salary) {
-        this.salary = salary;
+    public void setSalary(Float salary) {    
+        this.salary.set(salary);
     }
 
     /**
@@ -52,8 +72,8 @@ public class Teacher extends User implements Serializable {
      * @return teacherCourses.
      */
     @XmlTransient
-    public Set<TeacherCourse> getTeacherCourses() {
-        return teacherCourses;
+     public ObservableList<TeacherCourse> getTeacherCourses() {
+        return teacherCourses.get();
     }
 
     /**
@@ -61,21 +81,19 @@ public class Teacher extends User implements Serializable {
      *
      * @param teacherCourses the teacherCourses to set.
      */
-    public void setTeacherCourses(Set<TeacherCourse> teacherCourses) {
-        this.teacherCourses = teacherCourses;
+    public void setTeacherCourses(ObservableList<TeacherCourse> teacherCourses) {
+        this.teacherCourses.set(teacherCourses);
     }
-
     /**
      * Integer representation of Teacher instance.
      *
      * @return
      */
-    @Override
+    @Override   
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.getIdUser());
-        hash = 53 * hash + Float.floatToIntBits(this.salary);
-        hash = 53 * hash + Objects.hashCode(this.teacherCourses);
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.salary);
+        hash = 37 * hash + Objects.hashCode(this.teacherCourses);
         return hash;
     }
 

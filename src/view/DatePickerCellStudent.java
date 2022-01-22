@@ -8,6 +8,7 @@ package view;
 import classes.Student;
 import classes.Teacher;
 import classes.User;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
 import javafx.scene.control.DatePicker;
@@ -38,25 +39,24 @@ public class DatePickerCellStudent extends TableCell<Student, Date> {
         }
     }
       @Override
-        public void updateItem(Date item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty) {
+    public void updateItem(Date item, boolean empty) {
+        super.updateItem(item, empty);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");     
+        
+        if (empty) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            if (isEditing()) {
                 setText(null);
+                setGraphic(datePicker);
+            } else if(item!=null){
+                String date=dateFormatter.format(item);
+                setText(date);
                 setGraphic(null);
-            } else {
-                if (isEditing()) {
-                    if (datePicker != null) {
-                   //     datePicker.setValue();
-                    }
-                    setText(null);
-                    setGraphic(datePicker);
-                } else {
-                   // setText(item.getDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
-                    setGraphic(null);
-                }
             }
         }
+    }
     @Override
     public void cancelEdit() {
         setGraphic(null);
