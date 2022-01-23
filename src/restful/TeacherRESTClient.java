@@ -6,6 +6,7 @@
 package restful;
 
 import interfaces.TeacherManager;
+import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -28,7 +29,8 @@ public class TeacherRESTClient implements TeacherManager{
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:38079/MazSolutionsServer/webresources";
+    private static final String BASE_URI =  ResourceBundle.getBundle("config.Config")
+                          .getString("BASE_URI");
 
     public TeacherRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();

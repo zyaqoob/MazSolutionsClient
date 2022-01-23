@@ -6,13 +6,9 @@
 package view;
 
 import classes.Teacher;
-import classes.TeacherCourse;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 
@@ -20,7 +16,7 @@ import javafx.scene.control.TableCell;
  *
  * @author Aitor
  */
-public class DatePickerCell extends TableCell<TeacherCourse, Date> {
+public class DatePickerCell extends TableCell<Teacher, Date> {
 
     private DatePicker datePicker;
 

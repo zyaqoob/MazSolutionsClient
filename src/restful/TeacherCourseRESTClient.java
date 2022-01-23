@@ -6,6 +6,7 @@
 package restful;
 
 import interfaces.TeacherCourseManager;
+import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -24,11 +25,12 @@ import javax.ws.rs.core.GenericType;
  *
  * @author z332h
  */
-public class TeacherCourseRESTClient implements TeacherCourseManager{
+public class TeacherCourseRESTClient implements TeacherCourseManager {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:38079/MazSolutionsServer/webresources";
+    private static final String BASE_URI = ResourceBundle.getBundle("config.Config")
+            .getString("BASE_URI");
 
     public TeacherCourseRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -75,6 +77,13 @@ public class TeacherCourseRESTClient implements TeacherCourseManager{
     }
 
     @Override
+    public <T> T findTeacherCourseByName(GenericType<T> responseType, String name) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("name/{0}", new Object[]{name}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+
+    @Override
     public void create(Object requestEntity) throws ClientErrorException {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
@@ -101,5 +110,5 @@ public class TeacherCourseRESTClient implements TeacherCourseManager{
     public void close() {
         client.close();
     }
-    
+
 }

@@ -32,6 +32,8 @@ public interface TeacherCourseManager {
     
     public <T> T findAll(Class<T> responseType) throws ClientErrorException;
     
+    public <T> T findTeacherCourseByName(GenericType<T>responseType,String name)throws ClientErrorException;
+    
     public void remove(String id) throws ClientErrorException;
     
     public void close();

@@ -7,19 +7,15 @@ package view;
 
 import classes.Teacher;
 import classes.TeacherCourse;
-import classes.User;
 import classes.UserPrivilege;
 import classes.UserStatus;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import interfaces.TeacherCourseManager;
+import interfaces.TeacherManager;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -32,26 +28,22 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javax.ws.rs.core.GenericType;
+import logic.RESTfulClientType;
+import logic.RESTfulFactory;
 import restful.TeacherCourseRESTClient;
-import restful.TeacherCourseSubjectRESTClient;
 import restful.TeacherRESTClient;
-import restful.UserRESTClient;
 
 /**
  *
@@ -93,32 +85,36 @@ public class AdminTeacherWindowController {
     private ImageView ivX;
 
     @FXML
-    private TableView<TeacherCourse> tblTeachers;
+    private TableView<Teacher> tblTeachers;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcFullName;
+    private TableColumn<Teacher, String> tbcFullName;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcUsername;
+    private TableColumn<Teacher, String> tbcUsername;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcEmail;
+    private TableColumn<Teacher, String> tbcEmail;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcTelephone;
+    private TableColumn<Teacher, String> tbcTelephone;
 
     @FXML
-    private TableColumn<TeacherCourse, Date> tbcBirthDate;
+    private TableColumn<Teacher, Date> tbcBirthDate;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcCourse;
+    private TableColumn<Teacher, String> tbcCourse;
 
     @FXML
-    private TableColumn<TeacherCourse, String> tbcSalary;
+    private TableColumn<Teacher, String> tbcSalary;
+
+    private ObservableList<Teacher> teachers;
 
     private ObservableList<TeacherCourse> teacherCourses;
-    @FXML
-    private ChoiceBox<?> chBox;
+
+    private final TeacherManager teacherManager = (TeacherManager) new RESTfulFactory().getRESTClient(RESTfulClientType.TEACHER);
+
+    private final TeacherCourseManager teacherCourseManager = (TeacherCourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.TEACHER_COURSE);
 
     public void initStage(Parent root) {
         //LOGGER.info("Stage initiated");
@@ -127,65 +123,60 @@ public class AdminTeacherWindowController {
         stage.setScene(scene);
         stage.setTitle("SignIn");
         stage.setResizable(false);
-
+        teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+        }));
+        teacherCourses = FXCollections.observableArrayList(teacherCourseManager.findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
+        }));
         tblTeachers.setEditable(true);
         ivTick.setVisible(false);
         ivX.setVisible(false);
         btnDelete.setDisable(true);
         TeacherRESTClient rest = new TeacherRESTClient();
-        teacherCourses = FXCollections.observableArrayList(new TeacherCourseRESTClient().findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
-        }));
-        tbcFullName.setCellValueFactory(cellData
-                -> new SimpleStringProperty(cellData.getValue().getTeacher().getFullName()));
-        tbcUsername.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTeacher().getLogin()));
-        tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTeacher().getEmail()));
-        tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTeacher().getTelephone()));
-        tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTeacher().getBirthDate()));
-        tbcSalary.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getTeacher().getSalary())));
-        tbcCourse.setCellValueFactory(new PropertyValueFactory<>("name"));
-
+        tbcFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFullName()));
+        tbcUsername.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getLogin()));
+        tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
+        tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
+        tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getBirthDate()));
+        tbcSalary.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getSalary())));
+        tbcCourse.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTeacherCourse().getName()));
         //Table column FullName editable with textField
-        tbcFullName.setCellFactory(TextFieldTableCell.<TeacherCourse>forTableColumn());
+        tbcFullName.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcFullName.setOnEditCommit(
-                (CellEditEvent<TeacherCourse, String> t) -> {
-                    ((TeacherCourse) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getTeacher().setFullName(t.getNewValue());
+                (CellEditEvent<Teacher, String> t) -> {
+                    ((Teacher) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setFullName(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
                 });
-        tbcFullName.setOnEditCancel((CellEditEvent<TeacherCourse, String> t) -> {
-            tblTeachers.refresh();
-            btnCreate.setDisable(false);
-        });
         //Table column Username editable with textField
-        tbcUsername.setCellFactory(TextFieldTableCell.<TeacherCourse>forTableColumn());
+        tbcUsername.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcUsername.setOnEditCommit(
-                (CellEditEvent<TeacherCourse, String> t) -> {
-                    ((TeacherCourse) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getTeacher().setLogin(t.getNewValue());
+                (CellEditEvent<Teacher, String> t) -> {
+                    ((Teacher) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setLogin(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcEmail);
                 });
         //Table column Email editable with textField
-        tbcEmail.setCellFactory(TextFieldTableCell.<TeacherCourse>forTableColumn());
+        tbcEmail.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcEmail.setOnEditCommit(
-                (CellEditEvent<TeacherCourse, String> t) -> {
-                    ((TeacherCourse) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getTeacher().setEmail(t.getNewValue());
+                (CellEditEvent<Teacher, String> t) -> {
+                    ((Teacher) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setEmail(t.getNewValue());
                     //tblTeachers.getColumns().add(tbcEmail);
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
                 });
         //Table column Telephone editable with textField
-        tbcTelephone.setCellFactory(TextFieldTableCell.<TeacherCourse>forTableColumn());
+        tbcTelephone.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcTelephone.setOnEditCommit(
-                (CellEditEvent<TeacherCourse, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     if (!t.getNewValue().matches("[0-9]{9}")) {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid telephone value", ButtonType.OK);
                         alert.show();
                     } else {
-                        ((TeacherCourse) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).getTeacher().setTelephone(t.getNewValue());
+                        ((Teacher) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setTelephone(t.getNewValue());
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcBirthDate);
                         tblTeachers.edit(t.getTablePosition().getRow(), tbcBirthDate);
                         // tblTeachers.getColumns().add(tbcTelephone);
@@ -205,26 +196,26 @@ public class AdminTeacherWindowController {
          * //throw new UnsupportedOperationException("Not supported yet."); //To
          * change body of generated methods, choose Tools | Templates. } });*
          */
-        Callback<TableColumn<TeacherCourse, Date>, TableCell<TeacherCourse, Date>> dateCellFactory
-                = (TableColumn<TeacherCourse, Date> param) -> new DatePickerCell();
+        Callback<TableColumn<Teacher, Date>, TableCell<Teacher, Date>> dateCellFactory
+                = (TableColumn<Teacher, Date> param) -> new DatePickerCell();
         tbcBirthDate.setCellFactory(dateCellFactory);
         tbcBirthDate.setOnEditCommit(
-                (TableColumn.CellEditEvent<TeacherCourse, Date> t) -> {
-                    ((TeacherCourse) t.getTableView().getItems()
-                            .get(t.getTablePosition().getRow())).getTeacher()
+                (TableColumn.CellEditEvent<Teacher, Date> t) -> {
+                    ((Teacher) t.getTableView().getItems()
+                            .get(t.getTablePosition().getRow()))
                             .setBirthDate(t.getNewValue());
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
                 });
-        tbcSalary.setCellFactory(TextFieldTableCell.<TeacherCourse>forTableColumn());
+        tbcSalary.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcSalary.setOnEditCommit(
-                (CellEditEvent<TeacherCourse, String> t) -> {
+                (CellEditEvent<Teacher, String> t) -> {
                     if (!t.getNewValue().matches("[0-9]{3,4}")) {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid salary value", ButtonType.OK);
                         alert.show();
                     } else {
-                        ((TeacherCourse) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).getTeacher().setSalary(Float.valueOf(t.getNewValue()));
+                        ((Teacher) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setSalary(Float.valueOf(t.getNewValue()));
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
                         // tblTeachers.getColumns().add(tbcTelephone);
                     }
@@ -237,7 +228,15 @@ public class AdminTeacherWindowController {
         }
         name = FXCollections.observableArrayList(stringnames);
         tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
-        tblTeachers.setItems(teacherCourses);
+        tbcCourse.setOnEditCommit(
+                (CellEditEvent<Teacher, String> t) -> {
+                    
+                    ((Teacher) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).getTeacherCourse().setName(t.getNewValue());
+                    tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
+                    // tblTeachers.getColumns().add(tbcTelephone);
+                });
+        tblTeachers.setItems(teachers);
         //tblTeachers.setItems(teachersData);
         btnCreate.setOnAction(this::creation);
         btnDelete.setOnAction(this::delete);
@@ -247,40 +246,42 @@ public class AdminTeacherWindowController {
     }
 
     public void creation(ActionEvent action) {
+        Teacher teacher = new Teacher();
         TeacherCourse teacherCourse = new TeacherCourse();
-        teacherCourse.setTeacher(new Teacher());
-        teacherCourses.add(teacherCourse);
-        tblTeachers.getSelectionModel().select(teacherCourses.size() - 1);
-        tblTeachers.getFocusModel().focus(teacherCourses.size() - 1, tbcFullName);
-        tblTeachers.edit(teacherCourses.size() - 1, tbcFullName);
+        teacher.setTeacherCourse(teacherCourse);
+        teachers.add(teacher);
+        tblTeachers.getSelectionModel().select(teachers.size() - 1);
+        tblTeachers.getFocusModel().focus(teachers.size() - 1, tbcFullName);
+        tblTeachers.edit(teachers.size() - 1, tbcFullName);
         ivTick.setVisible(true);
         ivX.setVisible(true);
         btnCreate.setDisable(true);
     }
 
     public void delete(ActionEvent action) {
-        TeacherRESTClient teacherRESTClient = new TeacherRESTClient();
-        TeacherCourseRESTClient teacherCourseRESTClient = new TeacherCourseRESTClient();
-        tblTeachers.getSelectionModel().getSelectedItem().getTeacher();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
         alert.setTitle("Confirmation");
         alert.setContentText("You sure you want to erase this teacher?");
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.OK) {
-            teacherCourseRESTClient.remove(String.valueOf(tblTeachers.getSelectionModel().getSelectedItem().getIdTeacherCourse()));
-            teacherRESTClient.remove(tblTeachers.getSelectionModel().getSelectedItem().getTeacher().getIdUser());
+            teacherManager.remove(tblTeachers.getSelectionModel().getSelectedItem().getIdUser());
+            tblTeachers.refresh();
         }
     }
 
     private void accept(MouseEvent event) {
-        Teacher teacher = tblTeachers.getSelectionModel().getSelectedItem().getTeacher();
-
+        tblTeachers.getSelectionModel().select(teachers.size() - 1);
+        Teacher teacher = tblTeachers.getSelectionModel().getSelectedItem();
         if (teacher != null) {
             teacher.setPrivilege(UserPrivilege.TEACHER);
             teacher.setStatus(UserStatus.ENABLED);
-            TeacherRESTClient teacherRESTClient = new TeacherRESTClient();
-            teacherRESTClient.create(teacher);
+            teacher.setLastPasswordChange(Calendar.getInstance());
+            teacher.setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>(){},teacher.getTeacherCourse().getName()));
+            teacherManager.create(teacher);
+            btnCreate.setDisable(true);
+            ivTick.setVisible(false);
+            ivX.setVisible(false);
             tblTeachers.refresh();
         }
     }
