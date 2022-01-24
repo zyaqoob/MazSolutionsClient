@@ -310,6 +310,7 @@ public class ExamSessionController {
             examSessionData = FXCollections.observableArrayList(eSession.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));
             tblExamSession.setItems(examSessionData);
+            
             tblExamSession.refresh();
         }
     }
