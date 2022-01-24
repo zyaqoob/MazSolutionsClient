@@ -25,12 +25,12 @@ import javax.ws.rs.core.GenericType;
  *
  * @author z332h
  */
-public class TeacherRESTClient implements TeacherManager{
+public class TeacherRESTClient implements TeacherManager {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI =  ResourceBundle.getBundle("config.Config")
-                          .getString("BASE_URI");
+    private static final String BASE_URI = ResourceBundle.getBundle("config.Config")
+            .getString("BASE_URI");
 
     public TeacherRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -95,10 +95,17 @@ public class TeacherRESTClient implements TeacherManager{
     }
 
     @Override
-    public void remove(Long id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
+    public void remove(String login) throws ClientErrorException {
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{login})).request().delete();
     }
-    
+
+    @Override
+    public <T> T findTeachersByLogin(GenericType<T> responseType, String login) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("login/{0}", new Object[]{login}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+
     @Override
     public <T> T findAllTeacher(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
@@ -109,5 +116,5 @@ public class TeacherRESTClient implements TeacherManager{
     public void close() {
         client.close();
     }
-    
+
 }

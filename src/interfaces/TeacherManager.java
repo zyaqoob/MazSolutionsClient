@@ -32,7 +32,9 @@ public interface TeacherManager {
 
     public <T> T findAllTeacher(GenericType<T> responseType) throws ClientErrorException;
 
-    public void remove(Long id) throws ClientErrorException;
+    public void remove(String login) throws ClientErrorException;
+    
+     public <T> T findTeachersByLogin(GenericType<T> responseType, String login) throws ClientErrorException;
     
     public void close();
 }
