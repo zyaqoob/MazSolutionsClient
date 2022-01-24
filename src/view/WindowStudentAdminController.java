@@ -244,14 +244,15 @@ public class WindowStudentAdminController {
     }
     public void delete(ActionEvent action) {
         
-        Student student=tblStudents.getSelectionModel().getSelectedItem();
+        //String email= tblStudents.getSelectionModel().getSelectedItem().getEmail();
+        //Student student= restStudents.findStudentByEmail(new GenericType<Student>(){}, email);
         Alert deleteConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
         deleteConfirmationAlert.setHeaderText(null);
         deleteConfirmationAlert.setTitle("Confirmation");
         deleteConfirmationAlert.setContentText("Are you sure that you want to erase this student?");
         Optional<ButtonType> button = deleteConfirmationAlert.showAndWait();
         if (button.get() == ButtonType.OK) {
-            restStudents.remove(String.valueOf(student.getIdUser()));
+            restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
         }
         
     }

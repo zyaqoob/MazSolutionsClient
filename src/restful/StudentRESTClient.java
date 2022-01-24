@@ -40,6 +40,12 @@ public class StudentRESTClient implements StudentManager{
         resource = resource.path(java.text.MessageFormat.format("course/{0}", new Object[]{id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
+    
+    public <T> T findStudentByEmail(GenericType<T> responseType, String email) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{email}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
 
     public String countREST() throws ClientErrorException {
         WebTarget resource = webTarget;
