@@ -5,6 +5,7 @@
  */
 package view;
 
+import classes.Course;
 import classes.Exam;
 import classes.ExamSession;
 import classes.Student;
@@ -43,9 +44,10 @@ import javafx.stage.Stage;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javax.ws.rs.core.GenericType;
-import logic.RESTfulClientType;
-import logic.RESTfulFactory;
+import restful.CourseRESTClient;
+
 import restful.ExamRESTClient;
+import restful.ExamSessionRESTClient;
 import restful.StudentRESTClient;
 import restful.SubjectRESTClient;
 
@@ -92,10 +94,10 @@ public class ExamSessionController {
     @FXML
     private Button btnDelete;
 
-   // private RESTfulFactory factory;
+    private DateFormat dateFormat;
 
-   // private ExamSessionManager manager;
-
+    // private RESTfulFactory factory;
+    // private ExamSessionManager manager;
     private ObservableList<ExamSession> examSessionData;
 
     private ObservableList<Student> studentData;
@@ -118,23 +120,25 @@ public class ExamSessionController {
         btnDelete.setDisable(true);
         btnCreate.setDisable(false);
         ivTick.setDisable(true);
-        
+
         ivCross.setDisable(true);
         btnCreate.setOnAction(this::handleCreationEvent);
         btnDelete.setDisable(true);
         btnDelete.setOnAction(this::handleDeleteEvent);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm");
+        dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm");
 
-      //  factory = new RESTfulFactory();
-
+        //  factory = new RESTfulFactory();
         // manager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
+        // StudentRESTClient studentClient = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
+        StudentRESTClient studentClient = new StudentRESTClient();
 
-        StudentRESTClient studentClient = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
+        ExamRESTClient examClient = new ExamRESTClient();
 
-        ExamRESTClient examClient = (ExamRESTClient) factory.getRESTClient(RESTfulClientType.EXAM);
+        ExamSessionRESTClient eSession = new ExamSessionRESTClient();
 
-        SubjectRESTClient subjectClient = (SubjectRESTClient) factory.getRESTClient(RESTfulClientType.SUBJECT);
+        // SubjectRESTClient subjectClient = (SubjectRESTClient) factory.getRESTClient(RESTfulClientType.SUBJECT);
+        SubjectRESTClient subjectClient = new SubjectRESTClient();
 
         studentData = FXCollections.observableArrayList(studentClient.findAllStudents(new GenericType<List<Student>>() {
         }));
@@ -144,7 +148,7 @@ public class ExamSessionController {
 
         examData = FXCollections.observableArrayList(examClient.findAllExam(new GenericType<List<Exam>>() {
         }));
-        examSessionData = FXCollections.observableArrayList(manager.findAllExamSession(new GenericType<List<ExamSession>>() {
+        examSessionData = FXCollections.observableArrayList(eSession.findAllExamSession(new GenericType<List<ExamSession>>() {
         }));
 
         tcSubject.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getExam().getSubject().getName()));
@@ -163,6 +167,7 @@ public class ExamSessionController {
         }
         subjectNames = FXCollections.observableArrayList(sNames);
         tcSubject.setCellFactory(ChoiceBoxTableCell.forTableColumn(subjectNames));
+        tcSubject.setOnEditCommit(this::handleTcSubjectEdit);
 
         //Table column exam
         ObservableList<String> examNames;
@@ -172,6 +177,7 @@ public class ExamSessionController {
         }
         examNames = FXCollections.observableArrayList(eNames);
         tcExam.setCellFactory(ChoiceBoxTableCell.forTableColumn(examNames));
+        tcExam.setOnEditCommit(this::handleTcExamEdit);
 
         //Table column student
         ObservableList<String> studentNames;
@@ -181,71 +187,89 @@ public class ExamSessionController {
         }
         studentNames = FXCollections.observableArrayList(names);
         tcStudent.setCellFactory(ChoiceBoxTableCell.forTableColumn(studentNames));
+        tcStudent.setOnEditCommit(this::handleTcStudentEdit);
 
         //Table column dateTimeStart
         tcDateStart.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
-        tcDateStart.setOnEditCommit(
-                (CellEditEvent<ExamSession, String> t) -> {
-
-                    try {
-                        //Calendar cal = Calendar.getInstance();
-                        Calendar cal = new GregorianCalendar();
-                        cal.setTime(dateFormat.parse(t.getNewValue()));
-
-                        ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
-                    } catch (ParseException ex) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
-                        alert.show();
-                        tblExamSession.refresh();
-
-                    }
-
-                });
+        tcDateStart.setOnEditCommit(this::handleTcDateStartEdit);
 
         //Table column dateTimeEnd
         tcDateEnd.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
-        tcDateEnd.setOnEditCommit(
-                (CellEditEvent<ExamSession, String> t) -> {
-
-                    try {
-                        //Calendar cal = Calendar.getInstance();
-                        Calendar cal = new GregorianCalendar();
-                        cal.setTime(dateFormat.parse(t.getNewValue()));
-
-                        ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
-                    } catch (ParseException ex) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
-                        alert.show();
-                        tblExamSession.refresh();
-                    }
-
-                });
+        tcDateEnd.setOnEditCommit(this::handleTcDateEndEdit);
 
         //Table Column mark.
         tcMark.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
-        tcMark.setOnEditCommit(
-                (CellEditEvent<ExamSession, String> t) -> {
-                    if (!t.getNewValue().matches("\\d*") || Integer.parseInt(t.getNewValue().trim()) > 10) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
-                        alert.show();
-                        ((ExamSession) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).setMark(Integer.parseInt(t.getOldValue().trim()));
-                        tblExamSession.refresh();
-                    } else {
-                        ((ExamSession) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).setMark(Integer.parseInt(t.getNewValue().trim()));
-                        tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcMark);
-                        tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
-                    }
-                });
-        tcMark.setOnEditCancel((CellEditEvent<ExamSession, String> t) -> {
-            tblExamSession.refresh();
-        });
-        
+        tcMark.setOnEditCommit(this::handleTcMarkEdit);
+
         ivTick.setOnMouseClicked(this::handleAcceptEvent);
         tblExamSession.setItems(examSessionData);
         stage.show();
 
+    }
+
+    private void handleTcSubjectEdit(CellEditEvent<ExamSession, String> t) {
+        ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().getSubject().setName(t.getNewValue());
+        tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcExam);
+        tblExamSession.edit(t.getTablePosition().getRow(), tcExam);
+    }
+
+    private void handleTcStudentEdit(CellEditEvent<ExamSession, String> t) {
+
+        ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getStudent().setFullName(t.getNewValue());
+        tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateStart);
+        tblExamSession.edit(t.getTablePosition().getRow(), tcDateStart);
+    }
+
+    private void handleTcExamEdit(CellEditEvent<ExamSession, String> t) {
+        ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().setExamStatement(t.getNewValue());
+        tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcStudent);
+        tblExamSession.edit(t.getTablePosition().getRow(), tcStudent);
+    }
+
+    private void handleTcDateStartEdit(CellEditEvent<ExamSession, String> t) {
+        try {
+            //Calendar cal = Calendar.getInstance();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(dateFormat.parse(t.getNewValue()));
+
+            ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
+            tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateEnd);
+            tblExamSession.edit(t.getTablePosition().getRow(), tcDateEnd);
+        } catch (ParseException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format, it should be 'dd-MM-yyyy : hh:mm'.", ButtonType.OK);
+            alert.show();
+            tblExamSession.refresh();
+
+        }
+    }
+
+    private void handleTcDateEndEdit(CellEditEvent<ExamSession, String> t) {
+        try {
+            //Calendar cal = Calendar.getInstance();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(dateFormat.parse(t.getNewValue()));
+
+            ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
+        } catch (ParseException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format, it should be 'dd-MM-yyyy : hh:mm'.", ButtonType.OK);
+            alert.show();
+            tblExamSession.refresh();
+        }
+    }
+
+    private void handleTcMarkEdit(CellEditEvent<ExamSession, String> t) {
+        if (!t.getNewValue().matches("\\d*") || Integer.parseInt(t.getNewValue().trim()) > 10) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
+            alert.show();
+            ((ExamSession) t.getTableView().getItems().get(
+                    t.getTablePosition().getRow())).setMark(Integer.parseInt(t.getOldValue().trim()));
+            tblExamSession.refresh();
+        } else {
+            ((ExamSession) t.getTableView().getItems().get(
+                    t.getTablePosition().getRow())).setMark(Integer.parseInt(t.getNewValue().trim()));
+            tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcMark);
+            tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
+        }
     }
 
     private void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
@@ -259,6 +283,7 @@ public class ExamSessionController {
     private void handleCreationEvent(ActionEvent action) {
         ExamSession eSession = new ExamSession();
         eSession.setStudent(new Student());
+        eSession.getStudent().setCourse(new Course());
         eSession.setExam(new Exam());
         eSession.getExam().setSubject(new Subject());
         eSession.setDateTimeEnd(new GregorianCalendar());
@@ -266,32 +291,55 @@ public class ExamSessionController {
 
         examSessionData.add(eSession);
         tblExamSession.getSelectionModel().select(examSessionData.size() - 1);
-        tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcStudent);
-        tblExamSession.edit(examSessionData.size() - 1, tcStudent);
+        tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
+        tblExamSession.edit(examSessionData.size() - 1, tcSubject);
         ivTick.setDisable(false);
         btnCreate.setDisable(true);
 
     }
 
     private void handleDeleteEvent(ActionEvent action) {
-        ExamSessionManager manager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
+
+        ExamSessionRESTClient eSession = new ExamSessionRESTClient();
         tblExamSession.getSelectionModel().getSelectedItem();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete?", ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.YES) {
-            manager.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
+            System.out.println(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession());
+            eSession.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
+            examSessionData = FXCollections.observableArrayList(eSession.findAllExamSession(new GenericType<List<ExamSession>>() {
+            }));
+            tblExamSession.setItems(examSessionData);
             tblExamSession.refresh();
         }
     }
 
     private void handleAcceptEvent(MouseEvent event) {
+        Course course = null;
         ExamSession examSession = tblExamSession.getSelectionModel().getSelectedItem();
-        if (examSession.getDateTimeEnd() == null || examSession.getDateTimeStart() == null || examSession.getStudent() == null || examSession.getExam() == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
-            alert.show();
-        } else {
-            
-            tblExamSession.refresh();
+        Subject subject = null;
+        for (int i = 0; i < studentData.size(); i++) {
+
+            if (examSession.getStudent().getFullName().equals(studentData.get(i).getFullName())) {
+                examSession.setStudent(studentData.get(i));
+
+                System.out.println(examSession.getStudent().getIdUser());
+            }
         }
+        for (int i = 0; i < subjectData.size(); i++) {
+            if (examSession.getExam().getSubject().getName().equals(subjectData.get(i).getName())) {
+                subject = subjectData.get(i);
+            }
+        }
+        for (int i = 0; i < examData.size(); i++) {
+            if (tblExamSession.getSelectionModel().getSelectedItem().getExam().getExamStatement().equals(examData.get(i).getExamStatement())) {
+                examSession.setExam(examData.get(i));
+                examSession.getExam().setSubject(subject);
+            }
+        }
+        ExamSessionRESTClient client = new ExamSessionRESTClient();
+        client.create(examSession);
+        tblExamSession.refresh();
     }
+
 }
