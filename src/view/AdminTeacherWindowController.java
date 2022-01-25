@@ -174,6 +174,8 @@ public class AdminTeacherWindowController {
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.OK) {
             new TeacherRESTClient().remove(teacher.getLogin());
+            teachers=FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>(){}));
+            tblTeachers.setItems(teachers);
             tblTeachers.refresh();
         }
     }
@@ -188,7 +190,9 @@ public class AdminTeacherWindowController {
             teacher.setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>() {
             }, teacher.getTeacherCourse().getName()));
             teacherManager.create(teacher);
-            btnCreate.setDisable(true);
+            teachers=FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>(){}));
+            tblTeachers.setItems(teachers);
+            btnCreate.setDisable(false);
             ivTick.setVisible(false);
             ivX.setVisible(false);
             tblTeachers.refresh();
@@ -209,11 +213,10 @@ public class AdminTeacherWindowController {
                 (CellEditEvent<Teacher, String> t) -> {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setFullName(t.getNewValue());
-                    if (((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
-                        new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
@@ -224,11 +227,10 @@ public class AdminTeacherWindowController {
                 (CellEditEvent<Teacher, String> t) -> {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setLogin(t.getNewValue());
-                    if (((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
-                        new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcEmail);
@@ -240,11 +242,10 @@ public class AdminTeacherWindowController {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setEmail(t.getNewValue());
                     //tblTeachers.getColumns().add(tbcEmail);
-                    if (((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
-                        new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
@@ -259,11 +260,10 @@ public class AdminTeacherWindowController {
                     } else {
                         ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())).setTelephone(t.getNewValue());
-                        if (((Teacher) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).getIdUser() != null) {
+                        if (!ivTick.isVisible()) {
                             Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                     t.getTablePosition().getRow()));
-                            new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                            teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcBirthDate);
                         tblTeachers.edit(t.getTablePosition().getRow(), tbcBirthDate);
@@ -278,11 +278,10 @@ public class AdminTeacherWindowController {
                     ((Teacher) t.getTableView().getItems()
                             .get(t.getTablePosition().getRow()))
                             .setBirthDate(t.getNewValue());
-                    if (((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
-                        new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
@@ -296,11 +295,10 @@ public class AdminTeacherWindowController {
                     } else {
                         ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())).setSalary(Float.valueOf(t.getNewValue()));
-                        if (((Teacher) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())).getIdUser() != null) {
+                        if (!ivTick.isVisible()) {
                             Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                     t.getTablePosition().getRow()));
-                            new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                            teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
                         // tblTeachers.getColumns().add(tbcTelephone);
@@ -321,11 +319,10 @@ public class AdminTeacherWindowController {
                             t.getTablePosition().getRow())).setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>() {
                     }, t.getNewValue()));
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
-                    if (((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
-                        new TeacherRESTClient().edit(teacher, String.valueOf(teacher.getIdUser()));
+                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     // tblTeachers.getColumns().add(tbcTelephone);
                 });
