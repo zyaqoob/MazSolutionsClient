@@ -10,6 +10,7 @@ import classes.Exam;
 import classes.ExamSession;
 import classes.Student;
 import classes.Subject;
+import interfaces.ExamManager;
 import interfaces.ExamSessionManager;
 
 import java.text.DateFormat;
@@ -44,9 +45,9 @@ import javafx.stage.Stage;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javax.ws.rs.core.GenericType;
-import restful.CourseRESTClient;
+import logic.RESTfulClientType;
+import logic.RESTfulFactory;
 
-import restful.ExamRESTClient;
 import restful.ExamSessionRESTClient;
 import restful.StudentRESTClient;
 import restful.SubjectRESTClient;
@@ -96,8 +97,10 @@ public class ExamSessionController {
 
     private DateFormat dateFormat;
 
-    // private RESTfulFactory factory;
-    // private ExamSessionManager manager;
+    private RESTfulFactory factory;
+    
+    private ExamSessionManager examSessionManager;
+    
     private ObservableList<ExamSession> examSessionData;
 
     private ObservableList<Student> studentData;
@@ -128,28 +131,29 @@ public class ExamSessionController {
 
         dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm");
 
-        //  factory = new RESTfulFactory();
-        // manager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
-        // StudentRESTClient studentClient = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
-        StudentRESTClient studentClient = new StudentRESTClient();
+        factory = new RESTfulFactory();
+        examSessionManager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
+       // StudentManager studentManager=(StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
+       // StudentRESTClient studentManager = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
+        StudentRESTClient studentManager = new StudentRESTClient();
+        
+          ExamManager examManager = (ExamManager) factory.getRESTClient(RESTfulClientType.EXAM);
+        
 
-        ExamRESTClient examClient = new ExamRESTClient();
+     
 
-        ExamSessionRESTClient eSession = new ExamSessionRESTClient();
+        // SubjectManager subjectManager = (SubjectManager) factory.getRESTClient(RESTfulClientType.SUBJECT);
+        SubjectRESTClient subjectManager = new SubjectRESTClient();
 
-        // SubjectRESTClient subjectClient = (SubjectRESTClient) factory.getRESTClient(RESTfulClientType.SUBJECT);
-        SubjectRESTClient subjectClient = new SubjectRESTClient();
-
-        studentData = FXCollections.observableArrayList(studentClient.findAllStudents(new GenericType<List<Student>>() {
+        studentData = FXCollections.observableArrayList(studentManager.findAllStudents(new GenericType<List<Student>>() {
         }));
 
-        subjectData = FXCollections.observableArrayList(subjectClient.findAllSubject(new GenericType<List<Subject>>() {
+        subjectData = FXCollections.observableArrayList(subjectManager.findAllSubject(new GenericType<List<Subject>>() {
         }));
 
-        examData = FXCollections.observableArrayList(examClient.findAllExam(new GenericType<List<Exam>>() {
+        examData = FXCollections.observableArrayList(examManager.findAllExam(new GenericType<List<Exam>>() {
         }));
-        examSessionData = FXCollections.observableArrayList(eSession.findAllExamSession(new GenericType<List<ExamSession>>() {
-        }));
+        examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {}));
 
         tcSubject.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getExam().getSubject().getName()));
         tcStudent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStudent().getFullName()));
@@ -192,6 +196,7 @@ public class ExamSessionController {
         //Table column dateTimeStart
         tcDateStart.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateStart.setOnEditCommit(this::handleTcDateStartEdit);
+       // tcDateStart.setOnEditStart(this::handleTcDateStartEditStart);
 
         //Table column dateTimeEnd
         tcDateEnd.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
@@ -239,9 +244,28 @@ public class ExamSessionController {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format, it should be 'dd-MM-yyyy : hh:mm'.", ButtonType.OK);
             alert.show();
             tblExamSession.refresh();
+            
 
         }
     }
+    
+    /*private void handleTcDateStartEditStart(CellEditEvent<ExamSession, String> t) {
+        try {
+            //Calendar cal = Calendar.getInstance();
+            Calendar cal = new GregorianCalendar();
+            cal.setTime(dateFormat.parse(t.getNewValue()));
+
+            ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
+            tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateEnd);
+            tblExamSession.edit(t.getTablePosition().getRow(), tcDateEnd);
+        } catch (ParseException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format, it should be 'dd-MM-yyyy : hh:mm'.", ButtonType.OK);
+            alert.show();
+            tblExamSession.refresh();
+            
+
+        }
+    }*/
 
     private void handleTcDateEndEdit(CellEditEvent<ExamSession, String> t) {
         try {
@@ -288,7 +312,7 @@ public class ExamSessionController {
         eSession.getExam().setSubject(new Subject());
         eSession.setDateTimeEnd(new GregorianCalendar());
         eSession.setDateTimeStart(new GregorianCalendar());
-
+           
         examSessionData.add(eSession);
         tblExamSession.getSelectionModel().select(examSessionData.size() - 1);
         tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
@@ -300,14 +324,14 @@ public class ExamSessionController {
 
     private void handleDeleteEvent(ActionEvent action) {
 
-        ExamSessionRESTClient eSession = new ExamSessionRESTClient();
+      
         tblExamSession.getSelectionModel().getSelectedItem();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete?", ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.YES) {
             System.out.println(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession());
-            eSession.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
-            examSessionData = FXCollections.observableArrayList(eSession.findAllExamSession(new GenericType<List<ExamSession>>() {
+            examSessionManager.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
+            examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));
             tblExamSession.setItems(examSessionData);
             
@@ -316,8 +340,8 @@ public class ExamSessionController {
     }
 
     private void handleAcceptEvent(MouseEvent event) {
-        Course course = null;
-        ExamSession examSession = tblExamSession.getSelectionModel().getSelectedItem();
+        try {
+             ExamSession examSession = tblExamSession.getSelectionModel().getSelectedItem();
         Subject subject = null;
         for (int i = 0; i < studentData.size(); i++) {
 
@@ -338,9 +362,18 @@ public class ExamSessionController {
                 examSession.getExam().setSubject(subject);
             }
         }
-        ExamSessionRESTClient client = new ExamSessionRESTClient();
-        client.create(examSession);
+        
+        examSessionManager.create(examSession);
+        examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
+        }));
+        tblExamSession.setItems(examSessionData);
         tblExamSession.refresh();
+        btnCreate.setDisable(false);
+        
+        } catch (Exception e) {
+        }
+        
+       
     }
 
 }
