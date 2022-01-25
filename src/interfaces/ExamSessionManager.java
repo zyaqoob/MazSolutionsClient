@@ -33,7 +33,6 @@ public interface ExamSessionManager {
 
     public void remove(String id) throws ClientErrorException ;
 
-    public <T> T findExamSessionsByTeacher(GenericType<T> responseType, String fullname) throws ClientErrorException ;
 
     public <T> T findAllExamSession(GenericType<T> responseType) throws ClientErrorException ;
     

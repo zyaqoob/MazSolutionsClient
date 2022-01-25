@@ -7,6 +7,7 @@ package interfaces;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 
 /**
  *
@@ -22,7 +23,7 @@ public interface ExamManager {
 
     public <T> T findRange(Class<T> responseType, String from, String to) throws ClientErrorException ;
 
-    public <T> T findAllExam(Class<T> responseType) throws ClientErrorException ;
+    public <T> T findAllExam(GenericType<T> responseType) throws ClientErrorException ;
 
     public void create(Object requestEntity) throws ClientErrorException ;
 
