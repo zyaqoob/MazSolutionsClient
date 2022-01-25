@@ -187,6 +187,7 @@ public class AdminTeacherWindowController {
             teacher.setPrivilege(UserPrivilege.TEACHER);
             teacher.setStatus(UserStatus.ENABLED);
             teacher.setLastPasswordChange(Calendar.getInstance());
+            teacher.setPassword(generatePassword());
             teacher.setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>() {
             }, teacher.getTeacherCourse().getName()));
             teacherManager.create(teacher);
@@ -214,8 +215,8 @@ public class AdminTeacherWindowController {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setFullName(t.getNewValue());
                     if (!ivTick.isVisible()) {
-                        Teacher teacher = ((Teacher) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow()));
+                        Teacher teacher = (Teacher )t.getTableView().getItems().get(
+                                t.getTablePosition().getRow());
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
