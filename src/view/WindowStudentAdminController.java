@@ -194,6 +194,7 @@ public class WindowStudentAdminController {
             student.setPrivilege(UserPrivilege.STUDENT);
             student.setStatus(UserStatus.ENABLED);
             student.setCourse(restCourses.findCourseByName(new GenericType<Course>(){}, student.getCourse().getName()));
+            student.setPassword(generatePassword());
             restStudents.create(student);
             tblStudents.refresh();
             btnCreate.setDisable(false);
@@ -320,4 +321,15 @@ public class WindowStudentAdminController {
                     }
                 });
     }
+    
+    
+    public static String generatePassword() {
+        String password;
+        String charLow[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+        String charUpper[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+        String number[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        password = charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)] + charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)];
+        return password;
+    }
+    
 }
