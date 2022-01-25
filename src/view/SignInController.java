@@ -8,7 +8,6 @@ package view;
 import classes.Student;
 import classes.User;
 import restful.UserRESTClient;
-import crypto.Crypto;
 /*import exceptions.UserNotFoundException;
 import exceptions.ConnectionRefusedException;
 import exceptions.IncorrectPasswordException;
@@ -155,7 +154,8 @@ public class SignInController {
                 //controller.setLabelText();
                 //controller.setStage(stageSignIn);
                 //controller.initStage(root);
-                System.out.println(userRest.login_XML(new GenericType<User>(){}, "aitorrdg", "abcd*1234"));
+                User user = (User)userRest.login_XML(new GenericType<User>(){}, "lmendiet", "abcd*1234");
+   
             } catch (Exception ex) {
                 //Alert alert = new Alert(Alert.AlertType.ERROR, "ERROR WHILE SIGNING UP", ButtonType.OK);
                 ex.printStackTrace();

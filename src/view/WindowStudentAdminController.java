@@ -146,78 +146,8 @@ public class WindowStudentAdminController {
         tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
         tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
         
-        //Table column FullName editable with textField
-        tbcFullName.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
-        tbcFullName.setOnEditCommit(
-                (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).setFullName(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
-                });
         
-        
-        //Table column Course editable with textField
-        ObservableList<String> name;
-        List<String> stringnames = new ArrayList<>();
-        for (int i = 0; i < coursesData.size(); i++) {
-            stringnames.add(i, coursesData.get(i).getName());
-        }
-        name = FXCollections.observableArrayList(stringnames);
-        tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
-        tbcCourse.setOnEditCommit(
-                (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getCourse().setName(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcYear);
-                });
-        
-        
-        
-        //Table column Year editable with textField
-        Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory
-                = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
-        tbcYear.setCellFactory(dateCellFactory);
-        tbcYear.setOnEditCommit(
-                (TableColumn.CellEditEvent<Student, Date> s) -> {
-                    ((Student) s.getTableView().getItems()
-                            .get(s.getTablePosition().getRow()))
-                            .setYear(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcEmail);
-                });
-        
-        //Table column Email editable with textField
-        tbcEmail.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
-        tbcEmail.setOnEditCommit(
-                (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).setEmail(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
-                });
-        tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
-        });
-        
-        //Table column Telephone editable with textField
-        tbcTelephone.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
-        tbcTelephone.setOnEditCommit(
-                (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).setTelephone(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
-                });
-        tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
-        });
-        
-        //Table column Birth Date editable with textField
-        Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory2
-                = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
-        tbcBirthDate.setCellFactory(dateCellFactory2);
-        tbcBirthDate.setOnEditCommit(
-                (TableColumn.CellEditEvent<Student, Date> s) -> {
-                    ((Student) s.getTableView().getItems()
-                            .get(s.getTablePosition().getRow()))
-                            .setBirthDate(s.getNewValue());
-                });
-        
+        checkStudentIsNull();
         
         tblStudents.setItems(studentsData);
         btnCreate.setOnAction(this::creation);
@@ -230,9 +160,9 @@ public class WindowStudentAdminController {
     public void creation(ActionEvent action) {
         Student student = new Student();
         Course course = new Course();
-        ExamSessionRESTClient restSessions = new ExamSessionRESTClient();
-        ObservableList<ExamSession> sessions=FXCollections.observableArrayList(restSessions.findAllExamSession(new GenericType<List<ExamSession>>(){}));
-        student.setSessions(sessions);
+        //ExamSessionRESTClient restSessions = new ExamSessionRESTClient();
+        //ObservableList<ExamSession> sessions=FXCollections.observableArrayList(restSessions.findAllExamSession(new GenericType<List<ExamSession>>(){}));
+        //student.setSessions(sessions);
         student.setCourse(course);
         studentsData.add(student);
         tblStudents.getSelectionModel().select(studentsData.size() - 1);
@@ -278,5 +208,116 @@ public class WindowStudentAdminController {
             btnDelete.setDisable(false);
         }
         
+    }
+    
+    private void checkStudentIsNull(){
+        //Table column FullName editable with textField
+        tbcFullName.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
+        tbcFullName.setOnEditCommit(
+                (CellEditEvent<Student, String> s) -> {
+                    ((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).setFullName(s.getNewValue());
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
+        
+        
+        
+        //Table column Course editable with textField
+        ObservableList<String> name;
+        List<String> stringnames = new ArrayList<>();
+        for (int i = 0; i < coursesData.size(); i++) {
+            stringnames.add(i, coursesData.get(i).getName());
+        }
+        name = FXCollections.observableArrayList(stringnames);
+        tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
+        tbcCourse.setOnEditCommit(
+                (CellEditEvent<Student, String> s) -> {
+                    ((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getCourse().setName(s.getNewValue());
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcYear);
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
+        
+        
+        
+        //Table column Year editable with textField
+        Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory
+                = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
+        tbcYear.setCellFactory(dateCellFactory);
+        tbcYear.setOnEditCommit(
+                (TableColumn.CellEditEvent<Student, Date> s) -> {
+                    ((Student) s.getTableView().getItems()
+                            .get(s.getTablePosition().getRow()))
+                            .setYear(s.getNewValue());
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcEmail);
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
+        
+        //Table column Email editable with textField
+        tbcEmail.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
+        tbcEmail.setOnEditCommit(
+                (CellEditEvent<Student, String> s) -> {
+                    ((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).setEmail(s.getNewValue());
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
+        tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
+        });
+        
+        //Table column Telephone editable with textField
+        tbcTelephone.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
+        tbcTelephone.setOnEditCommit(
+                (CellEditEvent<Student, String> s) -> {
+                    ((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).setTelephone(s.getNewValue());
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
+        tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
+        });
+        
+        //Table column Birth Date editable with textField
+        Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory2
+                = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
+        tbcBirthDate.setCellFactory(dateCellFactory2);
+        tbcBirthDate.setOnEditCommit(
+                (TableColumn.CellEditEvent<Student, Date> s) -> {
+                    ((Student) s.getTableView().getItems()
+                            .get(s.getTablePosition().getRow()))
+                            .setBirthDate(s.getNewValue());
+                    if (((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).getIdUser() != null) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                });
     }
 }
