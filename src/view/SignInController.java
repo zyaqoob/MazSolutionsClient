@@ -85,13 +85,13 @@ public class SignInController {
         String username = txtUserName.getText();
         String password = txtPasswd.getText();
         
-
-        //password = Crypto.cifrar(password);
+        
+        password = Crypto.cifrar(password);
         UserRESTClient rest = new UserRESTClient();
         user = rest.login_XML(new GenericType<User>(){}, username, password);
         stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
-        Stage userDetailsStage = new Stage();
+        //Stage userDetailsStage = new Stage();
         try {
             Parent root = (Parent) loader.load();
             WindowStudentAdminController controller = loader.getController();
@@ -154,7 +154,7 @@ public class SignInController {
 
     public void handlePasswordRecoverAction(ActionEvent action) {
        
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/password_recover_window.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/PasswordRecoverWindow.fxml"));
         Stage passwordRecoverStage = new Stage();
         try {
             Parent root = (Parent) loader.load();

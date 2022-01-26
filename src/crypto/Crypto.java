@@ -5,6 +5,7 @@
  */
 package crypto;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
@@ -37,11 +38,13 @@ public class Crypto {
         byte[] encodedMessage = null;
         try {
             InputStream is = Crypto.class.getResourceAsStream("PublicKey.key");
-            byte[] fileContent = new byte[is.available()];
+            byte[] encKey = toByteArray(is);
+            is.close();
+            /*byte[] fileContent = new byte[is.available()];
             is.read(fileContent, 0, is.available());
-            key = fileContent;
+            key = fileContent;*/
             keyFactory = KeyFactory.getInstance("RSA");
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(encKey);
             publicKey = keyFactory.generatePublic(spec);
             Cipher cipherRSA = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -148,6 +151,7 @@ public class Crypto {
         }
         return mensajeByte;
     }
+
     public static String generatePassword() {
         String password;
         String charLow[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
@@ -155,5 +159,17 @@ public class Crypto {
         String number[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         password = charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)] + charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)];
         return password;
+    }
+
+    public static byte[] toByteArray(InputStream in) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        // read bytes from the input stream and store them in buffer
+        while ((len = in.read(buffer)) != -1) {
+            // write bytes from the buffer into output stream
+            os.write(buffer, 0, len);
+        }
+        return os.toByteArray();
     }
 }

@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.ws.rs.core.GenericType;
 import restful.UserRESTClient;
 
 /**
@@ -66,7 +67,7 @@ public class PasswordRecoverController {
         User user = new User();
         if (checkEmailRegex(email)) {
             UserRESTClient restUser = new UserRESTClient();
-            restUser.findUserByEmail_XML(User.class, email);
+            restUser.findUserByEmail_XML(new GenericType<User>(){}, email);
 
             txtEmail.setText("");
             txtInfo.setVisible(true);
@@ -106,10 +107,6 @@ public class PasswordRecoverController {
     }
 
     private boolean checkEmailRegex(String email) {
-        // String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
-        //Pattern pattern = Pattern.compile(regex);
-        //Matcher matcher = pattern.matcher(email);
-        //    return matcher.matches();
         return email.matches("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
     }
 }
