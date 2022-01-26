@@ -9,6 +9,7 @@ import classes.Teacher;
 import classes.TeacherCourse;
 import classes.UserPrivilege;
 import classes.UserStatus;
+import static crypto.Crypto.generatePassword;
 import interfaces.TeacherCourseManager;
 import interfaces.TeacherManager;
 import java.util.ArrayList;
