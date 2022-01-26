@@ -117,7 +117,7 @@ public class ExamSession implements Serializable {
      *
      * @return student
      */
-    @XmlTransient
+    
     public Student getStudent() {
         return student.get();
     }

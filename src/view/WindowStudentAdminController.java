@@ -206,6 +206,8 @@ public class WindowStudentAdminController {
             student.setCourse(restCourses.findCourseByName(new GenericType<Course>(){}, student.getCourse().getName()));
             student.setPassword(generatePassword());
             restStudents.create(student);
+            ivTick.setVisible(false);
+            ivX.setVisible(false);
             tblStudents.refresh();
             btnCreate.setDisable(false);
         }
@@ -229,8 +231,7 @@ public class WindowStudentAdminController {
                     ((Student) s.getTableView().getItems().get(
                             s.getTablePosition().getRow())).setFullName(s.getNewValue());
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
