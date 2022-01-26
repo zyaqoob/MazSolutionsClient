@@ -117,12 +117,15 @@ public class WindowStudentAdminController {
     @FXML
     private TableColumn<Student, Date> tbcBirthDate;
     
+    @FXML
+    private ChoiceBox <String> chbFilterStudentsByCourse;
+    
     private final StudentRESTClient restStudents = new StudentRESTClient();
     private final ObservableList<Student> studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
     private final CourseRESTClient restCourses = new CourseRESTClient();
     private final ObservableList<Course> coursesData=FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>(){}));
-    @FXML
-    private ChoiceBox<?> chBox;
+    
+    
    
     
     public void initStage(Parent root) {
@@ -146,6 +149,13 @@ public class WindowStudentAdminController {
         tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
         tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
         
+        /*ObservableList<String> name;
+        List<String> stringnames = new ArrayList<>();
+        for (int i = 0; i < coursesData.size(); i++) {
+            stringnames.add(i, coursesData.get(i).getName());
+        }
+        name = FXCollections.observableArrayList(stringnames);
+        chbFilterStudentsByCourse.setItems(name);*/
         
         checkStudentIsNull();
         
