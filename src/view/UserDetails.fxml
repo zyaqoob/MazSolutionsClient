@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="587.0" prefWidth="924.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.UserDetailsController">
+   <left>
+      <VBox prefHeight="190.0" prefWidth="100.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="lblCourse" alignment="CENTER" contentDisplay="CENTER" prefHeight="69.0" prefWidth="101.0" text="Courses" textFill="#d0c1c1">
+               <font>
+                  <Font name="System Bold" size="9.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblExam" alignment="CENTER" contentDisplay="CENTER" prefHeight="30.0" prefWidth="118.0" text="Exam" textFill="#d0c1c1">
+               <font>
+                  <Font name="System Bold" size="9.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblExamSession" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="ExamSession" textFill="#d0c1c1">
+               <font>
+                  <Font name="System Bold" size="9.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+   </left>
+   <top>
+      <Pane prefHeight="96.0" prefWidth="700.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
+         <children>
+            <Button layoutY="16.0" mnemonicParsing="false" prefHeight="79.0" prefWidth="174.0" style="-fx-background-color: #3F2B63;" text="Maz Solutions" textFill="#d0c1c1">
+               <font>
+                  <Font name="System Italic" size="21.0" />
+               </font>
+            </Button>
+            <Button layoutX="867.0" layoutY="41.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="37.0" style="-fx-background-radius: 100; -fx-background-color: #d0c1c1;" text="A" />
+            <ImageView fitHeight="38.0" fitWidth="36.0" layoutX="811.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../Downloads/setting.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
+   </top>
+   <center>
+      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Pane prefHeight="492.0" prefWidth="825.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="-11.0" layoutY="11.0" prefHeight="69.0" prefWidth="167.0" text="PERSONAL INFO">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+                  <Separator layoutX="28.0" layoutY="59.0" prefHeight="12.0" prefWidth="472.0" />
+                  <Label fx:id="lblName" alignment="CENTER" contentDisplay="CENTER" layoutX="-1.0" layoutY="56.0" prefHeight="69.0" prefWidth="166.0" text="Aitor Ruiz de Gauna">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblEmail" alignment="CENTER" contentDisplay="CENTER" layoutX="-14.0" layoutY="88.0" prefHeight="69.0" prefWidth="242.0" text="aitorruizdegauna@gmail.com">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblBirthDate" alignment="CENTER" contentDisplay="CENTER" layoutX="-4.0" layoutY="121.0" prefHeight="69.0" prefWidth="132.0" text="2001/09/18">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblTelephone" alignment="CENTER" contentDisplay="CENTER" layoutY="156.0" prefHeight="69.0" prefWidth="132.0" text="688-860-597">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="btnEdit" layoutX="32.0" layoutY="212.0" mnemonicParsing="false" text="EDIT " />
+                  <Button fx:id="btnCancel" layoutX="98.0" layoutY="212.0" mnemonicParsing="false" text="CANCEL" />
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+   </center>
+</BorderPane>
