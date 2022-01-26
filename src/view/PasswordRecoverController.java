@@ -6,6 +6,9 @@
 package view;
 
 import classes.User;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -14,7 +17,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import restful.UserRESTClient;
 
 /**
@@ -43,16 +48,68 @@ public class PasswordRecoverController {
     public void initStage(Parent root) {
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setTitle("Sign In");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Password recovery");
         stage.setResizable(false);
+        btnAccept.setDisable(true);
         btnAccept.setOnAction(this::handleBtnAcceptAction);
+        btnSignIn.setOnAction(this::handleSignIn);
+        txtEmail.textProperty().addListener(this::textChanged);
         lblMax.setVisible(false);
         txtInfo.setVisible(false);
         stage.show();
     }
 
     public void handleBtnAcceptAction(ActionEvent action) {
-        UserRESTClient restUser = new UserRESTClient();
-       restUser.findUserByEmail_XML(User.class, txtEmail.getText());
+
+        String email = txtEmail.getText();
+        User user = new User();
+        if (checkEmailRegex(email)) {
+            UserRESTClient restUser = new UserRESTClient();
+            restUser.findUserByEmail_XML(User.class, email);
+
+            txtEmail.setText("");
+            txtInfo.setVisible(true);
+
+        } else {
+            lblMax.setText("Not a valid email address");
+            lblMax.setVisible(true);
+        }
+
+    }
+
+    public void handleSignIn(ActionEvent action) {
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+    }
+
+    public void textChanged(ObservableValue observable, String oldValue, String newValue) {
+        if (!txtEmail.getText().trim().equals("")) {
+            txtInfo.setVisible(false);
+            btnAccept.setDisable(false);
+        } else {
+            btnAccept.setDisable(true);
+        }
+        // to check the limit of characters introduced in username and password fields.
+        characterLimitArrived(txtEmail, lblMax);
+
+    }
+
+    private void characterLimitArrived(TextField textField, Label label) {
+
+        //if textfield length is higher than 255 character, label will be visible to warn the user.
+        if (textField.getText().trim().length() > 255) {
+            label.setVisible(true);
+            btnAccept.setDisable(true);
+        } else {
+            label.setVisible(false);
+        }
+    }
+
+    private boolean checkEmailRegex(String email) {
+        // String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+        //Pattern pattern = Pattern.compile(regex);
+        //Matcher matcher = pattern.matcher(email);
+        //    return matcher.matches();
+        return email.matches("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
     }
 }
