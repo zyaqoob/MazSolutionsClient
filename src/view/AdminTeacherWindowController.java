@@ -210,6 +210,7 @@ public class AdminTeacherWindowController {
     }
 
     private void setCellFactories() {
+        //Comentario de celdas.
         tbcFullName.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcFullName.setOnEditCommit(
                 (CellEditEvent<Teacher, String> t) -> {
