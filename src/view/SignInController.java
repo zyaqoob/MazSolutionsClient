@@ -27,6 +27,7 @@ import javafx.scene.control.TextField;
 import static javafx.scene.input.KeyCode.I;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.ws.rs.core.GenericType;
 import restful.UserRESTClient;
 
 /**
@@ -52,12 +53,11 @@ public class SignInController {
 
     private Stage stage;
 
-    public void setStage(Stage primaryStage) {
-        this.stage = primaryStage;
-    }
+    
 
     public void initStage(Parent root) {
         Scene scene = new Scene(root);
+        stage= new Stage();
         stage.setScene(scene);
         stage.setTitle("Sign In");
         stage.setResizable(false);
@@ -84,21 +84,17 @@ public class SignInController {
         User user = new User();
         String username = txtUserName.getText();
         String password = txtPasswd.getText();
-        // user.setFullName("Zeesha Yaqoob");
-        // user.setEmail("z332han@gmail.com");
-        // user.setTelephone("612569329");
-
+        
+        
         password = Crypto.cifrar(password);
         UserRESTClient rest = new UserRESTClient();
-        user = rest.login_XML(User.class, username, password);
+        user = rest.login_XML(new GenericType<User>(){}, username, password);
         stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/UserDetails.fxml"));
-        Stage userDetailsStage = new Stage();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+        //Stage userDetailsStage = new Stage();
         try {
             Parent root = (Parent) loader.load();
-            UserDetailsController controller = loader.getController();
-            controller.setStage(userDetailsStage);
-            controller.setUser(user);
+            WindowStudentAdminController controller = loader.getController();
             controller.initStage(root);
         } catch (IOException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
@@ -158,7 +154,7 @@ public class SignInController {
 
     public void handlePasswordRecoverAction(ActionEvent action) {
        
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/password_recover_window.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/PasswordRecoverWindow.fxml"));
         Stage passwordRecoverStage = new Stage();
         try {
             Parent root = (Parent) loader.load();

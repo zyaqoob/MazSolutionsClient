@@ -11,6 +11,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import view.AdminTeacherWindowController;
+import view.ExamSessionController;
+import view.SignInController;
+import view.WindowStudentAdminController;
 
 /**
  *
@@ -20,10 +23,10 @@ public class ApplicationMaz extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-       FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
+       FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
        Parent root = (Parent) loader.load();
-       AdminTeacherWindowController a = loader.getController();
-       a.initStage(root);
+       SignInController controller = loader.getController();
+       controller.initStage(root);
     }
 
     /**

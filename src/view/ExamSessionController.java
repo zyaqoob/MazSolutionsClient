@@ -21,8 +21,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -45,8 +43,6 @@ import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.effect.ColorAdjust;
-import static javafx.scene.input.KeyCode.E;
 import javafx.scene.input.MouseEvent;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
@@ -127,7 +123,6 @@ public class ExamSessionController {
         
       
 
-        ivSearch.setDisable(false);
         ivSearch.setOnMouseClicked(this::handleSearchEvent);
         txtFilters.setText("");
 
@@ -401,10 +396,10 @@ public class ExamSessionController {
         tblExamSession.getSelectionModel().select(examSessionData.size() - 1);
         tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
         tblExamSession.edit(examSessionData.size() - 1, tcSubject);
-        ivTick.setDisable(false);
-        ivTick.setEffect(null);
-        ivCross.setDisable(false);
-        ivCross.setEffect(null);
+        ivTick.setVisible(true);
+      
+        ivCross.setVisible(true);
+       
         btnCreate.setDisable(true);
 
     }
@@ -415,7 +410,7 @@ public class ExamSessionController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete the record.?", ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.YES) {
-            System.out.println(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession());
+              
             examSessionManager.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
             examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));

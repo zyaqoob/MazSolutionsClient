@@ -5,6 +5,7 @@
  */
 package restful;
 
+import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -27,7 +28,8 @@ public class UserRESTClient {
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:25772/MazSolutionsServer/webresources";
+    private static final String BASE_URI = ResourceBundle.getBundle("config.Config")
+            .getString("BASE_URI");
 
     public UserRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -80,7 +82,7 @@ public class UserRESTClient {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_JSON));
     }
 
-    public <T> T findUserByEmail_XML(Class<T> responseType, String email) throws ClientErrorException {
+    public <T> T findUserByEmail_XML(GenericType<T> responseType, String email) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("email/{0}", new Object[]{email}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);

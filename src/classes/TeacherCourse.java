@@ -28,12 +28,12 @@ import javax.xml.bind.annotation.XmlTransient;
 public class TeacherCourse implements Serializable {
 
     public TeacherCourse(Long idTeacherCourse, Date dateStart, Date dateEnd, ObservableList<TeacherCourseSubject> teacherCourseSubjects,
-            Teacher teacher, String name) {
+            ObservableList<Teacher> teachers, String name) {
         this.idTeacherCourse = new SimpleLongProperty(idTeacherCourse);
         this.dateStart = new SimpleObjectProperty<>(dateStart);
         this.dateEnd = new SimpleObjectProperty<>(dateEnd);
         this.teacherCourseSubjects = new SimpleListProperty<>(teacherCourseSubjects);
-        this.teacher = new SimpleObjectProperty<>(teacher);
+        this.teachers = new SimpleListProperty<>(teachers);
         this.name = new SimpleStringProperty(name);
     }
 
@@ -42,7 +42,7 @@ public class TeacherCourse implements Serializable {
         this.dateStart = new SimpleObjectProperty<>();
         this.dateEnd = new SimpleObjectProperty<>();
         this.teacherCourseSubjects = new SimpleListProperty<>();
-        this.teacher = new SimpleObjectProperty<>();
+        this.teachers = new SimpleListProperty<>();
         this.name = new SimpleStringProperty();
     }
 
@@ -55,7 +55,7 @@ public class TeacherCourse implements Serializable {
     //Collection of the subject that the teacher has.
     private SimpleListProperty<TeacherCourseSubject> teacherCourseSubjects;
     //Teacher of the TeacherCourse
-    private SimpleObjectProperty<Teacher> teacher;
+    private SimpleListProperty<Teacher> teachers;
 
     private SimpleStringProperty name;
 
@@ -148,17 +148,18 @@ public class TeacherCourse implements Serializable {
      *
      * @return teacher
      */
-    public Teacher getTeacher() {
-        return teacher.get();
+    @XmlTransient
+    public ObservableList<Teacher> getTeachers() {
+        return teachers.get();
     }
 
     /**
      * Method that set the value of the collection of subjects of TeacherCourse.
      *
-     * @param teacher
+     * @param teachers
      */
-    public void setTeacher(Teacher teacher) {
-        this.teacher.set(teacher);
+    public void setTeacher(ObservableList<Teacher> teachers) {
+        this.teachers.set(teachers);
     }
 
     /**
@@ -204,6 +205,6 @@ public class TeacherCourse implements Serializable {
      */
     @Override
     public String toString() {
-        return "TeacherCourse{" + "idTeacherCourseId=" + idTeacherCourse + ", dateStart=" + dateStart + ", dateEnd=" + dateEnd + ", subjects=" + teacherCourseSubjects + ", teacher=" + teacher + '}';
+        return "TeacherCourse{" + "idTeacherCourseId=" + idTeacherCourse + ", dateStart=" + dateStart + ", dateEnd=" + dateEnd + ", subjects=" + teacherCourseSubjects + ", teacher=" + teachers + '}';
     }
 }
