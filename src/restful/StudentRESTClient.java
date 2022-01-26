@@ -5,9 +5,11 @@
  */
 package restful;
 
+import interfaces.StudentManager;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Jersey REST client generated for REST resource:StudentFacadeREST
@@ -22,11 +24,11 @@ import javax.ws.rs.client.WebTarget;
  *
  * @author z332h
  */
-public class StudentRESTClient {
+public class StudentRESTClient implements StudentManager{
 
     private WebTarget webTarget;
     private Client client;
-    private static final String BASE_URI = "http://localhost:32099/MazSolutionsServer/webresources";
+    private static final String BASE_URI = "http://localhost:25772/MazSolutionsServer/webresources";
 
     public StudentRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
@@ -36,6 +38,12 @@ public class StudentRESTClient {
     public <T> T findStudentsByCourse(Class<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("course/{0}", new Object[]{id}));
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+    
+    public <T> T findStudentByEmail(GenericType<T> responseType, String email) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{email}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
@@ -71,12 +79,12 @@ public class StudentRESTClient {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
+    public <T> T findAll(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
     }
 
-    public <T> T findAllStudents(Class<T> responseType) throws ClientErrorException {
+    public <T> T findAllStudents(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }

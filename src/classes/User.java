@@ -10,6 +10,11 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.Set;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -25,57 +30,90 @@ import javax.xml.bind.annotation.XmlTransient;
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    /**
-     * Identification field for the user.
-     */
-    private Long idUser;
+
+    public User(Long idUser, String login, String email,String password,String telephone, Calendar lastPasswordChange, 
+            UserStatus status,UserPrivilege privilege,Date birthDate,
+            String fullName,
+            ObservableList<LastSignIn> lastSignIn) {
+        this.idUser=new SimpleLongProperty(idUser);
+        this.login=new SimpleStringProperty(login);
+        this.email=new SimpleStringProperty(email);
+        this.password=new SimpleStringProperty(password);
+        this.telephone=new SimpleStringProperty(telephone);
+        this.lastPasswordChange=new SimpleObjectProperty<>(lastPasswordChange);
+        this.status=new SimpleObjectProperty<>(status);
+        this.privilege=new SimpleObjectProperty<>(privilege);
+        this.birthDate=new SimpleObjectProperty<>(birthDate);
+        this.fullName=new SimpleStringProperty(fullName);
+        this.lastSignIn=new SimpleListProperty<>(lastSignIn);
+    }
+
+    public User() {
+        this.idUser=new SimpleLongProperty();
+        this.login=new SimpleStringProperty();
+        this.email=new SimpleStringProperty();
+        this.password=new SimpleStringProperty();
+        this.telephone=new SimpleStringProperty();
+        this.lastPasswordChange=new SimpleObjectProperty<>();
+        this.status=new SimpleObjectProperty<>();
+        this.privilege=new SimpleObjectProperty<>();
+        this.birthDate=new SimpleObjectProperty<>();
+        this.fullName=new SimpleStringProperty();
+        this.lastSignIn=new SimpleListProperty<>();
+    }
     
     /**
      * Identification field for the user.
      */
-    private String login;
+    
+    private SimpleLongProperty idUser;
+    
+    /**
+     * Identification field for the user.
+     */
+    private SimpleStringProperty login;
     /**
      * Email field for the user.
      */
-    private String email;
+    private SimpleStringProperty email;
     /**
      * Password field for the user.
      */
-    private String password;
+    private SimpleStringProperty password;
     /**
      * Telephone field for the user.
      */
-    private String telephone;
+    private SimpleStringProperty telephone;
     /**
      * Last password change date field for the user.
      */
-    private Calendar lastPasswordChange;
+    private SimpleObjectProperty<Calendar> lastPasswordChange;
     /**
      * Status field for the user(ENABLED, DISALBED).
      */
-    private UserStatus status;
+    private SimpleObjectProperty<UserStatus> status;
     /**
      * Privileges field for the user(USER, ADMIN, STUDENT, TEACHER).
      */
-    private UserPrivilege privilege;
+    private SimpleObjectProperty<UserPrivilege> privilege;
     /**
      * Birth date for the user.
      */
-    private Date birthDate;
+    private SimpleObjectProperty<Date> birthDate;
     /**
      * Full name for the user.
      */
-    private String fullName;
+    private SimpleStringProperty fullName;
 
-    private Set<LastSignIn> lastSignIn;
+    private SimpleListProperty<LastSignIn> lastSignIn;
 
     @XmlTransient
-    public Set<LastSignIn> getLastSignIn() {
-        return lastSignIn;
+    public ObservableList<LastSignIn> getLastSignIn() {
+        return lastSignIn.get();
     }
 
-    public void setLastSignIn(Set<LastSignIn> lastSignIn) {
-        this.lastSignIn = lastSignIn;
+    public void setLastSignIn(ObservableList<LastSignIn> lastSignIn) {
+        this.lastSignIn.set(lastSignIn);
     }
     
     /**
@@ -83,77 +121,77 @@ public class User implements Serializable {
      * @return Return the id.
      */
     public Long getIdUser() {
-        return idUser;
+        return idUser.get();
     }
     /**
      * 
      * @param idUser Method to set the id
      */
-    public void setUserId(Long idUser) {
-        this.idUser = idUser;
+    public void setIdUser(Long idUser) {
+        this.idUser.set(idUser);
     }
     /**
      * 
      * @return Return the login.
      */
     public String getLogin() {
-        return login;
+        return login.get();
     }
     /**
      * 
      * @param login Method to set the login.
      */
     public void setLogin(String login) {
-        this.login = login;
+        this.login.set(login);
     }
     /**
      * 
      * @return Method wich returns the email.
      */
     public String getEmail() {
-        return email;
+        return email.get();
     }
     /**
      * 
      * @param email Method to set the email.
      */
     public void setEmail(String email) {
-        this.email = email;
+        this.email.set(email);
     }
     /**
      * 
      * @return Method wich returns the password.
      */
     public String getPassword() {
-        return password;
+        return password.get();
     }
     /**
      * 
      * @param password Method to set the password.
      */
     public void setPassword(String password) {
-        this.password = password;
+        this.password.set(password);
     }
     /**
      * 
      * @return Method wich returns the telephone.
      */
     public String getTelephone() {
-        return telephone;
+        return telephone.get();
     }
     /**
      * 
      * @param telephone Method to set the telephone.
      */
     public void setTelephone(String telephone) {
-        this.telephone = telephone;
+        this.telephone.set(telephone);
     }
     /**
      * 
      * @return Method wich return the last password change date.
      */
     public Calendar getLastPasswordChange() {    
-        return lastPasswordChange;
+        return lastPasswordChange.get();
     }
 
     /**
@@ -161,63 +199,63 @@ public class User implements Serializable {
      * @param lastPasswordChange Method to set the last password change date.
      */
     public void setLastPasswordChange(Calendar lastPasswordChange) {
-        this.lastPasswordChange = lastPasswordChange;
+        this.lastPasswordChange.set(lastPasswordChange);
     }
     /**
      * 
      * @return Method wich returns the user status. 
      */
     public UserStatus getStatus() {
-        return status;
+        return status.get();
     }
     /**
      * 
      * @param status Method to set the user status.
      */
     public void setStatus(UserStatus status) {
-        this.status = status;
+        this.status.set(status);
     }
     /**
      * 
      * @return Method wich returns the bird date of the user.
      */
     public Date getBirthDate() {
-        return birthDate;
+        return birthDate.get();
     }
     /**
      * 
      * @param birthDate Method to set the users birth date.
      */
     public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
+        this.birthDate.set(birthDate);
     }
     /**
      * 
      * @return Method wich returns the users full name.
      */
     public String getFullName() {
-        return fullName;
+        return fullName.get();
     }
     /**
      * 
      * @param fullName Method to set the users full name.
      */
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.fullName.set(fullName);
     }
     /**
      * 
      * @return Method wich returns the user privilege.
      */
     public UserPrivilege getPrivilege() {
-        return privilege;
+        return privilege.get();
     }
     /**
      * 
      * @param privilege Method to set the user privilege.
      */
     public void setPrivilege(UserPrivilege privilege) {
-        this.privilege = privilege;
+        this.privilege.set(privilege);
     }
     
     

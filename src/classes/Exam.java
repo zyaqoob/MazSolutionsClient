@@ -8,6 +8,11 @@ package classes;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -20,32 +25,52 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Exam implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     /**
      * Field that identify ExamSession.
+     *
+     * @param idExam
+     * @param examStatement
+     * @param subject
+     * @param sessions
      */
-    private Long idExam;
+    public Exam(Long idExam, String examStatement, Subject subject, ObservableList<ExamSession> sessions) {
+        this.idExam = new SimpleLongProperty(idExam);
+        this.examStatement = new SimpleStringProperty(examStatement);
+        this.subject = new SimpleObjectProperty<>(subject);
+        this.sessions = new SimpleListProperty<>(sessions);
+    }
+
+    public Exam() {
+        this.idExam = new SimpleLongProperty();
+        this.examStatement = new SimpleStringProperty();
+        this.subject = new SimpleObjectProperty<>();
+        this.sessions = new SimpleListProperty<>();
+    }
+
+    private SimpleLongProperty idExam;
 
     /**
      * Field that represent statement of exam.
      */
-    private String examStatement;
+    private SimpleStringProperty examStatement;
 
     /**
      * An object of student.
      */
-    private Subject subject;
+    private SimpleObjectProperty<Subject> subject;
 
     /**
      * Collection of examSession.
      */
-    private Set<ExamSession> sessions;
+    private SimpleListProperty<ExamSession> sessions;
 
     /**
      *
      * @return examStatement
      */
     public String getExamStatement() {
-        return examStatement;
+        return examStatement.get();
     }
 
     /**
@@ -54,7 +79,7 @@ public class Exam implements Serializable {
      * @param examStatement the examStatement to set
      */
     public void setExamStatement(String examStatement) {
-        this.examStatement = examStatement;
+        this.examStatement.set(examStatement);
     }
 
     /**
@@ -62,7 +87,7 @@ public class Exam implements Serializable {
      * @return subject.
      */
     public Subject getSubject() {
-        return subject;
+        return subject.get();
     }
 
     /**
@@ -71,7 +96,7 @@ public class Exam implements Serializable {
      * @param subject the subject to set.
      */
     public void setSubject(Subject subject) {
-        this.subject = subject;
+        this.subject.set(subject);
     }
 
     /**
@@ -80,8 +105,8 @@ public class Exam implements Serializable {
      * @return sessions
      */
     @XmlTransient
-    public Set<ExamSession> getSessions() {
-        return sessions;
+    public ObservableList<ExamSession> getSessions() {
+        return sessions.get();
     }
 
     /**
@@ -89,8 +114,8 @@ public class Exam implements Serializable {
      *
      * @param sessions the collection of ExamSession to set.
      */
-    public void setSessions(Set<ExamSession> sessions) {
-        this.sessions = sessions;
+    public void setSessions(ObservableList<ExamSession> sessions) {
+        this.sessions.set(sessions);
     }
 
     /**
@@ -98,7 +123,7 @@ public class Exam implements Serializable {
      * @return idExam.
      */
     public Long getIdExam() {
-        return idExam;
+        return idExam.get();
     }
 
     /**
@@ -107,7 +132,7 @@ public class Exam implements Serializable {
      * @param idExam the id of exam to set
      */
     public void setIdExam(Long idExam) {
-        this.idExam = idExam;
+        this.idExam.set(idExam);
     }
 
     /**
