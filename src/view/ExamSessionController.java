@@ -12,12 +12,17 @@ import classes.Student;
 import classes.Subject;
 import interfaces.ExamManager;
 import interfaces.ExamSessionManager;
+import interfaces.StudentManager;
+import interfaces.SubjectManager;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
@@ -120,8 +125,6 @@ public class ExamSessionController {
         btnCreate.setDisable(false);
         ivTick.setVisible(false);
         ivCross.setVisible(false);
-        
-      
 
         ivSearch.setOnMouseClicked(this::handleSearchEvent);
         txtFilters.setText("");
@@ -134,14 +137,13 @@ public class ExamSessionController {
 
         factory = new RESTfulFactory();
         examSessionManager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
-        // StudentManager studentManager=(StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
-        // StudentRESTClient studentManager = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
-        StudentRESTClient studentManager = new StudentRESTClient();
+        
+        StudentManager studentManager = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
 
         ExamManager examManager = (ExamManager) factory.getRESTClient(RESTfulClientType.EXAM);
 
-        // SubjectManager subjectManager = (SubjectManager) factory.getRESTClient(RESTfulClientType.SUBJECT);
-        SubjectRESTClient subjectManager = new SubjectRESTClient();
+        SubjectManager subjectManager = (SubjectManager) factory.getRESTClient(RESTfulClientType.SUBJECT);
+       
 
         studentData = FXCollections.observableArrayList(studentManager.findAllStudents(new GenericType<List<Student>>() {
         }));
@@ -295,8 +297,13 @@ public class ExamSessionController {
         try {
             Calendar cal = new GregorianCalendar();
             cal.setTime(dateFormat.parse(t.getNewValue()));
-           
-            if (!cal.getTime().after((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime())) && cal.getTime().equals((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime()))) {
+            Date date = cal.getTime();
+            LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            Date dateOld = t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime();
+            LocalDateTime localDateTimeOld = dateOld.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            if (localDateTime.isAfter(localDateTimeOld))
+                      {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Date Start should be before the Date End", ButtonType.OK);
                 alert.show();
             } else {
@@ -317,23 +324,6 @@ public class ExamSessionController {
         }
     }
 
-    /*private void handleTcDateStartEditStart(CellEditEvent<ExamSession, String> t) {
-        try {
-            //Calendar cal = Calendar.getInstance();
-            Calendar cal = new GregorianCalendar();
-            cal.setTime(dateFormat.parse(t.getNewValue()));
-
-            ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
-            tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateEnd);
-            tblExamSession.edit(t.getTablePosition().getRow(), tcDateEnd);
-        } catch (ParseException ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid date format, it should be 'dd-MM-yyyy : hh:mm'.", ButtonType.OK);
-            alert.show();
-            tblExamSession.refresh();
-            
-
-        }
-    }*/
     private void handleTcDateEndEdit(CellEditEvent<ExamSession, String> t) {
         try {
             //Calendar cal = Calendar.getInstance();
@@ -397,9 +387,9 @@ public class ExamSessionController {
         tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
         tblExamSession.edit(examSessionData.size() - 1, tcSubject);
         ivTick.setVisible(true);
-      
+
         ivCross.setVisible(true);
-       
+
         btnCreate.setDisable(true);
 
     }
@@ -410,7 +400,7 @@ public class ExamSessionController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete the record.?", ButtonType.YES, ButtonType.NO);
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.YES) {
-              
+
             examSessionManager.remove(tblExamSession.getSelectionModel().getSelectedItem().getIdExamSession().toString());
             examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));
@@ -513,4 +503,6 @@ public class ExamSessionController {
 
     }
 
+    /*(!cal.getTime().after((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime()))
+                    && cal.getTime().equals((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime())))*/
 }

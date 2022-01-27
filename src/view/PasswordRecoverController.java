@@ -13,7 +13,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
@@ -64,13 +66,18 @@ public class PasswordRecoverController {
     public void handleBtnAcceptAction(ActionEvent action) {
 
         String email = txtEmail.getText();
-        User user = new User();
+        User user;
         if (checkEmailRegex(email)) {
             UserRESTClient restUser = new UserRESTClient();
-            restUser.findUserByEmail_XML(new GenericType<User>(){}, email);
-
-            txtEmail.setText("");
-            txtInfo.setVisible(true);
+            user = restUser.findUserByEmail_XML(new GenericType<User>() {
+            }, email);
+            if (!user.getEmail().isEmpty()) {
+                txtEmail.setText("");
+                txtInfo.setVisible(true);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Introduced Email does not belong to any account.", ButtonType.OK);
+                alert.show();
+            }
 
         } else {
             lblMax.setText("Not a valid email address");
