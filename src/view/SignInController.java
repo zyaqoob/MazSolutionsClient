@@ -5,8 +5,11 @@
  */
 package view;
 
+import classes.Teacher;
 import classes.User;
+import classes.UserPrivilege;
 import crypto.Crypto;
+import interfaces.UserManager;
 import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -28,6 +31,8 @@ import static javafx.scene.input.KeyCode.I;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
+import logic.RESTfulClientType;
+import logic.RESTfulFactory;
 import restful.UserRESTClient;
 
 /**
@@ -53,11 +58,13 @@ public class SignInController {
 
     private Stage stage;
 
-    
+    private UserManager userManager;
+
+    private RESTfulFactory factory;
 
     public void initStage(Parent root) {
         Scene scene = new Scene(root);
-        stage= new Stage();
+        stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("Sign In");
         stage.setResizable(false);
@@ -69,6 +76,7 @@ public class SignInController {
         passwdRecoverLink.setOnAction(this::handlePasswordRecoverAction);
         lblUserMax.setVisible(false);
         lblPasswdMax.setVisible(false);
+        factory = new RESTfulFactory();
         stage.show();
 
     }
@@ -76,7 +84,7 @@ public class SignInController {
     /**
      * Method that get the information from window and make a call to the
      * interface Signable depending on the action.
-     *  
+     *
      * @param action
      *
      */
@@ -84,23 +92,39 @@ public class SignInController {
         User user = new User();
         String username = txtUserName.getText();
         String password = txtPasswd.getText();
-        
-        
-        password = Crypto.cifrar(password);
-        UserRESTClient rest = new UserRESTClient();
-        user = rest.login_XML(new GenericType<User>(){}, username, password);
-        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
-        //Stage userDetailsStage = new Stage();
-        try {
-            Parent root = (Parent) loader.load();
-            WindowStudentAdminController controller = loader.getController();
-            controller.initStage(root);
-        } catch (IOException ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
-            alert.show();
-        }
 
+        password = Crypto.cifrar(password);
+        userManager = (UserManager) factory.getRESTClient(RESTfulClientType.USER);
+        user = userManager.login_XML(new GenericType<User>() {
+        }, username, password);
+        if (user instanceof Teacher) {
+            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ExamSessionWindow.fxml"));
+            try {
+                Parent root = (Parent) loader.load();
+                ExamSessionController controller = loader.getController();
+                controller.initStage(root);
+            } catch (IOException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+                alert.show();
+            }
+        } else if (user.getPrivilege().equals(UserPrivilege.ADMIN)) {
+            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+            try {
+                Parent root = (Parent) loader.load();
+                WindowStudentAdminController controller = loader.getController();
+                controller.initStage(root);
+            } catch (IOException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+                alert.show();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "You do not have permission to access the application", ButtonType.OK);
+            alert.show();
+            txtPasswd.setText("");
+            txtUserName.setText("");
+        }
     }
 
     /**
@@ -153,7 +177,7 @@ public class SignInController {
     }
 
     public void handlePasswordRecoverAction(ActionEvent action) {
-       
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/PasswordRecoverWindow.fxml"));
         Stage passwordRecoverStage = new Stage();
         try {
@@ -166,6 +190,5 @@ public class SignInController {
             alert.show();
         }
     }
-    
 
 }

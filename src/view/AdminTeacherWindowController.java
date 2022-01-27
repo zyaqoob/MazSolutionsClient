@@ -9,6 +9,7 @@ import classes.Teacher;
 import classes.TeacherCourse;
 import classes.UserPrivilege;
 import classes.UserStatus;
+import crypto.Crypto;
 import static crypto.Crypto.generatePassword;
 import interfaces.TeacherCourseManager;
 import interfaces.TeacherManager;
@@ -43,7 +44,6 @@ import javafx.util.Callback;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
-import restful.TeacherCourseRESTClient;
 import restful.TeacherRESTClient;
 
 /**
@@ -188,7 +188,7 @@ public class AdminTeacherWindowController {
             teacher.setPrivilege(UserPrivilege.TEACHER);
             teacher.setStatus(UserStatus.ENABLED);
             teacher.setLastPasswordChange(Calendar.getInstance());
-            teacher.setPassword(generatePassword());
+            teacher.setPassword(Crypto.cifrar(generatePassword()));
             teacher.setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>() {
             }, teacher.getTeacherCourse().getName()));
             teacherManager.create(teacher);

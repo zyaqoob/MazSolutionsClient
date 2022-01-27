@@ -6,21 +6,13 @@
 package view;
 
 import classes.Course;
-import classes.ExamSession;
 import classes.Student;
-import classes.Teacher;
-import classes.TeacherCourse;
-import classes.User;
 import classes.UserPrivilege;
 import classes.UserStatus;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import crypto.Crypto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -35,27 +27,20 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import javax.ws.rs.core.GenericType;
 import restful.CourseRESTClient;
-import restful.ExamSessionRESTClient;
 import restful.StudentRESTClient;
-import restful.TeacherCourseRESTClient;
-import restful.TeacherRESTClient;
-import restful.UserRESTClient;
 
 /**
  *
@@ -204,7 +189,7 @@ public class WindowStudentAdminController {
             student.setPrivilege(UserPrivilege.STUDENT);
             student.setStatus(UserStatus.ENABLED);
             student.setCourse(restCourses.findCourseByName(new GenericType<Course>(){}, student.getCourse().getName()));
-            student.setPassword(generatePassword());
+            student.setPassword(Crypto.cifrar(generatePassword()));
             restStudents.create(student);
             ivTick.setVisible(false);
             ivX.setVisible(false);
