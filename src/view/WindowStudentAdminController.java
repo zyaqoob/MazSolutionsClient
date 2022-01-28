@@ -10,10 +10,13 @@ import classes.Student;
 import classes.UserPrivilege;
 import classes.UserStatus;
 import crypto.Crypto;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -32,6 +35,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
@@ -103,7 +107,10 @@ public class WindowStudentAdminController {
     private TableColumn<Student, Date> tbcBirthDate;
     
     @FXML
-    private ChoiceBox <String> chbFilterStudentsByCourse;
+    private ChoiceBox chbFilterStudents;
+    
+    @FXML
+    private TextField tfSearch;
     
     private final StudentRESTClient restStudents = new StudentRESTClient();
     private final ObservableList<Student> studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
@@ -134,13 +141,17 @@ public class WindowStudentAdminController {
         tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
         tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
         
-        /*ObservableList<String> name;
+        ObservableList<String> name;
         List<String> stringnames = new ArrayList<>();
-        for (int i = 0; i < coursesData.size(); i++) {
-            stringnames.add(i, coursesData.get(i).getName());
-        }
+        stringnames.add("Full name");
+        stringnames.add("Course");
+        stringnames.add("Year");
+        stringnames.add("Email");
+        stringnames.add("Telephone");
+        stringnames.add("Birth date");
         name = FXCollections.observableArrayList(stringnames);
-        chbFilterStudentsByCourse.setItems(name);*/
+        chbFilterStudents.setItems(name);
+        chbFilterStudents.getSelectionModel().selectFirst();
         
         checkStudentIsNull();
         
@@ -148,6 +159,7 @@ public class WindowStudentAdminController {
         btnCreate.setOnAction(this::creation);
         btnDelete.setOnAction(this::delete);
         ivTick.setOnMouseClicked(this::accept);
+        ivSearch.setOnMouseClicked(this::filterBySelectedValue);
         tblStudents.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         stage.show();
     }
@@ -198,7 +210,7 @@ public class WindowStudentAdminController {
         }
     }
 
-    private void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
+    public void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
         
         if (newValue == null) {
             btnDelete.setDisable(true);
@@ -208,7 +220,7 @@ public class WindowStudentAdminController {
         
     }
     
-    private void checkStudentIsNull(){
+    public void checkStudentIsNull(){
         //Table column FullName editable with textField
         tbcFullName.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
         tbcFullName.setOnEditCommit(
@@ -280,8 +292,6 @@ public class WindowStudentAdminController {
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
                     }
                 });
-        tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
-        });
         
         //Table column Telephone editable with textField
         tbcTelephone.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
@@ -326,6 +336,48 @@ public class WindowStudentAdminController {
         String number[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         password = charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)] + charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)];
         return password;
+    }
+    
+    public void filterBySelectedValue(MouseEvent event){
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Full name")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> s.getFullName().equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Course")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> s.getCourse().getName().equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Year")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> dateFormatter.format(s.getYear()).equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Email")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> s.getEmail().equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Telephone")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> s.getTelephone().equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Birth date")){
+            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+                    .filter(s -> dateFormatter.format(s.getBirthDate()).equalsIgnoreCase(tfSearch.getText()))
+                    .map(s -> s).collect(Collectors.toList()));
+            tblStudents.setItems(students);
+        }
+        
+        
     }
     
 }

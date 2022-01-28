@@ -53,12 +53,12 @@
          <children>
             <TableView fx:id="tblStudents" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
                <columns>
-                  <TableColumn fx:id="tbcFullName" prefWidth="75.0" text="Full name" />
-                  <TableColumn fx:id="tbcCourse" prefWidth="75.0" text="Course" />
-                  <TableColumn fx:id="tbcYear" prefWidth="75.0" text="Year" />
-                  <TableColumn fx:id="tbcEmail" prefWidth="75.0" text="Email" />
-                  <TableColumn fx:id="tbcTelephone" prefWidth="75.0" text="Telephone" />
-                  <TableColumn fx:id="tbcBirthDate" prefWidth="75.0" text="Birth Date" />
+                  <TableColumn fx:id="tbcFullName" prefWidth="157.60003662109375" text="Full name" />
+                  <TableColumn fx:id="tbcCourse" prefWidth="83.2000732421875" text="Course" />
+                  <TableColumn fx:id="tbcYear" prefWidth="90.39996337890625" text="Year" />
+                  <TableColumn fx:id="tbcEmail" prefWidth="244.80001831054688" text="Email" />
+                  <TableColumn fx:id="tbcTelephone" prefWidth="99.99993896484375" text="Telephone" />
+                  <TableColumn fx:id="tbcBirthDate" prefWidth="99.99993896484375" text="Birth Date" />
                </columns>
             </TableView>
             <Button fx:id="btnCreate" layoutX="29.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="CREATE">
@@ -66,10 +66,10 @@
                   <Font name="Arial Bold" size="12.0" />
                </font>
             </Button>
-            <ChoiceBox fx:id="cbChoiceBox" layoutX="110.0" layoutY="29.0" prefHeight="25.0" prefWidth="164.0" style="-fx-background-radius: 100;" />
+            <ChoiceBox fx:id="chbFilterStudents" layoutX="110.0" layoutY="29.0" prefHeight="25.0" prefWidth="164.0" style="-fx-background-radius: 100;" />
             <Label fx:id="lblSearchBy" layoutX="31.0" layoutY="34.0" text="SEARCH BY" />
             <TextField fx:id="tfSearch" layoutX="293.0" layoutY="30.0" />
-            <ImageView id="ivSearch" fitHeight="27.0" fitWidth="29.0" layoutX="459.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="ivSearch" fitHeight="27.0" fitWidth="29.0" layoutX="459.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@search.png" />
                </image>
