@@ -55,7 +55,7 @@ public class UserRESTClient implements UserManager {
     }
 
     @Override
-    public <T> T find_XML(Class<T> responseType, String id) throws ClientErrorException {
+    public <T> T find_XML(GenericType<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("{0}", new Object[]{id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
@@ -118,7 +118,7 @@ public class UserRESTClient implements UserManager {
     }
 
     @Override
-    public <T> T findUserByPassword_XML(Class<T> responseType, String login, String password, String newPassword) throws ClientErrorException {
+    public <T> T findUserByPassword_XML(GenericType<T> responseType, String login, String password, String newPassword) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("password/{0}/{1}/{2}", new Object[]{login, password, newPassword}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);

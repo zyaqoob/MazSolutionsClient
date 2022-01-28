@@ -13,11 +13,14 @@ import crypto.Crypto;
 import static crypto.Crypto.generatePassword;
 import interfaces.TeacherCourseManager;
 import interfaces.TeacherManager;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -30,11 +33,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
@@ -109,6 +114,12 @@ public class AdminTeacherWindowController {
     @FXML
     private TableColumn<Teacher, String> tbcSalary;
 
+    @FXML
+    private ChoiceBox chBox;
+
+    @FXML
+    private TextField tfFilter;
+
     private ObservableList<Teacher> teachers;
 
     private ObservableList<TeacherCourse> teacherCourses;
@@ -128,6 +139,16 @@ public class AdminTeacherWindowController {
         }));
         teacherCourses = FXCollections.observableArrayList(teacherCourseManager.findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
         }));
+        List<String> filterValues = new ArrayList<>();
+        filterValues.add("Full Name");
+        filterValues.add("Course");
+        filterValues.add("Username");
+        filterValues.add("Date");
+        filterValues.add("Salary");
+        filterValues.add("All");
+        ObservableList<String> filterValuesForChoiceBox = FXCollections.observableList(filterValues);
+        chBox.setItems(filterValuesForChoiceBox);
+        chBox.getSelectionModel().selectFirst();
         tblTeachers.setEditable(true);
         ivTick.setVisible(false);
         ivX.setVisible(false);
@@ -148,11 +169,20 @@ public class AdminTeacherWindowController {
         btnCreate.setOnAction(this::creation);
         btnDelete.setOnAction(this::delete);
         ivTick.setOnMouseClicked(this::accept);
+        ivSearch.setOnMouseClicked(this::search);
+        ivX.setOnMouseClicked((MouseEvent e) -> {
+            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+            }));
+            tblTeachers.setItems(teachers);
+            ivTick.setVisible(false);
+            ivX.setVisible(false);
+            btnCreate.setDisable(false);
+        });
         tblTeachers.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         stage.show();
     }
 
-    public void creation(ActionEvent action) {
+    private void creation(ActionEvent action) {
         Teacher teacher = new Teacher();
         TeacherCourse teacherCourse = new TeacherCourse();
         teacher.setTeacherCourse(teacherCourse);
@@ -165,7 +195,7 @@ public class AdminTeacherWindowController {
         btnCreate.setDisable(true);
     }
 
-    public void delete(ActionEvent action) {
+    private void delete(ActionEvent action) {
         Teacher teacher = teacherManager.findTeachersByLogin(new GenericType<Teacher>() {
         }, tblTeachers.getSelectionModel().getSelectedItem().getLogin());
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -175,9 +205,56 @@ public class AdminTeacherWindowController {
         Optional<ButtonType> button = alert.showAndWait();
         if (button.get() == ButtonType.OK) {
             new TeacherRESTClient().remove(teacher.getLogin());
-            teachers=FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>(){}));
+            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+            }));
             tblTeachers.setItems(teachers);
             tblTeachers.refresh();
+        }
+    }
+
+    private void search(MouseEvent event) {
+        String filter = (String) chBox.getSelectionModel().getSelectedItem();
+        ObservableList<Teacher> filteredTeachers = tblTeachers.getItems();
+        switch (filter) {
+            case "Full Name":
+                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getFullName()
+                        .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
+                tblTeachers.setItems(teachers);
+                break;
+            case "Course":
+                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.
+                        getTeacherCourse().getName().equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher)
+                        .collect(Collectors.toList()));
+                tblTeachers.setItems(teachers);
+                break;
+            case "Username":
+                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getLogin()
+                        .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
+                tblTeachers.setItems(teachers);
+                break;
+            case "Salary":
+                if (tfFilter.getText().matches("[0-9]{3,4}")) {
+                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher
+                            -> Objects.equals(teacher.getSalary(), Float.valueOf(tfFilter.getText())))
+                            .map(teacher -> teacher).collect(Collectors.toList()));
+                    tblTeachers.setItems(teachers);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid salary value", ButtonType.OK);
+                    alert.show();
+                }
+                break;
+            case "Date":
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd"); 
+                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> dateFormatter.
+                        format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).
+                        collect(Collectors.toList()));
+                tblTeachers.setItems(teachers);
+                break;
+            case "All":
+                teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+                }));
+                tblTeachers.setItems(teachers);
+                break;
         }
     }
 
@@ -192,7 +269,8 @@ public class AdminTeacherWindowController {
             teacher.setTeacherCourse(teacherCourseManager.findTeacherCourseByName(new GenericType<TeacherCourse>() {
             }, teacher.getTeacherCourse().getName()));
             teacherManager.create(teacher);
-            teachers=FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>(){}));
+            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+            }));
             tblTeachers.setItems(teachers);
             btnCreate.setDisable(false);
             ivTick.setVisible(false);
@@ -202,6 +280,14 @@ public class AdminTeacherWindowController {
     }
 
     private void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
+        if (ivTick.isVisible()) {
+            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+            }));
+            tblTeachers.setItems(teachers);
+            ivTick.setVisible(false);
+            ivX.setVisible(false);
+            btnCreate.setDisable(false);
+        }
         if (newValue == null) {
             btnDelete.setDisable(true);
         } else {
@@ -217,7 +303,7 @@ public class AdminTeacherWindowController {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setFullName(t.getNewValue());
                     if (!ivTick.isVisible()) {
-                        Teacher teacher = (Teacher )t.getTableView().getItems().get(
+                        Teacher teacher = (Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow());
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
                     }

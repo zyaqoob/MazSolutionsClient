@@ -67,7 +67,7 @@
             </Button>
             <ChoiceBox fx:id="chBox" layoutX="110.0" layoutY="29.0" prefHeight="25.0" prefWidth="164.0" style="-fx-background-radius: 100;" />
             <Label layoutX="31.0" layoutY="34.0" text="SEARCH BY" />
-            <TextField layoutX="293.0" layoutY="30.0" />
+            <TextField fx:id="tfFilter" layoutX="293.0" layoutY="30.0" />
             <ImageView fx:id="ivSearch" fitHeight="27.0" fitWidth="29.0" layoutX="459.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@search.png" />
