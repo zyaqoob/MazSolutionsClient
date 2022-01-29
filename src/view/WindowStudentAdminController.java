@@ -10,12 +10,15 @@ import classes.Student;
 import classes.UserPrivilege;
 import classes.UserStatus;
 import crypto.Crypto;
+import static java.lang.Thread.sleep;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -40,6 +43,7 @@ import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.ws.rs.core.GenericType;
@@ -118,6 +122,8 @@ public class WindowStudentAdminController {
     private final ObservableList<Course> coursesData=FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>(){}));
     
     
+    
+    
    
     
     public void initStage(Parent root) {
@@ -126,6 +132,7 @@ public class WindowStudentAdminController {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(false);
+        
         
                
         tblStudents.setEditable(true);
@@ -160,6 +167,7 @@ public class WindowStudentAdminController {
         btnDelete.setOnAction(this::delete);
         ivTick.setOnMouseClicked(this::accept);
         ivSearch.setOnMouseClicked(this::filterBySelectedValue);
+        tfSearch.textProperty().addListener(this::textChanged);
         tblStudents.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         stage.show();
     }
@@ -377,6 +385,19 @@ public class WindowStudentAdminController {
             tblStudents.setItems(students);
         }
         
+        
+    }
+    
+    //this method observes the text changes
+    public void textChanged(ObservableValue observable, Object oldValue, Object newValue) {
+        
+        if (tfSearch.getText().length() > 255) {
+            
+            Alert alert = new Alert(Alert.AlertType.ERROR, "You have entered a value that is too large for this search.", ButtonType.OK);
+            alert.show();
+            //tfSearch.setText("");
+            
+        } 
         
     }
     
