@@ -189,6 +189,7 @@ public class AdminTeacherWindowController {
         teachers.add(teacher);
         tblTeachers.getSelectionModel().select(teachers.size() - 1);
         tblTeachers.getFocusModel().focus(teachers.size() - 1, tbcFullName);
+        tblTeachers.layout();
         tblTeachers.edit(teachers.size() - 1, tbcFullName);
         ivTick.setVisible(true);
         ivX.setVisible(true);
@@ -244,7 +245,7 @@ public class AdminTeacherWindowController {
                 }
                 break;
             case "Date":
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd"); 
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
                 teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> dateFormatter.
                         format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).
                         collect(Collectors.toList()));
@@ -328,16 +329,21 @@ public class AdminTeacherWindowController {
         tbcEmail.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
         tbcEmail.setOnEditCommit(
                 (CellEditEvent<Teacher, String> t) -> {
-                    ((Teacher) t.getTableView().getItems().get(
-                            t.getTablePosition().getRow())).setEmail(t.getNewValue());
-                    //tblTeachers.getColumns().add(tbcEmail);
-                    if (!ivTick.isVisible()) {
-                        Teacher teacher = ((Teacher) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow()));
-                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                    if (t.getNewValue().matches("[A-Za-z0-9._%+-]+@[a-z0-9.-]+.[A-Za-z]")) {
+                        ((Teacher) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())).setEmail(t.getNewValue());
+                        //tblTeachers.getColumns().add(tbcEmail);
+                        if (!ivTick.isVisible()) {
+                            Teacher teacher = ((Teacher) t.getTableView().getItems().get(
+                                    t.getTablePosition().getRow()));
+                            teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                        }
+                        tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
+                        tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid email value", ButtonType.OK);
+                        alert.show();
                     }
-                    tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
-                    tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
                 });
         //Table column Telephone editable with textField
         tbcTelephone.setCellFactory(TextFieldTableCell.<Teacher>forTableColumn());
@@ -400,7 +406,19 @@ public class AdminTeacherWindowController {
             //name.add(t.getName());
         }
         name = FXCollections.observableArrayList(stringnames);
-        tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
+        tbcCourse.setCellFactory(cb -> new ChoiceBoxTableCell(name) {
+
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                if (isEditing() && getGraphic() instanceof ChoiceBox) {
+                    // needs focus for proper working of esc/enter 
+                    getGraphic().requestFocus();
+                    ((ChoiceBox<String>) getGraphic()).show();
+                }
+            }
+
+        });
         tbcCourse.setOnEditCommit(
                 (CellEditEvent<Teacher, String> t) -> {
 
