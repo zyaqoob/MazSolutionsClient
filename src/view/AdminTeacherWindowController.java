@@ -13,6 +13,7 @@ import crypto.Crypto;
 import static crypto.Crypto.generatePassword;
 import interfaces.TeacherCourseManager;
 import interfaces.TeacherManager;
+import static java.lang.Thread.sleep;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
@@ -46,6 +50,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
@@ -183,6 +188,7 @@ public class AdminTeacherWindowController {
     }
 
     private void creation(ActionEvent action) {
+        btnCreate.setDisable(true);
         Teacher teacher = new Teacher();
         TeacherCourse teacherCourse = new TeacherCourse();
         teacher.setTeacherCourse(teacherCourse);
@@ -193,7 +199,6 @@ public class AdminTeacherWindowController {
         tblTeachers.edit(teachers.size() - 1, tbcFullName);
         ivTick.setVisible(true);
         ivX.setVisible(true);
-        btnCreate.setDisable(true);
     }
 
     private void delete(ActionEvent action) {
@@ -261,8 +266,8 @@ public class AdminTeacherWindowController {
 
     private void accept(MouseEvent event) {
         tblTeachers.getSelectionModel().select(teachers.size() - 1);
-        Teacher teacher = tblTeachers.getSelectionModel().getSelectedItem();
-        if (teacher != null) {
+        try {
+            Teacher teacher = tblTeachers.getSelectionModel().getSelectedItem();
             teacher.setPrivilege(UserPrivilege.TEACHER);
             teacher.setStatus(UserStatus.ENABLED);
             teacher.setLastPasswordChange(Calendar.getInstance());
@@ -277,21 +282,16 @@ public class AdminTeacherWindowController {
             ivTick.setVisible(false);
             ivX.setVisible(false);
             tblTeachers.refresh();
+        } catch (InternalServerErrorException e) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Missing data in table cell", ButtonType.OK);
+            alert.show();
         }
     }
 
     private void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
-        if (ivTick.isVisible()) {
-            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
-            }));
-            tblTeachers.setItems(teachers);
-            ivTick.setVisible(false);
-            ivX.setVisible(false);
-            btnCreate.setDisable(false);
-        }
-        if (newValue == null) {
+        if (newValue == null || btnCreate.isDisabled()) {
             btnDelete.setDisable(true);
-        } else {
+        } else if (!ivTick.isVisible()) {
             btnDelete.setDisable(false);
         }
     }
@@ -307,6 +307,7 @@ public class AdminTeacherWindowController {
                         Teacher teacher = (Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow());
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                        tblTeachers.refresh();
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcUsername);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcUsername);
@@ -321,6 +322,7 @@ public class AdminTeacherWindowController {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                        tblTeachers.refresh();
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcEmail);
@@ -337,6 +339,7 @@ public class AdminTeacherWindowController {
                             Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                     t.getTablePosition().getRow()));
                             teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                            tblTeachers.refresh();
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
                         tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
@@ -359,6 +362,7 @@ public class AdminTeacherWindowController {
                             Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                     t.getTablePosition().getRow()));
                             teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                            tblTeachers.refresh();
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcBirthDate);
                         tblTeachers.edit(t.getTablePosition().getRow(), tbcBirthDate);
@@ -377,6 +381,7 @@ public class AdminTeacherWindowController {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                        tblTeachers.refresh();
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
@@ -394,6 +399,7 @@ public class AdminTeacherWindowController {
                             Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                     t.getTablePosition().getRow()));
                             teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                            tblTeachers.refresh();
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcSalary);
                         // tblTeachers.getColumns().add(tbcTelephone);
@@ -430,6 +436,7 @@ public class AdminTeacherWindowController {
                         Teacher teacher = ((Teacher) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow()));
                         teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                        tblTeachers.refresh();
                     }
                     // tblTeachers.getColumns().add(tbcTelephone);
                 });

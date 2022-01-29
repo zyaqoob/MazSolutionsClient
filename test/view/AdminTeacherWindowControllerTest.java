@@ -5,10 +5,12 @@
  */
 package view;
 
+import application.ApplicationMaz;
 import classes.Teacher;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
@@ -28,8 +30,11 @@ import javafx.stage.Stage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import static org.testfx.api.FxAssert.verifyThat;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.matcher.base.NodeMatchers;
 import static org.testfx.matcher.base.NodeMatchers.isDisabled;
@@ -47,30 +52,28 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
 
     private TableView<Teacher> tblTeachers;
     private TextField tfFilter;
-    private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private ChoiceBox chBox;
-    private TableColumn tbcFullName;
 
-    @Override
-    public void start(Stage stage) throws Exception {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
-            Parent root;
-            root = (Parent) loader.load();
-            AdminTeacherWindowController controller = loader.getController();
-            controller.initStage(root);
-            tblTeachers = lookup("#tblTeachers").query();
-            tfFilter = lookup("#tfFilter").query();
-            chBox = lookup("#chBox").query();
-        } catch (IOException ex) {
-            // Logger.getLogger(AdminTeacherWindowControllerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+    @BeforeClass
+    public static void setUpClass() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+        FxToolkit.setupApplication(ApplicationMaz.class);
     }
 
     @Test
-    public void testA_InitialState() {
+    public void testA_SignIn() {
+        clickOn("#txtUserName");
+        write("admin");
+        clickOn("#txtPasswd");
+        write("uA2fN7");
+        clickOn("#btnSignIn");
+        verifyThat("#adminTeacherPane", isVisible());
+    }
+
+    @Test
+    public void testB_InitialState() {
+        chBox = lookup("#chBox").query();
         verifyThat("#btnCreate", isEnabled());
         verifyThat("#ivTick", isInvisible());
         verifyThat("#ivX", isInvisible());
@@ -90,9 +93,9 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
     }
 
     @Test
-    @Ignore
-    public void testB_FilterSearch() {
-        clickOn("#tfFiler");
+    public void testC_FilterSearch() {
+        tblTeachers = lookup("#tblTeachers").query();
+        tfFilter = lookup("#tfFilter").query();
         tfFilter.setText("Lorea Mendieta Lastia");
         clickOn("#ivSearch");
         assertEquals("Not filtered by name correctly", 1, tblTeachers.getItems().size());
@@ -125,7 +128,7 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         tfFilter.setText("1980-03-07");
         clickOn("#ivSearch");
-        assertEquals("Not filtered by salary correctly", 1, tblTeachers.getItems().size());
+        assertEquals("Not filtered by birthdate correctly", 1, tblTeachers.getItems().size());
         assertTrue("The birth date value does not match with the one of the filter", tblTeachers.getItems().stream().
                 filter(teacher -> dateFormatter.format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).count() > 0);
         resetTableValues();
@@ -144,10 +147,14 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
 
     @Test
     public void testD_CreationOfANewTeacher() {
+        tblTeachers = lookup("#tblTeachers").query();
         int row = tblTeachers.getItems().size();
         clickOn("#btnCreate");
         assertEquals("Row not added on creation!", row + 1, tblTeachers.getItems().size());
         // tblTeachers.getSelectionModel().select(row + 1, tbcFullName);
+        verifyThat("#btnDelete", isDisabled());
+        verifyThat("#ivTick", isVisible());
+        verifyThat("#ivX", isVisible());
         write("Federico Fernandez");
         type(KeyCode.ENTER);
         type(KeyCode.ENTER);
@@ -188,6 +195,81 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         //doubleClickOn(cell);
     }
 
+    @Test
+    public void testE_ModificationOfTheCreatedTeacher() {
+        tblTeachers = lookup("#tblTeachers").query();
+        doubleClickOn("Federico Fernandez");
+        eraseText(20);
+        write("Federico Garcia");
+        type(KeyCode.ENTER);
+        doubleClickOn("ffernandez");
+        eraseText(20);
+        write("fgarcia");
+        type(KeyCode.ENTER);
+        doubleClickOn("fedefer@gmail.com");
+        doubleClickOn("fedefer@gmail.com");
+        clickOn("fedefer@gmail.com");
+        eraseText(1);
+        write("fedegarcia@gmail.com");
+        type(KeyCode.ENTER);
+        doubleClickOn("676956879");
+        eraseText(10);
+        write("643923058");
+        type(KeyCode.ENTER);
+        doubleClickOn("1986-03-03");
+        eraseText(20);
+        write("2/1/1982");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.DOWN);
+        type(KeyCode.DOWN);
+        type(KeyCode.ENTER);
+        doubleClickOn("1000.0");
+        eraseText(4);
+        write("1200");
+        type(KeyCode.ENTER);
+
+        assertTrue("Error while modifying the fullname", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getFullName().equalsIgnoreCase("Federico Garcia")).count() > 0);
+        assertTrue("Error while modifying the username", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getLogin().equalsIgnoreCase("fgarcia")).count() > 0);
+        assertTrue("Error while modifying the email", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getEmail().equalsIgnoreCase("fedegarcia@gmail.com")).count() > 0);
+        assertTrue("Error while modifying the telephone", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getTelephone().equalsIgnoreCase("643923058")).count() > 0);
+        assertTrue("Error while modifying the course", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getTeacherCourse().getName().equalsIgnoreCase("2dam")).count() > 0);
+        assertTrue("Error while modifying the birthdate", tblTeachers.getItems().stream().
+                filter(teacher -> dateFormatter.format(teacher.getBirthDate()).equalsIgnoreCase("1982-01-02")).count() > 0);
+        assertTrue("Error while modifying the salary", tblTeachers.getItems().stream().
+                filter(teacher -> Objects.equals(teacher.getSalary(), Float.valueOf("1200.0"))).count() > 0);
+    }
+
+    @Test
+    //@Ignore
+    public void testF_DeleteTheCreatedTeacher() {
+        tblTeachers = lookup("#tblTeachers").query();
+        int row = tblTeachers.getItems().size();
+        clickOn("Federico Garcia");
+        verifyThat("#btnDelete", isEnabled());
+        verifyThat("#ivTick", isInvisible());
+        verifyThat("#ivX", isInvisible());
+        clickOn("#btnDelete");
+        verifyThat("You sure you want to erase this teacher?", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        assertEquals("Teacher not deleted!", row - 1,tblTeachers.getItems().size());
+        assertTrue("Teacher is still in the table", tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getFullName().equalsIgnoreCase("Federico Garcia")).count() == 0);
+        verifyThat("#btnDelete", isDisabled());
+    }
+    @Test
+    public void testG_CreateEmptyTeacher(){
+        clickOn("#btnCreate");
+        clickOn("#ivTick");
+        verifyThat("Missing data in table cell",NodeMatchers.isVisible());
+        clickOn("Aceptar");
+    }
     public void resetTableValues() {
         clickOn("#chBox");
         clickOn("All");
