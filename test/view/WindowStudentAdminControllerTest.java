@@ -15,9 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -88,7 +90,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
 
     }
     
-  
+    
     public void testA_variablesStart() throws Exception {
         //start JavaFX application to be tested    
         //new ApplicationMaz().start(stage);
@@ -112,7 +114,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
     }
     
     
-    
+    //@Ignore
     @Test
     public void testB_initialInteraction(){
         
@@ -123,7 +125,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         clickOn("#btnSignIn");
         verifyThat("#studentsViewPane", isVisible());
     }
-    
+    //@Ignore
     @Test
     public void testC_initialState() {
         
@@ -137,7 +139,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         verifyThat("#ivSearch", isVisible());
         verifyThat("#btnPrint", isEnabled());
     }
-    
+    //@Ignore
     @Test
     public void testD_choiceBoxFilterWorking() {
         
@@ -147,8 +149,14 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         ivSearch=lookup ("#ivSearch").query();
         tblStudents=lookup ("#tblStudents").queryTableView();
         
+        
+        clickOn(ivSearch);
+        assertNotEquals("Empty table.", tblStudents.getItems().size(), 0);
+        
         //Test search by Full name
-        clickOn("#tfSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student full name");
+        clickOn(tfSearch);
         tfSearch.setText("Miguel Sanchez Herrero");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -158,9 +166,11 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , tblStudents.getItems().get(0).getFullName().equalsIgnoreCase(tfSearch.getText()));
         
         //Test search by Course
-        clickOn("#chbFilterStudents");
-        type(KeyCode.DOWN);
-        type(KeyCode.ENTER);
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student courses");
         tfSearch.setText("2dam");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -170,9 +180,11 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , tblStudents.getItems().get(0).getCourse().getName().equalsIgnoreCase(tfSearch.getText()));
         
         //Test search by Year
-        clickOn("#chbFilterStudents");
-        type(KeyCode.DOWN);
-        type(KeyCode.ENTER);
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student year");
         tfSearch.setText("2021-09-16");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -182,9 +194,11 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , dateFormatter.format(tblStudents.getItems().get(0).getYear()).equalsIgnoreCase(tfSearch.getText()));
         
         //Test search by Email
-        clickOn("#chbFilterStudents");
-        type(KeyCode.DOWN);
-        type(KeyCode.ENTER);
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student email");
         tfSearch.setText("msanchezherrero7@gmail.com");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -194,9 +208,11 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , tblStudents.getItems().get(0).getEmail().equalsIgnoreCase(tfSearch.getText()));
         
         //Test search by Telephone
-        clickOn("#chbFilterStudents");
-        type(KeyCode.DOWN);
-        type(KeyCode.ENTER);
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student telephone");
         tfSearch.setText("691814720");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -206,9 +222,11 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , tblStudents.getItems().get(0).getTelephone().equalsIgnoreCase(tfSearch.getText()));
         
         //Test search by Birth date
-        clickOn("#chbFilterStudents");
-        type(KeyCode.DOWN);
-        type(KeyCode.ENTER);
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student birth date");
         tfSearch.setText("1985-05-27");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
@@ -217,7 +235,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         assertTrue("The filter is not working"
                 , dateFormatter.format(tblStudents.getItems().get(0).getBirthDate()).equalsIgnoreCase(tfSearch.getText()));
     }
-    
+    //@Ignore
     @Test
     public void testE_tfSearchMaxCharacterReached() {
         
@@ -229,9 +247,134 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         clickOn("Aceptar");
         
     }
-    
+    //@Ignore
     @Test
     public void testF_studentCreationIsWorking() {
+        
+        chbFilterStudents=lookup("#chbFilterStudents").query();
+        tblStudents=lookup ("#tblStudents").queryTableView();
+        tfSearch=lookup("#tfSearch").query();
+        ivSearch=lookup ("#ivSearch").query();
+        btnCreate=lookup ("#btnCreate").query();
+        ivTick=lookup ("#ivTick").query();
+        
+        int rowCount = tblStudents.getItems().size();
+        
+        clickOn(btnCreate);       
+        assertEquals("The row has not been added!!!",rowCount+1,tblStudents.getItems().size());
+        write("Adama Traoré");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.DOWN);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.TAB);
+        write("16/2/2022");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("Mister Adama");
+        type(KeyCode.ENTER);
+        verifyThat("Invalid email format.", NodeMatchers.isVisible());      
+        clickOn("Aceptar");
+        type(KeyCode.ENTER);
+        write("adamaAlBarca@gmail.com");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("adama");
+        type(KeyCode.ENTER);
+        verifyThat("Invalid telephone.", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        type(KeyCode.ENTER);
+        write("666666666");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.TAB);
+        write("3/3/1986");
+        type(KeyCode.ENTER);
+        clickOn(ivTick);
+        assertTrue("Error while creating the teacher", tblStudents.getItems().stream().filter(s -> s.getFullName().
+                equalsIgnoreCase("Adama Traoré")).count() > 0);
+        
+        
+    }
+    
+    @Test
+    public void testG_studentEditIsWorking() {
+        
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        tblStudents=lookup ("#tblStudents").queryTableView();
+        chbFilterStudents=lookup("#chbFilterStudents").query();
+        tfSearch=lookup("#tfSearch").query();
+        ivSearch=lookup ("#ivSearch").query();
+        
+        //get row count
+        int rowCount=tblStudents.getItems().size();
+        assertNotEquals("Table has no data: Cannot test.",
+                        rowCount,0);
+        doubleClickOn("Adama Traoré");
+        doubleClickOn("Adama Traoré");
+        clickOn("Adama Traoré");
+        write("Ansu Fati");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        doubleClickOn("2022-02-16");
+        write("20/5/1966");
+        type(KeyCode.ENTER);
+        doubleClickOn("adamaAlBarca@gmail.com");
+        doubleClickOn("adamaAlBarca@gmail.com");
+        clickOn("adamaAlBarca@gmail.com");
+        write("fuerzaFati@gmail.com");
+        type(KeyCode.ENTER);
+        doubleClickOn("666666666");
+        doubleClickOn("666666666");
+        clickOn("666666666");
+        write("777777777");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.TAB);
+        write("20/5/1966");
+        type(KeyCode.ENTER);
+        
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        clickOn(chbFilterStudents);
+        clickOn("Student full name");
+        tfSearch.setText("Ansu Fati");
+        clickOn(ivSearch);
+        assertEquals("The row was not updated."
+                , tblStudents.getItems().stream().filter(u->u.getFullName().equals(tfSearch.getText())).count()
+                , tblStudents.getItems().size());
+        assertTrue("The row was not updated."
+                , tblStudents.getItems().get(0).getFullName().equalsIgnoreCase(tfSearch.getText()));
+        
+        
+    }
+    
+    @Test
+    public void testH_studentDeleteIsWorking() {
+        
+        tblStudents=lookup ("#tblStudents").queryTableView();
+        chbFilterStudents=lookup("#chbFilterStudents").query();
+        tfSearch=lookup("#tfSearch").query();
+        ivSearch=lookup ("#ivSearch").query();
+        btnDelete=lookup ("#btnDelete").query();
+        clickOn(chbFilterStudents);
+        clickOn("Reset");
+        clickOn("#ivSearch");
+        int rowCount=tblStudents.getItems().size();
+        
+        clickOn("Ansu Fati");
+        clickOn(btnDelete);
+        verifyThat("Are you sure that you want to erase this student?", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        
+        assertEquals("Delete is not working.", rowCount-1,tblStudents.getItems().size());
+        assertTrue("Teacher is still in the table", tblStudents.getItems().stream().
+                filter(s -> s.getFullName().equalsIgnoreCase("Ansu Fati")).count() == 0);
+        verifyThat("#btnDelete", isDisabled());
     }
     
 }

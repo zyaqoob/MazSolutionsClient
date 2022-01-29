@@ -55,86 +55,79 @@ import restful.StudentRESTClient;
  * @author Miguel Sanchez
  */
 public class WindowStudentAdminController {
-    
+
     @FXML
     private Label lblStudents;
-    
+
     @FXML
     private Label lblTeachers;
-    
+
     @FXML
     private Label lblSubjects;
-    
+
     @FXML
     private Label lblCourses;
-    
+
     @FXML
     private Label lblTeacherCourses;
-    
+
     @FXML
     private Button btnCreate;
-    
+
     @FXML
     private Button btnDelete;
-    
+
     @FXML
     private Button btnPrint;
-    
+
     @FXML
     private ImageView ivSearch;
-    
+
     @FXML
     private ImageView ivTick;
-    
+
     @FXML
     private ImageView ivX;
-    
+
     @FXML
     private TableView<Student> tblStudents;
-    
+
     @FXML
     private TableColumn<Student, String> tbcFullName;
-    
+
     @FXML
     private TableColumn<Student, String> tbcCourse;
-    
+
     @FXML
     private TableColumn<Student, Date> tbcYear;
-    
+
     @FXML
     private TableColumn<Student, String> tbcEmail;
-    
+
     @FXML
     private TableColumn<Student, String> tbcTelephone;
-    
+
     @FXML
     private TableColumn<Student, Date> tbcBirthDate;
-    
+
     @FXML
     private ChoiceBox chbFilterStudents;
-    
+
     @FXML
     private TextField tfSearch;
-    
-    private final StudentRESTClient restStudents = new StudentRESTClient();
-    private final ObservableList<Student> studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
+
+    private StudentRESTClient restStudents = new StudentRESTClient();
+    private ObservableList<Student> studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
     private final CourseRESTClient restCourses = new CourseRESTClient();
-    private final ObservableList<Course> coursesData=FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>(){}));
-    
-    
-    
-    
-   
-    
+    private final ObservableList<Course> coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {}));
+
     public void initStage(Parent root) {
         //LOGGER.info("Stage initiated");
         Stage stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(false);
-        
-        
-               
+
         tblStudents.setEditable(true);
         ivTick.setVisible(false);
         ivX.setVisible(false);
@@ -147,50 +140,50 @@ public class WindowStudentAdminController {
         tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
         tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
         tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
-        
+
         ObservableList<String> name;
         List<String> stringnames = new ArrayList<>();
-        stringnames.add("Full name");
-        stringnames.add("Course");
-        stringnames.add("Year");
-        stringnames.add("Email");
-        stringnames.add("Telephone");
-        stringnames.add("Birth date");
+        stringnames.add("Reset");
+        stringnames.add("Student full name");
+        stringnames.add("Student courses");
+        stringnames.add("Student year");
+        stringnames.add("Student email");
+        stringnames.add("Student telephone");
+        stringnames.add("Student birth date");
         name = FXCollections.observableArrayList(stringnames);
         chbFilterStudents.setItems(name);
         chbFilterStudents.getSelectionModel().selectFirst();
-        
-        checkStudentIsNull();
-        
+
+        tableCellInit();
+
         tblStudents.setItems(studentsData);
-        btnCreate.setOnAction(this::creation);
+        btnCreate.setOnAction(this::create);
         btnDelete.setOnAction(this::delete);
         ivTick.setOnMouseClicked(this::accept);
         ivSearch.setOnMouseClicked(this::filterBySelectedValue);
         tfSearch.textProperty().addListener(this::textChanged);
+        ivX.setOnMouseClicked(this::cancel);
         tblStudents.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         stage.show();
     }
-    
-    public void creation(ActionEvent action) {
+
+    public void create(ActionEvent action) {
+        ivSearch.setVisible(false);
         Student student = new Student();
         Course course = new Course();
-        //ExamSessionRESTClient restSessions = new ExamSessionRESTClient();
-        //ObservableList<ExamSession> sessions=FXCollections.observableArrayList(restSessions.findAllExamSession(new GenericType<List<ExamSession>>(){}));
-        //student.setSessions(sessions);
         student.setCourse(course);
         studentsData.add(student);
         tblStudents.getSelectionModel().select(studentsData.size() - 1);
         tblStudents.getFocusModel().focus(studentsData.size() - 1, tbcFullName);
+        tblStudents.layout();
         tblStudents.edit(studentsData.size() - 1, tbcFullName);
         ivTick.setVisible(true);
         ivX.setVisible(true);
         btnCreate.setDisable(true);
     }
+
     public void delete(ActionEvent action) {
-        
-        //String email= tblStudents.getSelectionModel().getSelectedItem().getEmail();
-        //Student student= restStudents.findStudentByEmail(new GenericType<Student>(){}, email);
+
         Alert deleteConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
         deleteConfirmationAlert.setHeaderText(null);
         deleteConfirmationAlert.setTitle("Confirmation");
@@ -198,8 +191,11 @@ public class WindowStudentAdminController {
         Optional<ButtonType> button = deleteConfirmationAlert.showAndWait();
         if (button.get() == ButtonType.OK) {
             restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
+            tblStudents.setItems(studentsData);
+            tblStudents.refresh();
         }
-        
+
     }
 
     private void accept(MouseEvent event) {
@@ -208,43 +204,56 @@ public class WindowStudentAdminController {
         if (student != null) {
             student.setPrivilege(UserPrivilege.STUDENT);
             student.setStatus(UserStatus.ENABLED);
-            student.setCourse(restCourses.findCourseByName(new GenericType<Course>(){}, student.getCourse().getName()));
+            student.setCourse(restCourses.findCourseByName(new GenericType<Course>() {
+            }, student.getCourse().getName()));
             student.setPassword(Crypto.cifrar(generatePassword()));
             restStudents.create(student);
             ivTick.setVisible(false);
             ivX.setVisible(false);
+            restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
+            tblStudents.setItems(studentsData);
             tblStudents.refresh();
             btnCreate.setDisable(false);
+            ivSearch.setVisible(true);
         }
     }
 
+    private void cancel(MouseEvent event) {
+        studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
+        tblStudents.setItems(studentsData);
+        ivTick.setVisible(false);
+        ivX.setVisible(false);
+        btnCreate.setDisable(false);
+        ivSearch.setVisible(true);
+    }
+
     public void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
-        
-        if (newValue == null) {
+
+        if (newValue == null||btnCreate.isDisabled()) {
             btnDelete.setDisable(true);
-        } else {
+        } else if(!ivTick.isVisible()){
             btnDelete.setDisable(false);
         }
-        
+
     }
-    
-    public void checkStudentIsNull(){
+
+    public void tableCellInit() {
         //Table column FullName editable with textField
         tbcFullName.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
         tbcFullName.setOnEditCommit(
                 (CellEditEvent<Student, String> s) -> {
                     ((Student) s.getTableView().getItems().get(
                             s.getTablePosition().getRow())).setFullName(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
                     if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
                     }
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
+                    tblStudents.edit(s.getTablePosition().getRow(), tbcCourse);
                 });
-        
-        
-        
+
         //Table column Course editable with textField
         ObservableList<String> name;
         List<String> stringnames = new ArrayList<>();
@@ -252,7 +261,18 @@ public class WindowStudentAdminController {
             stringnames.add(i, coursesData.get(i).getName());
         }
         name = FXCollections.observableArrayList(stringnames);
-        tbcCourse.setCellFactory(ChoiceBoxTableCell.forTableColumn(name));
+        tbcCourse.setCellFactory(cb -> new ChoiceBoxTableCell(name) {
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                if (isEditing() && getGraphic() instanceof ChoiceBox) {
+                    // needs focus for proper working of esc/enter 
+                    getGraphic().requestFocus();
+                    ((ChoiceBox<String>) getGraphic()).show();
+                }
+            }
+
+        });
         tbcCourse.setOnEditCommit(
                 (CellEditEvent<Student, String> s) -> {
                     ((Student) s.getTableView().getItems().get(
@@ -264,10 +284,10 @@ public class WindowStudentAdminController {
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
                     }
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcYear);
+                    tblStudents.edit(s.getTablePosition().getRow(), tbcYear);
                 });
-        
-        
-        
+
         //Table column Year editable with textField
         Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory
                 = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
@@ -284,40 +304,57 @@ public class WindowStudentAdminController {
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
                     }
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcEmail);
+                    tblStudents.edit(s.getTablePosition().getRow(), tbcEmail);
                 });
-        
+
         //Table column Email editable with textField
         tbcEmail.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
         tbcEmail.setOnEditCommit(
                 (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).setEmail(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
-                        Student student = ((Student) s.getTableView().getItems().get(
-                                s.getTablePosition().getRow()));
-                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    if (s.getNewValue().matches("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) {
+                        ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow())).setEmail(s.getNewValue());
+                        tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
+                        if (((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow())).getIdUser() != null) {
+                            Student student = ((Student) s.getTableView().getItems().get(
+                                    s.getTablePosition().getRow()));
+                            new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                        }
+                        tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
+                        tblStudents.edit(s.getTablePosition().getRow(), tbcTelephone);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid email format.", ButtonType.OK);
+                        alert.show();
+
                     }
                 });
-        
+
         //Table column Telephone editable with textField
         tbcTelephone.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
         tbcTelephone.setOnEditCommit(
                 (CellEditEvent<Student, String> s) -> {
-                    ((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).setTelephone(s.getNewValue());
-                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
-                        Student student = ((Student) s.getTableView().getItems().get(
-                                s.getTablePosition().getRow()));
-                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    if (s.getNewValue().matches("[0-9]{9}")) {
+                        ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow())).setTelephone(s.getNewValue());
+                        tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
+                        if (((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow())).getIdUser() != null) {
+                            Student student = ((Student) s.getTableView().getItems().get(
+                                    s.getTablePosition().getRow()));
+                            new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                        }
+                        tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
+                        tblStudents.edit(s.getTablePosition().getRow(), tbcBirthDate);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid telephone.", ButtonType.OK);
+                        alert.show();
                     }
                 });
         tbcFullName.setOnEditCancel((CellEditEvent<Student, String> s) -> {
         });
-        
+
         //Table column Birth Date editable with textField
         Callback<TableColumn<Student, Date>, TableCell<Student, Date>> dateCellFactory2
                 = (TableColumn<Student, Date> param) -> new DatePickerCellStudent();
@@ -335,8 +372,7 @@ public class WindowStudentAdminController {
                     }
                 });
     }
-    
-    
+
     public static String generatePassword() {
         String password;
         String charLow[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
@@ -345,60 +381,65 @@ public class WindowStudentAdminController {
         password = charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)] + charLow[(int) (Math.random() * charLow.length)] + charUpper[(int) (Math.random() * charUpper.length)] + number[(int) (Math.random() * 9)];
         return password;
     }
-    
-    public void filterBySelectedValue(MouseEvent event){
+
+    public void filterBySelectedValue(MouseEvent event) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Full name")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        ObservableList<Student> students = tblStudents.getItems();
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student full name")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> s.getFullName().equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Course")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student course")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> s.getCourse().getName().equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Year")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student year")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> dateFormatter.format(s.getYear()).equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Email")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student email")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> s.getEmail().equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Telephone")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student telephone")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> s.getTelephone().equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        if(chbFilterStudents.getSelectionModel().getSelectedItem().equals("Birth date")){
-            ObservableList <Student> students= FXCollections.observableArrayList ( studentsData.stream()
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student birth date")) {
+            studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> dateFormatter.format(s.getBirthDate()).equalsIgnoreCase(tfSearch.getText()))
                     .map(s -> s).collect(Collectors.toList()));
-            tblStudents.setItems(students);
+            tblStudents.setItems(studentsData);
         }
-        
-        
+        if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Reset")) {
+            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+            }));
+            tblStudents.setItems(studentsData);
+        }
+
     }
-    
+
     //this method observes the text changes
     public void textChanged(ObservableValue observable, Object oldValue, Object newValue) {
-        
+
         if (tfSearch.getText().length() > 255) {
-            
+
             Alert alert = new Alert(Alert.AlertType.ERROR, "You have entered a value that is too large for this search.", ButtonType.OK);
             alert.show();
             //tfSearch.setText("");
-            
-        } 
-        
+
+        }
+
     }
-    
+
 }
