@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="signUpViewPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="608.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.SignUpController">
+   <left>
+      <VBox prefHeight="190.0" prefWidth="100.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER" />
+   </left>
+   <top>
+      <Pane prefHeight="96.0" prefWidth="700.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="btnMazSolutions" layoutY="16.0" mnemonicParsing="false" prefHeight="79.0" prefWidth="174.0" style="-fx-background-color: #3F2B63;" text="Maz Solutions" textFill="#d0c1c1">
+               <font>
+                  <Font name="System Italic" size="21.0" />
+               </font>
+            </Button>
+            <MenuBar layoutY="-2.0" prefHeight="26.0" prefWidth="608.0">
+               <menus>
+                  <Menu mnemonicParsing="false" text="File">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Close" />
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Edit">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="Delete" />
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Help">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="About" />
+                     </items>
+                  </Menu>
+               </menus>
+            </MenuBar>
+         </children>
+      </Pane>
+   </top>
+   <center>
+      <Pane prefHeight="379.0" prefWidth="419.0" BorderPane.alignment="CENTER">
+         <children>
+            <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="440.0" prefWidth="508.0" style="-fx-background-color: white; -fx-border-style: solid; -fx-border-width: 2;">
+               <children>
+                  <Label fx:id="lblPersonalInfo" layoutX="22.0" layoutY="11.0" text="PERSONAL INFO:" />
+                  <Label fx:id="lblSetUser" layoutX="22.0" layoutY="220.0" text="SET USER:" />
+                  <Button fx:id="btnSignUp" layoutX="405.0" layoutY="394.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="82.0" text="SignUP" />
+                  <Hyperlink fx:id="hypLogIn" layoutX="22.0" layoutY="392.0" prefHeight="23.0" prefWidth="127.0" text="I prefer to login">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Hyperlink>
+                  <Pane layoutX="21.0" layoutY="35.0" prefHeight="178.0" prefWidth="466.0" style="-fx-border-style: solid;">
+                     <children>
+                        <TextField fx:id="txtFullName" layoutX="9.0" layoutY="33.0" prefHeight="26.0" prefWidth="443.0">
+                           <tooltip>
+                              <Tooltip text="ENTER YOUR NAME AND SURNAMES" />
+                           </tooltip>
+                        </TextField>
+                        <Label fx:id="lblFullName" layoutX="8.0" layoutY="16.0" text="FULL NAME:">
+                           <tooltip>
+                              <Tooltip text="Max length 50 characters" />
+                           </tooltip>
+                        </Label>
+                        <TextField fx:id="txtEmail" layoutX="8.0" layoutY="87.0" prefHeight="26.0" prefWidth="445.0" />
+                        <Label fx:id="lblEmail" layoutX="9.0" layoutY="69.0" text="EMAIL:" />
+                        <Label fx:id="lblFullNameError" layoutX="299.0" layoutY="17.0" prefHeight="15.0" prefWidth="151.0" text="Maximum character limit reached!" textFill="RED">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblEmailError" layoutX="299.0" layoutY="70.0" text="Maximum character limit reached!" textFill="RED">
+                           <font>
+                              <Font size="10.0" />
+                           </font>
+                        </Label>
+                        <DatePicker fx:id="dpBirthDate" layoutX="11.0" layoutY="139.0" prefHeight="25.0" prefWidth="440.0" />
+                        <Label fx:id="lblBirthDate" layoutX="10.0" layoutY="121.0" text="BIRTH DATE" />
+                     </children>
+                  </Pane>
+                  <Pane layoutX="21.0" layoutY="243.0" prefHeight="137.0" prefWidth="466.0" style="-fx-border-style: solid;" />
+                  <Label fx:id="lblPassword" layoutX="32.0" layoutY="312.0" text="PASSWORD:" />
+                  <Label fx:id="lblRepeatPassword" layoutX="251.0" layoutY="312.0" text="REPEAT PASSWORD:" />
+                  <TextField fx:id="txtUserName" layoutX="31.0" layoutY="266.0" prefHeight="25.0" prefWidth="212.0" />
+                  <Label fx:id="lblUserName" layoutX="30.0" layoutY="248.0" text="USERNAME:" />
+                  <PasswordField fx:id="pswPassword" layoutX="31.0" layoutY="330.0" prefHeight="25.0" prefWidth="212.0" />
+                  <PasswordField fx:id="pswRepeatPassword" layoutX="250.0" layoutY="330.0" prefHeight="25.0" prefWidth="223.0" />
+                  <Label fx:id="lblUserNameError" layoutX="31.0" layoutY="292.0" text="Maximum character limit reached!" textFill="RED">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lblPasswordMax" layoutX="35.0" layoutY="356.0" prefHeight="15.0" prefWidth="237.0" text="Maximum character limit reached!" textFill="RED">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children>
+      </Pane>
+   </center>
+</BorderPane>

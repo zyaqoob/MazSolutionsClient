@@ -53,12 +53,13 @@
          <children>
             <TableView fx:id="tblStudents" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
                <columns>
-                  <TableColumn fx:id="tbcFullName" prefWidth="157.60003662109375" text="Full name" />
-                  <TableColumn fx:id="tbcCourse" prefWidth="83.2000732421875" text="Course" />
-                  <TableColumn fx:id="tbcYear" prefWidth="90.39996337890625" text="Year" />
-                  <TableColumn fx:id="tbcEmail" prefWidth="244.80001831054688" text="Email" />
-                  <TableColumn fx:id="tbcTelephone" prefWidth="99.99993896484375" text="Telephone" />
-                  <TableColumn fx:id="tbcBirthDate" prefWidth="99.99993896484375" text="Birth Date" />
+                  <TableColumn fx:id="tbcFullName" prefWidth="175.0" text="Full name" />
+                  <TableColumn fx:id="tbcCourse" prefWidth="78.0" text="Course" />
+                  <TableColumn fx:id="tbcYear" prefWidth="70.0" text="Year" />
+                  <TableColumn fx:id="tbcEmail" prefWidth="193.0" text="Email" />
+                  <TableColumn fx:id="tbcTelephone" prefWidth="91.0" text="Telephone" />
+                  <TableColumn fx:id="tbcBirthDate" prefWidth="69.0" text="Birth Date" />
+                  <TableColumn fx:id="tbcLogin" prefWidth="93.0" text="Login" />
                </columns>
             </TableView>
             <Button fx:id="btnCreate" layoutX="29.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="CREATE">

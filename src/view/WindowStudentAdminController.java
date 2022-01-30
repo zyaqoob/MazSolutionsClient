@@ -13,7 +13,6 @@ import crypto.Crypto;
 import static java.lang.Thread.sleep;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,9 +42,12 @@ import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.ServiceUnavailableException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
 import restful.CourseRESTClient;
 import restful.StudentRESTClient;
@@ -111,18 +113,33 @@ public class WindowStudentAdminController {
     private TableColumn<Student, Date> tbcBirthDate;
 
     @FXML
+    private TableColumn<Student, String> tbcLogin;
+
+    @FXML
     private ChoiceBox chbFilterStudents;
 
     @FXML
     private TextField tfSearch;
 
     private StudentRESTClient restStudents = new StudentRESTClient();
-    private ObservableList<Student> studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
-    private final CourseRESTClient restCourses = new CourseRESTClient();
-    private final ObservableList<Course> coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {}));
+    private ObservableList<Student> studentsData;
+    private CourseRESTClient restCourses = new CourseRESTClient();
+    private ObservableList<Course> coursesData;
 
     public void initStage(Parent root) {
-        //LOGGER.info("Stage initiated");
+        
+        try {
+            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+            }));
+            coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {
+            }));
+        } catch (Exception e) {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable" + e.getMessage(), ButtonType.OK);
+            alert.show();
+
+        }
+
         Stage stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -132,14 +149,13 @@ public class WindowStudentAdminController {
         ivTick.setVisible(false);
         ivX.setVisible(false);
         btnDelete.setDisable(true);
-        //coursesData = FXCollections.observableArrayList(rest.findAll(new GenericType<List<Course>>(){}));
-        //tblStudents.setItems(studentsData);
         tbcFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFullName()));
         tbcCourse.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCourse().getName()));
         tbcYear.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getYear()));
         tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
         tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
         tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
+        tbcLogin.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getLogin()));
 
         ObservableList<String> name;
         List<String> stringnames = new ArrayList<>();
@@ -190,10 +206,26 @@ public class WindowStudentAdminController {
         deleteConfirmationAlert.setContentText("Are you sure that you want to erase this student?");
         Optional<ButtonType> button = deleteConfirmationAlert.showAndWait();
         if (button.get() == ButtonType.OK) {
-            restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
-            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
-            tblStudents.setItems(studentsData);
-            tblStudents.refresh();
+            try {
+                restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+                studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+                }));
+                tblStudents.setItems(studentsData);
+                tblStudents.refresh();
+            } catch (InternalServerErrorException e) {
+
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error ocurred while deleting the student.", ButtonType.OK);
+                alert.show();
+                ivSearch.setVisible(true);
+                ivX.setVisible(false);
+                ivTick.setVisible(false);
+                studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+                }));
+                tblStudents.setItems(studentsData);
+                tblStudents.refresh();
+                btnCreate.setDisable(false);
+
+            }
         }
 
     }
@@ -202,25 +234,34 @@ public class WindowStudentAdminController {
         Student student = tblStudents.getSelectionModel().getSelectedItem();
 
         if (student != null) {
-            student.setPrivilege(UserPrivilege.STUDENT);
-            student.setStatus(UserStatus.ENABLED);
-            student.setCourse(restCourses.findCourseByName(new GenericType<Course>() {
-            }, student.getCourse().getName()));
-            student.setPassword(Crypto.cifrar(generatePassword()));
-            restStudents.create(student);
-            ivTick.setVisible(false);
-            ivX.setVisible(false);
-            restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
-            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
-            tblStudents.setItems(studentsData);
-            tblStudents.refresh();
-            btnCreate.setDisable(false);
-            ivSearch.setVisible(true);
+            try {
+                student.setPrivilege(UserPrivilege.STUDENT);
+                student.setStatus(UserStatus.ENABLED);
+                student.setCourse(restCourses.findCourseByName(new GenericType<Course>() {
+                }, student.getCourse().getName()));
+                student.setPassword(Crypto.cifrar(generatePassword()));
+                restStudents.create(student);
+                ivTick.setVisible(false);
+                ivX.setVisible(false);
+                restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+                studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+                }));
+                tblStudents.setItems(studentsData);
+                tblStudents.refresh();
+                btnCreate.setDisable(false);
+                ivSearch.setVisible(true);
+            } catch (WebApplicationException e) {
+
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error while creating the user.\n" + e.getMessage(), ButtonType.OK);
+                alert.show();
+
+            }
         }
     }
 
     private void cancel(MouseEvent event) {
-        studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {}));
+        studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+        }));
         tblStudents.setItems(studentsData);
         ivTick.setVisible(false);
         ivX.setVisible(false);
@@ -230,9 +271,9 @@ public class WindowStudentAdminController {
 
     public void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
 
-        if (newValue == null||btnCreate.isDisabled()) {
+        if (newValue == null || btnCreate.isDisabled()) {
             btnDelete.setDisable(true);
-        } else if(!ivTick.isVisible()){
+        } else if (!ivTick.isVisible()) {
             btnDelete.setDisable(false);
         }
 
@@ -320,7 +361,16 @@ public class WindowStudentAdminController {
                                 s.getTablePosition().getRow())).getIdUser() != null) {
                             Student student = ((Student) s.getTableView().getItems().get(
                                     s.getTablePosition().getRow()));
-                            new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                            try {
+
+                                new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+
+                            } catch (WebApplicationException e) {
+
+                                Alert alert = new Alert(Alert.AlertType.ERROR, "This email is already registered.", ButtonType.OK);
+                                alert.show();
+
+                            }
                         }
                         tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
                         tblStudents.edit(s.getTablePosition().getRow(), tbcTelephone);
@@ -369,6 +419,30 @@ public class WindowStudentAdminController {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                    }
+                    tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcLogin);
+                    tblStudents.edit(s.getTablePosition().getRow(), tbcLogin);
+                });
+
+        //Table column FullName editable with textField
+        tbcLogin.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
+        tbcLogin.setOnEditCommit(
+                (CellEditEvent<Student, String> s) -> {
+                    ((Student) s.getTableView().getItems().get(
+                            s.getTablePosition().getRow())).setLogin(s.getNewValue());
+                    if (!ivTick.isVisible()) {
+                        Student student = ((Student) s.getTableView().getItems().get(
+                                s.getTablePosition().getRow()));
+                        try {
+
+                            new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+
+                        } catch (WebApplicationException e) {
+
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "This login is already registered.", ButtonType.OK);
+                            alert.show();
+
+                        }
                     }
                 });
     }

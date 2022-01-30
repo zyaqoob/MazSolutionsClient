@@ -134,7 +134,15 @@ public class SignInController {
      *
      */
     public void signUp(ActionEvent action) {
-
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUpWindow.fxml"));
+        try {
+            Parent root = (Parent) loader.load();
+            SignUpController controller = loader.getController();
+            controller.initStage(root);
+        } catch (IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "ERROR WHILE SIGNING UP", ButtonType.OK);
+        }
     }
 
     /**
@@ -190,5 +198,7 @@ public class SignInController {
             alert.show();
         }
     }
+    
+    
 
 }
