@@ -50,7 +50,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
@@ -221,47 +224,80 @@ public class AdminTeacherWindowController {
     private void search(MouseEvent event) {
         String filter = (String) chBox.getSelectionModel().getSelectedItem();
         ObservableList<Teacher> filteredTeachers = tblTeachers.getItems();
+
         switch (filter) {
             case "Full Name":
-                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getFullName()
-                        .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
-                tblTeachers.setItems(teachers);
+                if (tfFilter.getText().trim().equals("") || ivTick.isVisible()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Unexpected error ocurred while filtering", ButtonType.OK);
+                    alert.show();
+                } else {
+                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getFullName()
+                            .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
+                    tblTeachers.setItems(teachers);
+                }
                 break;
+
             case "Course":
-                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.
-                        getTeacherCourse().getName().equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher)
-                        .collect(Collectors.toList()));
-                tblTeachers.setItems(teachers);
+                if (tfFilter.getText().trim().equals("") || ivTick.isVisible()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Unexpected error ocurred while filtering", ButtonType.OK);
+                    alert.show();
+                } else {
+                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.
+                            getTeacherCourse().getName().equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher)
+                            .collect(Collectors.toList()));
+                    tblTeachers.setItems(teachers);
+                }
                 break;
             case "Username":
-                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getLogin()
-                        .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
-                tblTeachers.setItems(teachers);
+                if (tfFilter.getText().trim().equals("") || ivTick.isVisible()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Unexpected error ocurred while filtering", ButtonType.OK);
+                    alert.show();
+                } else {
+                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> teacher.getLogin()
+                            .equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).collect(Collectors.toList()));
+                    tblTeachers.setItems(teachers);
+                }
                 break;
             case "Salary":
-                if (tfFilter.getText().matches("[0-9]{3,4}")) {
-                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher
-                            -> Objects.equals(teacher.getSalary(), Float.valueOf(tfFilter.getText())))
-                            .map(teacher -> teacher).collect(Collectors.toList()));
-                    tblTeachers.setItems(teachers);
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid salary value", ButtonType.OK);
+                if (tfFilter.getText().trim().equals("") || ivTick.isVisible()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Unexpected error ocurred while filtering", ButtonType.OK);
                     alert.show();
+                } else {
+                    if (tfFilter.getText().matches("[0-9]{3,4}")) {
+                        teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher
+                                -> Objects.equals(teacher.getSalary(), Float.valueOf(tfFilter.getText())))
+                                .map(teacher -> teacher).collect(Collectors.toList()));
+                        tblTeachers.setItems(teachers);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid salary value", ButtonType.OK);
+                        alert.show();
+                    }
                 }
                 break;
             case "Date":
-                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-                teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> dateFormatter.
-                        format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).
-                        collect(Collectors.toList()));
-                tblTeachers.setItems(teachers);
+                if (tfFilter.getText().trim().equals("") || ivTick.isVisible()) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Unexpected error ocurred while filtering", ButtonType.OK);
+                    alert.show();
+                } else {
+                    SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+                    teachers = FXCollections.observableArrayList(filteredTeachers.stream().filter(teacher -> dateFormatter.
+                            format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).map(teacher -> teacher).
+                            collect(Collectors.toList()));
+                    tblTeachers.setItems(teachers);
+                }
                 break;
             case "All":
+                if(ivTick.isVisible()){
+                    ivTick.setVisible(false);
+                    ivX.setVisible(false);
+                    btnCreate.setDisable(false);
+                }
                 teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
                 }));
                 tblTeachers.setItems(teachers);
                 break;
         }
+
     }
 
     private void accept(MouseEvent event) {
@@ -282,9 +318,15 @@ public class AdminTeacherWindowController {
             ivTick.setVisible(false);
             ivX.setVisible(false);
             tblTeachers.refresh();
-        } catch (InternalServerErrorException e) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Missing data in table cell", ButtonType.OK);
-            alert.show();
+        } catch (InternalServerErrorException | NotAuthorizedException e) {
+            Alert alert;
+            if (e instanceof NotAuthorizedException) {
+                alert = new Alert(Alert.AlertType.ERROR, "Exisiting teacher", ButtonType.OK);
+                alert.show();
+            } else {
+                alert = new Alert(Alert.AlertType.ERROR, "Missing Data", ButtonType.OK);
+                alert.show();
+            }
         }
     }
 

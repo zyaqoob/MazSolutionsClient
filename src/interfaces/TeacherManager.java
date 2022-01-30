@@ -6,6 +6,7 @@
 package interfaces;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.GenericType;
 
 /**
