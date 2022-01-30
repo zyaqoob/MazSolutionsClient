@@ -97,12 +97,13 @@ public class SignInController {
         userManager = (UserManager) factory.getRESTClient(RESTfulClientType.USER);
         user = userManager.login_XML(new GenericType<User>() {
         }, username, password);
-        if (user instanceof Teacher) {
+        if (user.getPrivilege().equals(UserPrivilege.TEACHER)) {
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ExamSessionWindow.fxml"));
             try {
                 Parent root = (Parent) loader.load();
                 ExamSessionController controller = loader.getController();
+                controller.setUser(user);
                 controller.initStage(root);
             } catch (IOException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);

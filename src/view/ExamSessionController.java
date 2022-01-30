@@ -10,6 +10,7 @@ import classes.Exam;
 import classes.ExamSession;
 import classes.Student;
 import classes.Subject;
+import classes.User;
 import interfaces.ExamManager;
 import interfaces.ExamSessionManager;
 import interfaces.StudentManager;
@@ -18,14 +19,15 @@ import interfaces.SubjectManager;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -52,9 +54,15 @@ import javafx.scene.input.MouseEvent;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 import restful.StudentRESTClient;
-import restful.SubjectRESTClient;
 
 /**
  *
@@ -98,6 +106,8 @@ public class ExamSessionController {
     private Button btnCreate;
     @FXML
     private Button btnDelete;
+    @FXML
+    Button btnPrint;
 
     private DateFormat dateFormat;
 
@@ -113,12 +123,23 @@ public class ExamSessionController {
 
     private ObservableList<Subject> subjectData;
 
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public void initStage(Parent root) {
         Stage stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Exam Sessions");
         stage.setResizable(false);
+        stage.requestFocus();
         tblExamSession.setEditable(true);
         tblExamSession.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         btnDelete.setDisable(true);
@@ -128,22 +149,21 @@ public class ExamSessionController {
 
         ivSearch.setOnMouseClicked(this::handleSearchEvent);
         txtFilters.setText("");
-
+        btnPrint.setOnAction(this::handlePrintEvent);
         btnCreate.setOnAction(this::handleCreationEvent);
         btnDelete.setDisable(true);
         btnDelete.setOnAction(this::handleDeleteEvent);
-
+        // btnRound.setText(user.getFullName().substring(0, 1));
         dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm");
 
         factory = new RESTfulFactory();
         examSessionManager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
-        
+
         StudentManager studentManager = (StudentRESTClient) factory.getRESTClient(RESTfulClientType.STUDENT);
 
         ExamManager examManager = (ExamManager) factory.getRESTClient(RESTfulClientType.EXAM);
 
         SubjectManager subjectManager = (SubjectManager) factory.getRESTClient(RESTfulClientType.SUBJECT);
-       
 
         studentData = FXCollections.observableArrayList(studentManager.findAllStudents(new GenericType<List<Student>>() {
         }));
@@ -164,11 +184,12 @@ public class ExamSessionController {
         tcDateEnd.setCellValueFactory(cellData -> new SimpleStringProperty(dateFormat.format(cellData.getValue().getDateTimeEnd().getTime())));
         tcMark.setCellValueFactory(cellData -> new SimpleObjectProperty(String.valueOf(cellData.getValue().getMark())));
 
-        chBoxFilters.getItems().add(0, "Subject");
-        chBoxFilters.getItems().add(1, "Exam");
-        chBoxFilters.getItems().add(2, "Student");
-        chBoxFilters.getItems().add(3, "Mark");
-        chBoxFilters.getItems().add("Show All");
+        for (int i = 0; i < tblExamSession.getColumns().size(); i++) {
+            if (!tblExamSession.getColumns().get(i).getText().equals(tcDateEnd.getText()) && !tblExamSession.getColumns().get(i).getText().equals(tcDateStart.getText())) {
+                chBoxFilters.getItems().add(tblExamSession.getColumns().get(i).getText());
+            }
+        }
+        chBoxFilters.getItems().add("Show all");
         chBoxFilters.setValue(chBoxFilters.getItems().get(0));
 
         //Table column subject
@@ -205,8 +226,8 @@ public class ExamSessionController {
         //Table column dateTimeStart
         tcDateStart.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateStart.setOnEditCommit(this::handleTcDateStartEdit);
-        // tcDateStart.setOnEditStart(this::handleTcDateStartEditStart);
 
+        // tcDateStart.setOnEditStart(this::handleTcDateStartEditStart);
         //Table column dateTimeEnd
         tcDateEnd.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateEnd.setOnEditCommit(this::handleTcDateEndEdit);
@@ -216,6 +237,7 @@ public class ExamSessionController {
         tcMark.setOnEditCommit(this::handleTcMarkEdit);
 
         ivTick.setOnMouseClicked(this::handleAcceptEvent);
+        ivCross.setOnMouseClicked(this::handleCreateCancelEvent);
         tblExamSession.setItems(examSessionData);
         stage.show();
 
@@ -297,15 +319,14 @@ public class ExamSessionController {
         try {
             Calendar cal = new GregorianCalendar();
             cal.setTime(dateFormat.parse(t.getNewValue()));
-            Date date = cal.getTime();
-            LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            Date dateOld = t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime();
-            LocalDateTime localDateTimeOld = dateOld.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
-            if (localDateTime.isAfter(localDateTimeOld))
-                      {
+            Calendar calOld = new GregorianCalendar();
+            calOld.setTime(dateFormat.parse(t.getOldValue()));
+            if (cal.after((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd()))) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Date Start should be before the Date End", ButtonType.OK);
                 alert.show();
+                tblExamSession.refresh();
+
             } else {
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
                 if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
@@ -329,12 +350,19 @@ public class ExamSessionController {
             //Calendar cal = Calendar.getInstance();
             Calendar cal = new GregorianCalendar();
             cal.setTime(dateFormat.parse(t.getNewValue()));
+            if (cal.before((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd()))) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Date Start should be before the Date End", ButtonType.OK);
+                alert.show();
+                tblExamSession.refresh();
 
-            ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
-            if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
-                ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
-                examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
+            } else {
+                ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
+                if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+                    ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
+                    examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
+                }
             }
+
             tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcMark);
             tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
         } catch (ParseException ex) {
@@ -387,10 +415,9 @@ public class ExamSessionController {
         tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
         tblExamSession.edit(examSessionData.size() - 1, tcSubject);
         ivTick.setVisible(true);
-
         ivCross.setVisible(true);
-
         btnCreate.setDisable(true);
+        btnDelete.setDisable(true);
 
     }
 
@@ -412,14 +439,13 @@ public class ExamSessionController {
 
     private void handleAcceptEvent(MouseEvent event) {
         try {
+
             ExamSession examSession = tblExamSession.getSelectionModel().getSelectedItem();
             Subject subject = null;
-            for (int i = 0; i < studentData.size(); i++) {
 
+            for (int i = 0; i < studentData.size(); i++) {
                 if (examSession.getStudent().getFullName().equals(studentData.get(i).getFullName())) {
                     examSession.setStudent(studentData.get(i));
-
-                    System.out.println(examSession.getStudent().getIdUser());
                 }
             }
             for (int i = 0; i < subjectData.size(); i++) {
@@ -433,12 +459,32 @@ public class ExamSessionController {
                     examSession.getExam().setSubject(subject);
                 }
             }
+            if (examSessionData.stream().anyMatch(e -> e.getExam().equals(examSession.getExam()) && e.getStudent().equals(examSession.getStudent()))) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "This student is already evaluvated, you can edit or delete the record", ButtonType.OK);
+                alert.show();
+            } else {
+                examSessionManager.create(examSession);
+                examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
+                }));
+                tblExamSession.setItems(examSessionData);
+                tblExamSession.refresh();
+                btnCreate.setDisable(false);
+            }
 
-            examSessionManager.create(examSession);
-            examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
-            }));
-            tblExamSession.setItems(examSessionData);
-            tblExamSession.refresh();
+        } catch (Exception e) {
+        }
+
+    }
+
+    private void handleCreateCancelEvent(MouseEvent event) {
+
+        try {
+
+            ExamSession selectedItem = tblExamSession.getSelectionModel().getSelectedItem();
+            tblExamSession.getItems().remove(selectedItem);
+            tblExamSession.getSelectionModel().clearSelection();
+            tblExamSession.requestFocus();
+
             btnCreate.setDisable(false);
 
         } catch (Exception e) {
@@ -447,62 +493,90 @@ public class ExamSessionController {
     }
 
     private void handleSearchEvent(MouseEvent event) {
-        ObservableList<ExamSession> examSessionFilteredData = FXCollections.observableArrayList();
+        ObservableList<ExamSession> examSessionFilteredData = null;
 
         for (int j = 0; j < tblExamSession.getColumns().size(); j++) {
             tblExamSession.getColumns().get(j).setVisible(true);
         }
-        if (chBoxFilters.getSelectionModel().getSelectedIndex() == 4) {
-            for (int j = 0; j < tblExamSession.getColumns().size(); j++) {
-                tblExamSession.getColumns().get(j).setVisible(true);
-            }
-            tblExamSession.getSelectionModel().clearSelection();
-            tblExamSession.refresh();
-            tblExamSession.setItems(examSessionData);
-        } else if (txtFilters.getText().trim().equals("")) {
+
+        if (txtFilters.getText().trim().equals("")) {
             for (int j = 0; j < tblExamSession.getColumns().size(); j++) {
                 if (!chBoxFilters.getValue().toString().equals(tblExamSession.getColumns().get(j).getText())) {
                     tblExamSession.getColumns().get(j).setVisible(false);
                 }
             }
+        } else {
+            switch (chBoxFilters.getSelectionModel().getSelectedItem().toString()) {
+                case "Subject":
+                    examSessionFilteredData = FXCollections.observableArrayList(examSessionData.stream().
+                            filter(e -> e.getExam().getSubject().getName().equalsIgnoreCase(txtFilters.getText().trim())).map(e -> e)
+                            .collect(Collectors.toList()));
+                    tblExamSession.setItems(examSessionFilteredData);
+                    break;
+                case "Exam":
+                    examSessionFilteredData = FXCollections.observableArrayList(examSessionData.stream().
+                            filter(e -> e.getExam().getExamStatement().equalsIgnoreCase(txtFilters.getText().trim())).map(e -> e)
+                            .collect(Collectors.toList()));
+                    tblExamSession.setItems(examSessionFilteredData);
+                    break;
+                case "Student":
+                    examSessionFilteredData = FXCollections.observableArrayList(examSessionData.stream().
+                            filter(e -> e.getStudent().getFullName().equalsIgnoreCase(txtFilters.getText().trim())).map(e -> e)
+                            .collect(Collectors.toList()));
+                    tblExamSession.setItems(examSessionFilteredData);
+                    break;
+                case "Mark":
+                    if (!txtFilters.getText().matches("\\d*") || Integer.parseInt(txtFilters.getText().trim()) > 10) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
+                        alert.show();
+                        txtFilters.setText("");
+                    } else {
 
-        } else if (chBoxFilters.getSelectionModel().getSelectedIndex() == 0) {
-
-            for (int i = 0; i < examSessionData.size(); i++) {
-                if (examSessionData.get(i).getExam().getSubject().getName().equalsIgnoreCase(txtFilters.getText().trim())) {
-                    examSessionFilteredData.add(examSessionData.get(i));
-                }
-            }
-            tblExamSession.setItems(examSessionFilteredData);
-        } else if (chBoxFilters.getSelectionModel().getSelectedIndex() == 1) {
-
-            for (int i = 0; i < examSessionData.size(); i++) {
-                if (examSessionData.get(i).getExam().getExamStatement().equalsIgnoreCase(txtFilters.getText().trim())) {
-                    examSessionFilteredData.add(examSessionData.get(i));
-                }
-            }
-            tblExamSession.setItems(examSessionFilteredData);
-        } else if (chBoxFilters.getSelectionModel().getSelectedIndex() == 2) {
-            for (int i = 0; i < examSessionData.size(); i++) {
-                if (examSessionData.get(i).getStudent().getFullName().equalsIgnoreCase(txtFilters.getText().trim())) {
-                    examSessionFilteredData.add(examSessionData.get(i));
-                }
-            }
-        } else if (chBoxFilters.getSelectionModel().getSelectedIndex() == 3) {
-            if (!txtFilters.getText().matches("\\d*") || Integer.parseInt(txtFilters.getText().trim()) > 10) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
-                alert.show();
-                for (int i = 0; i < examSessionData.size(); i++) {
-                    if (examSessionData.get(i).getMark() == Integer.parseInt(txtFilters.getText())) {
-                        examSessionFilteredData.add(examSessionData.get(i));
+                        examSessionFilteredData = FXCollections.observableArrayList(examSessionData.stream().
+                                filter(e -> e.getMark() == Integer.valueOf(txtFilters.getText().trim())).map(e -> e)
+                                .collect(Collectors.toList()));
+                        tblExamSession.setItems(examSessionFilteredData);
+                        tblExamSession.refresh();
                     }
-                }
-                tblExamSession.setItems(examSessionFilteredData);
             }
+        }
+        if (chBoxFilters.getSelectionModel().getSelectedIndex() == 4) {
+            for (int j = 0; j < tblExamSession.getColumns().size(); j++) {
+                tblExamSession.getColumns().get(j).setVisible(true);
+            }
+            examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
+            }));
+            tblExamSession.setItems(examSessionData);
+            tblExamSession.refresh();
         }
 
     }
 
-    /*(!cal.getTime().after((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime()))
-                    && cal.getTime().equals((t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd().getTime())))*/
+    private void handlePrintEvent(ActionEvent action) {
+
+        try {
+
+            JasperReport report
+                    = JasperCompileManager.compileReport(getClass()
+                            .getResourceAsStream("/view.ExamSessionReport.jrxml"));
+            //Data for the report: a collection of UserBean passed as a JRDataSource 
+            //implementation 
+            JRBeanCollectionDataSource dataItems
+                    = new JRBeanCollectionDataSource((Collection<ExamSession>) this.tblExamSession.getItems());
+            //Map of parameter to be passed to the report
+            Map<String, Object> parameters = new HashMap<>();
+            //Fill report with data
+            JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataItems);
+            //Create and show the report window. The second parameter false value makes 
+            //report window not to close app.
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setVisible(true);
+            // jasperViewer.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        } catch (JRException ex) {
+
+            /*
+            Alert alert = new Alert(Alert.AlertType.ERROR, "An error occured while printing report", ButtonType.OK);
+            alert.show();*/
+        }
+    }
 }
