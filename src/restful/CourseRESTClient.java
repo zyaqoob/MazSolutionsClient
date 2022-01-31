@@ -5,6 +5,7 @@
  */
 package restful;
 
+import interfaces.CourseManager;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
@@ -24,7 +25,7 @@ import javax.ws.rs.core.GenericType;
  *
  * @author z332h
  */
-public class CourseRESTClient {
+public class CourseRESTClient implements CourseManager{
 
     private WebTarget webTarget;
     private Client client;

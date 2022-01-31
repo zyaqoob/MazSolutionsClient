@@ -362,4 +362,17 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         verifyThat("#btnDelete", isDisabled());
     }
     
+    @Test
+    public void testI_deleteWhileCreating() {
+        
+        btnCreate=lookup ("#btnCreate").query();
+        btnDelete=lookup ("#btnDelete").query();
+        clickOn(btnCreate);
+        clickOn(btnDelete);
+        verifyThat("Are you sure that you want to erase this student?", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        verifyThat("Unexpected error ocurred while deleting the student.", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+    }
+    
 }

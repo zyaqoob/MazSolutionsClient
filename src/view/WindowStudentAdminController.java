@@ -7,14 +7,20 @@ package view;
 
 import classes.Course;
 import classes.Student;
+import classes.User;
 import classes.UserPrivilege;
 import classes.UserStatus;
 import crypto.Crypto;
-import static java.lang.Thread.sleep;
+import interfaces.CourseManager;
+import interfaces.StudentManager;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +32,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -43,13 +50,20 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
-import restful.CourseRESTClient;
+import logic.RESTfulClientType;
+import logic.RESTfulFactory;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import restful.StudentRESTClient;
 
 /**
@@ -121,10 +135,12 @@ public class WindowStudentAdminController {
     @FXML
     private TextField tfSearch;
 
-    private StudentRESTClient restStudents = new StudentRESTClient();
+    private final StudentManager restStudents = (StudentManager) new RESTfulFactory().getRESTClient(RESTfulClientType.STUDENT);
     private ObservableList<Student> studentsData;
-    private CourseRESTClient restCourses = new CourseRESTClient();
+    private final CourseManager restCourses = (CourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.COURSE);
     private ObservableList<Course> coursesData;
+    private User user;
+    private Stage stage;
 
     public void initStage(Parent root) {
 
@@ -133,14 +149,14 @@ public class WindowStudentAdminController {
             }));
             coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {
             }));
+
         } catch (Exception e) {
 
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable" + e.getMessage(), ButtonType.OK);
-            alert.show();
-
+            //Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable" + e.getMessage(), ButtonType.OK);
+            //alert.show();
         }
 
-        Stage stage = new Stage();
+        stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(false);
@@ -180,7 +196,10 @@ public class WindowStudentAdminController {
         tfSearch.textProperty().addListener(this::textChanged);
         ivX.setOnMouseClicked(this::cancel);
         tblStudents.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
+        lblTeacherCourses.setOnMouseClicked(this::changeToTeacherWindow);
+        btnPrint.setOnMouseClicked(this::printReport);
         stage.show();
+
     }
 
     public void create(ActionEvent action) {
@@ -252,7 +271,7 @@ public class WindowStudentAdminController {
                 ivSearch.setVisible(true);
             } catch (WebApplicationException e) {
 
-                Alert alert = new Alert(Alert.AlertType.ERROR,"Error while creating the user.", ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error while creating the user.", ButtonType.OK);
                 alert.show();
 
             }
@@ -519,6 +538,44 @@ public class WindowStudentAdminController {
 
         }
 
+    }
+
+    public void changeToTeacherWindow(MouseEvent event) {
+
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
+        try {
+            Parent root = (Parent) loader.load();
+            AdminTeacherWindowController controller = loader.getController();
+            //controller.setUser(user);
+            controller.initStage(root);
+        } catch (IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "ERROR WHILE SIGNING UP", ButtonType.OK);
+        }
+
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public void printReport(MouseEvent event) {
+        
+        try {
+            JasperReport report = JasperCompileManager.compileReport(getClass().getResourceAsStream("/view/AdminStudentReport.jrxml"));
+            JRBeanCollectionDataSource dataItems = new JRBeanCollectionDataSource((Collection<Student>) this.tblStudents.getItems());
+            Map<String, Object> parameters = new HashMap<>();
+            JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataItems);
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setVisible(true);
+        } catch (JRException ex) {
+            Logger.getLogger(WindowStudentAdminController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
 }
