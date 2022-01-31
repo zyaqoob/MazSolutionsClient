@@ -84,6 +84,7 @@ public class ExamSessionController {
     private Label lblCourse;
     @FXML
     private Label lblExam;
+
     @FXML
     private Label lblExamSession;
     @FXML
@@ -146,7 +147,6 @@ public class ExamSessionController {
         btnCreate.setDisable(false);
         ivTick.setVisible(false);
         ivCross.setVisible(false);
-
         ivSearch.setOnMouseClicked(this::handleSearchEvent);
         txtFilters.setText("");
         btnPrint.setOnAction(this::handlePrintEvent);
@@ -179,18 +179,18 @@ public class ExamSessionController {
         tcSubject.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getExam().getSubject().getName()));
         tcStudent.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStudent().getFullName()));
         tcExam.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getExam().getExamStatement()));
-        //tcDateStart.setCellValueFactory(new PropertyValueFactory<>(dateFormat.format(("dateTimeStart"))));
         tcDateStart.setCellValueFactory(cellData -> new SimpleStringProperty(dateFormat.format(cellData.getValue().getDateTimeStart().getTime())));
         tcDateEnd.setCellValueFactory(cellData -> new SimpleStringProperty(dateFormat.format(cellData.getValue().getDateTimeEnd().getTime())));
         tcMark.setCellValueFactory(cellData -> new SimpleObjectProperty(String.valueOf(cellData.getValue().getMark())));
 
         for (int i = 0; i < tblExamSession.getColumns().size(); i++) {
-            if (!tblExamSession.getColumns().get(i).getText().equals(tcDateEnd.getText()) && !tblExamSession.getColumns().get(i).getText().equals(tcDateStart.getText())) {
+            if (!tblExamSession.getColumns().get(i).getText().equals(tcDateEnd.getText())
+                    && !tblExamSession.getColumns().get(i).getText().equals(tcDateStart.getText())) {
                 chBoxFilters.getItems().add(tblExamSession.getColumns().get(i).getText());
             }
         }
         chBoxFilters.getItems().add("Show all");
-        chBoxFilters.setValue(chBoxFilters.getItems().get(0));
+        chBoxFilters.getSelectionModel().selectFirst();
 
         //Table column subject
         ObservableList<String> subjectNames;
@@ -200,8 +200,10 @@ public class ExamSessionController {
         }
         subjectNames = FXCollections.observableArrayList(sNames);
         tcSubject.setCellFactory(ChoiceBoxTableCell.forTableColumn(subjectNames));
+       // tcSubject.setCellFactory(TextFieldTableCell.forTableColumn());
         tcSubject.setEditable(false);
-        tcSubject.setOnEditCommit(this::handleTcSubjectEdit);
+
+
 
         //Table column exam
         ObservableList<String> examNames;
@@ -227,11 +229,23 @@ public class ExamSessionController {
         tcDateStart.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateStart.setOnEditCommit(this::handleTcDateStartEdit);
 
-        // tcDateStart.setOnEditStart(this::handleTcDateStartEditStart);
         //Table column dateTimeEnd
         tcDateEnd.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateEnd.setOnEditCommit(this::handleTcDateEndEdit);
+       
+           tcSubject.setCellFactory(cb -> new ChoiceBoxTableCell(subjectNames) {
 
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                if (isEditing() && getGraphic() instanceof ChoiceBox) {
+                    // needs focus for proper working of esc/enter 
+                    getGraphic().requestFocus();
+                    ((ChoiceBox<String>) getGraphic()).show();
+                }
+            }
+
+        });
         //Table Column mark.
         tcMark.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcMark.setOnEditCommit(this::handleTcMarkEdit);
@@ -242,7 +256,7 @@ public class ExamSessionController {
         stage.show();
 
     }
-
+    
     private void handleTcSubjectEdit(CellEditEvent<ExamSession, String> t) {
 
         ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().getSubject().setName(t.getNewValue());
@@ -251,7 +265,7 @@ public class ExamSessionController {
                 t.getTableView().getItems().get(t.getTablePosition().getRow()).getExam().setSubject(subjectData.get(i));
             }
         }
-        if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+        if (!ivTick.isVisible()) {
             ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
 
             examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
@@ -269,7 +283,7 @@ public class ExamSessionController {
                 t.getTableView().getItems().get(t.getTablePosition().getRow()).setStudent(studentData.get(i));
             }
         }
-        if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+        if (!ivTick.isVisible()) {
             ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
             examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
         }
@@ -280,6 +294,7 @@ public class ExamSessionController {
     private void handleTcExamEdit(CellEditEvent<ExamSession, String> t) {
         boolean found = false;
         String examStatement = t.getOldValue();
+        Exam exam;
         try {
             ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().setExamStatement(t.getNewValue());
             for (int i = 0; i < examData.size(); i++) {
@@ -292,23 +307,20 @@ public class ExamSessionController {
             if (!found) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid Exam for selected Subject.", ButtonType.OK);
                 alert.show();
+                t.consume();
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().setExamStatement(examStatement);
                 tblExamSession.refresh();
+                found = false;
 
-            }
-            if (found == true && t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+            } else if (found == true && !ivTick.isVisible()) {
 
                 ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                 examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
             }
             tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcStudent);
             tblExamSession.edit(t.getTablePosition().getRow(), tcStudent);
-            if (((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().getSubject() == null) {
-
-            }
-
         } catch (NullPointerException ex) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Please slect a Subject.", ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Please select a Subject.", ButtonType.OK);
             alert.show();
             tblExamSession.refresh();
         } catch (Exception e) {
@@ -329,7 +341,7 @@ public class ExamSessionController {
 
             } else {
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
-                if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+                if (!ivTick.isVisible()) {
                     ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                     examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
                 }
@@ -357,7 +369,7 @@ public class ExamSessionController {
 
             } else {
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
-                if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+                if (!ivTick.isVisible()) {
                     ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                     examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
                 }
@@ -382,12 +394,12 @@ public class ExamSessionController {
         } else {
             ((ExamSession) t.getTableView().getItems().get(
                     t.getTablePosition().getRow())).setMark(Integer.parseInt(t.getNewValue().trim()));
-            if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getIdExamSession() != null) {
+            if (!ivTick.isVisible()) {
                 ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                 examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
             }
             tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcMark);
-            tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
+            // tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
         }
     }
 
@@ -409,16 +421,15 @@ public class ExamSessionController {
         eSession.getExam().setSubject(new Subject());
         eSession.setDateTimeEnd(new GregorianCalendar());
         eSession.setDateTimeStart(new GregorianCalendar());
-
         examSessionData.add(eSession);
         tblExamSession.getSelectionModel().select(examSessionData.size() - 1);
         tblExamSession.getFocusModel().focus(examSessionData.size() - 1, tcSubject);
+        tblExamSession.layout();
         tblExamSession.edit(examSessionData.size() - 1, tcSubject);
         ivTick.setVisible(true);
         ivCross.setVisible(true);
         btnCreate.setDisable(true);
         btnDelete.setDisable(true);
-
     }
 
     private void handleDeleteEvent(ActionEvent action) {
@@ -459,9 +470,13 @@ public class ExamSessionController {
                     examSession.getExam().setSubject(subject);
                 }
             }
-            if (examSessionData.stream().anyMatch(e -> e.getExam().equals(examSession.getExam()) && e.getStudent().equals(examSession.getStudent()))) {
+            if (examSessionData.stream().anyMatch(e -> e.getExam().equals(examSession.getExam())
+                    && e.getExam().getSubject().equals(examSession.getExam().getSubject())
+                    && e.getStudent().equals(examSession.getStudent()))) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "This student is already evaluvated, you can edit or delete the record", ButtonType.OK);
                 alert.show();
+                tblExamSession.getSelectionModel().getSelectedItem();
+                event.consume();
             } else {
                 examSessionManager.create(examSession);
                 examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
@@ -526,7 +541,7 @@ public class ExamSessionController {
                     tblExamSession.setItems(examSessionFilteredData);
                     break;
                 case "Mark":
-                    if (!txtFilters.getText().matches("\\d*") || Integer.parseInt(txtFilters.getText().trim()) > 10) {
+                    if (!txtFilters.getText().matches("\\d*") || Integer.parseInt(txtFilters.getText().trim()) > 10 || Integer.parseInt(txtFilters.getText().trim()) < 0) {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid value for mark, it should be between 0 to 10.", ButtonType.OK);
                         alert.show();
                         txtFilters.setText("");
@@ -553,7 +568,6 @@ public class ExamSessionController {
     }
 
     private void handlePrintEvent(ActionEvent action) {
-
         try {
 
             JasperReport report
@@ -579,4 +593,5 @@ public class ExamSessionController {
             alert.show();*/
         }
     }
+
 }

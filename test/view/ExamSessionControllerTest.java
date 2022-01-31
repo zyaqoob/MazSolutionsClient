@@ -5,30 +5,34 @@
  */
 package view;
 
+import application.ApplicationMaz;
 import classes.ExamSession;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import java.util.concurrent.TimeoutException;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.stage.Stage;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import static org.testfx.api.FxAssert.verifyThat;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.matcher.base.NodeMatchers;
-
 import static org.testfx.matcher.base.NodeMatchers.isDisabled;
 import static org.testfx.matcher.base.NodeMatchers.isEnabled;
 import static org.testfx.matcher.base.NodeMatchers.isInvisible;
+import static org.testfx.matcher.base.NodeMatchers.isVisible;
+import org.testfx.robot.Motion;
 
 /**
  *
@@ -46,39 +50,47 @@ public class ExamSessionControllerTest extends ApplicationTest {
     private ImageView ivSearch;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm");
 
-    @Override
-    public void start(Stage stage) throws Exception {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ExamSessionWindow.fxml"));
-            Parent root;
-            root = (Parent) loader.load();
-            ExamSessionController controller = loader.getController();
-            controller.initStage(root);
-            tblExamSession = lookup("#tblExamSession").query();
-            txtFilters = lookup("#txtFilters").query();
-            btnDelete = (Button) lookup("#btnDelete").query();
-            btnCreate = (Button) lookup("#btnCreate").query();
-            ivTick = (ImageView) lookup("#ivTick").query();
-            ivCross = (ImageView) lookup("#ivCroos").query();
-            ivSearch = (ImageView) lookup("#ivSearch").query();
-
-        } catch (IOException ex) {
-            Logger.getLogger(ExamSessionControllerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    @BeforeClass
+    public static void setUpClass() throws TimeoutException {
+        FxToolkit.registerPrimaryStage();
+        FxToolkit.setupApplication(ApplicationMaz.class);
 
     }
 
     @Test
-    public void windowControlls() {
+    public void testA_initialInteraction() {
+
+        clickOn("#txtUserName");
+        write("zyaqoob");
+        clickOn("#txtPasswd");
+        write("zF0yB1");
+        clickOn("#btnSignIn");
+        verifyThat("#examSessionPane", isVisible());
+    }
+
+    @Test
+    @Ignore
+    public void testB_windowControlls() {
+
         verifyThat("#btnCreate", isEnabled());
         verifyThat("#btnDelete", isDisabled());
         verifyThat("#ivTick", isInvisible());
         verifyThat("#ivCross", isInvisible());
+        verifyThat("#ivSearch", isVisible());
+
     }
 
     @Test
-    public void checkFilters() {
+    @Ignore
+    public void testC_CheckFilters() {
+        tblExamSession = lookup("#tblExamSession").query();
+        txtFilters = lookup("#txtFilters").query();
+        btnDelete = (Button) lookup("#btnDelete").query();
+        btnCreate = (Button) lookup("#btnCreate").query();
+        ivTick = (ImageView) lookup("#ivTick").query();
+        ivCross = (ImageView) lookup("#ivCroos").query();
+        ivSearch = (ImageView) lookup("#ivSearch").query();
+
         //Subjct Search
         txtFilters.setText("PMD");
         clickOn("#ivSearch");
@@ -127,11 +139,13 @@ public class ExamSessionControllerTest extends ApplicationTest {
         loadAllDataInTable();
         clickOn("#chBoxFilters");
         type(KeyCode.UP);
-        txtFilters.setText("11");
+        txtFilters.setText("dhg");
+        type(KeyCode.ENTER);
         clickOn("#ivSearch");
         verifyThat("Invalid value for mark, it should be between 0 to 10.", NodeMatchers.isVisible());
         clickOn("OK");
         txtFilters.setText("9");
+        clickOn("#ivSearch");
         assertTrue("No record matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getMark()
                 == Integer.valueOf(txtFilters.getText())).count() == 0);
@@ -140,12 +154,35 @@ public class ExamSessionControllerTest extends ApplicationTest {
         assertTrue("No record matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getMark()
                 == Integer.valueOf(txtFilters.getText())).count() > 0);
-
     }
 
     public void loadAllDataInTable() {
         clickOn("#chBoxFilters");
         clickOn("Show all");
         clickOn("#ivSearch");
+    }
+
+    @Test
+    public void testD_CheckDelete() {
+        tblExamSession = lookup("#tblExamSession").query();
+        loadAllDataInTable();
+        int totalRows = tblExamSession.getItems().size();
+        Node row = lookup(".table-row-cell").nth(totalRows-1).query();
+        clickOn(row);
+      //  clickOn("#btnCreate");
+      //  assertEquals("The row has not been added", totalRows + 1, tblExamSession.getItems().size());
+        verifyThat("#btnCreate", isEnabled());
+        verifyThat("#ivTick", isInvisible());
+        verifyThat("#ivCross", isInvisible());
+        verifyThat("#btnDelete", isEnabled());
+        clickOn("#btnDelete");
+        verifyThat("Are you sure you want to delete the record.?", isVisible());
+        clickOn("No");
+        assertEquals("Row have been deleted", totalRows,tblExamSession.getItems().size());
+        clickOn("#btnDelete");
+        clickOn("Yes");
+        assertEquals("Row have not been deleted correctly", totalRows-1,tblExamSession.getItems().size());
+       
+
     }
 }
