@@ -23,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.GenericType;
@@ -65,6 +66,7 @@ public class ChangePasswordWindowController {
     public void initStage(Parent root) {
         Stage stage = new Stage();
         Scene scene = new Scene(root);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
         stage.setTitle("SignIn");
         stage.setResizable(false);

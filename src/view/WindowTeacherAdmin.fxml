@@ -22,6 +22,9 @@
                <font>
                   <Font name="System Bold" size="9.0" />
                </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
             </Label>
             <Label fx:id="lblTeachers" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="TEACHERS" textFill="#d0c1c1">
                <font>

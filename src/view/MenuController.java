@@ -20,13 +20,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import static view.AdminTeacherWindowController.stage;
 
 /**
  * FXML Controller class
  *
  * @author Aitor
  */
-public class MenuController {
+public class MenuController extends MenuData implements Initializable{
 
     /**
      * Initializes the controller class.
@@ -39,17 +41,16 @@ public class MenuController {
     private MenuItem menuPersonalInfo;
     @FXML
     private MenuItem menuLogOut;
+    
+    
 
-    public void initStage(Parent root) {
-        Stage stage = new Stage();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("SignIn");
-        stage.setResizable(false);
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         menuChangePassword.setOnAction((ActionEvent a) -> {
             try {
+                Parent root;
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ChangePasswordWindow.fxml"));
-                Parent rootNewPassd = (Parent) loader.load();
+                root = (Parent) loader.load();
                 ChangePasswordWindowController controller = loader.getController();
                 controller.initStage(root);
             } catch (IOException ex) {
@@ -61,17 +62,21 @@ public class MenuController {
             alert.show();
         });
         menuLogOut.setOnAction((ActionEvent a) -> {
-            try {
+            Parent root;
+            FXMLLoader loader;
+            try {            
+                
                 stage.close();
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
-                Parent rootSignIn = (Parent) loader.load();
-                SignInController controller = loader.getController();
-                controller.initStage(root);
+                loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
+                root = (Parent) loader.load();
+                SignInController signInController = loader.getController();
+                signInController.initStage(root);
             } catch (IOException ex) {
                 Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        stage.show();
     }
+
+
 
 }

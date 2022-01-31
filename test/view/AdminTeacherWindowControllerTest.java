@@ -267,7 +267,7 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
     public void testG_CreateEmptyTeacher(){
         clickOn("#btnCreate");
         clickOn("#ivTick");
-        verifyThat("Missing data in table cell",NodeMatchers.isVisible());
+        verifyThat("Missing Data",NodeMatchers.isVisible());
         clickOn("Aceptar");
     }
     public void resetTableValues() {

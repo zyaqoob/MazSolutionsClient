@@ -13,7 +13,9 @@ import crypto.Crypto;
 import static crypto.Crypto.generatePassword;
 import interfaces.TeacherCourseManager;
 import interfaces.TeacherManager;
+import java.io.IOException;
 import static java.lang.Thread.sleep;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,9 +23,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.beans.Observable;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -31,6 +35,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -49,6 +54,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
@@ -130,6 +136,8 @@ public class AdminTeacherWindowController {
 
     private ObservableList<Teacher> teachers;
 
+    public static Stage stage = new Stage();
+
     private ObservableList<TeacherCourse> teacherCourses;
 
     private final TeacherManager teacherManager = (TeacherManager) new RESTfulFactory().getRESTClient(RESTfulClientType.TEACHER);
@@ -137,16 +145,20 @@ public class AdminTeacherWindowController {
     private final TeacherCourseManager teacherCourseManager = (TeacherCourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.TEACHER_COURSE);
 
     public void initStage(Parent root) {
+        //try {
         //LOGGER.info("Stage initiated");
-        Stage stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setTitle("SignIn");
+        stage.setTitle("Teacher Crud");
         stage.setResizable(false);
-        teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
-        }));
-        teacherCourses = FXCollections.observableArrayList(teacherCourseManager.findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
-        }));
+        try {
+            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+            }));
+            teacherCourses = FXCollections.observableArrayList(teacherCourseManager.findAllTeacherCourses(new GenericType<List<TeacherCourse>>() {
+            }));
+        } catch (ClientErrorException e) {
+            Alert alert = new Alert(AlertType.ERROR, "Server Unavailable", ButtonType.OK);
+        }
         List<String> filterValues = new ArrayList<>();
         filterValues.add("Full Name");
         filterValues.add("Course");
@@ -187,7 +199,18 @@ public class AdminTeacherWindowController {
             btnCreate.setDisable(false);
         });
         tblTeachers.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
+        /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/menu.fxml"));
+            Parent rootMenu = (Parent) loader.load();
+            MenuController controller = loader.getController();
+            controller.setStage(getStage());*/
+        MenuData menuData = new MenuData();
+        menuData.setStage(stage);
+        tfFilter.textProperty().addListener(this::textChanged);
+        lblStudents.setOnMouseClicked(this::goToStudentWindow);
         stage.show();
+        /* } catch (IOException ex) {
+            Logger.getLogger(AdminTeacherWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
     }
 
     private void creation(ActionEvent action) {
@@ -287,7 +310,7 @@ public class AdminTeacherWindowController {
                 }
                 break;
             case "All":
-                if(ivTick.isVisible()){
+                if (ivTick.isVisible()) {
                     ivTick.setVisible(false);
                     ivX.setVisible(false);
                     btnCreate.setDisable(false);
@@ -361,10 +384,15 @@ public class AdminTeacherWindowController {
                     ((Teacher) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setLogin(t.getNewValue());
                     if (!ivTick.isVisible()) {
-                        Teacher teacher = ((Teacher) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow()));
-                        teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
-                        tblTeachers.refresh();
+                        try {
+                            Teacher teacher = ((Teacher) t.getTableView().getItems().get(
+                                    t.getTablePosition().getRow()));
+                            teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                            tblTeachers.refresh();
+                        } catch (InternalServerErrorException e) {
+                            Alert alert = new Alert(AlertType.ERROR, "Login is already registered");
+                            alert.show();
+                        }
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcEmail);
@@ -378,10 +406,15 @@ public class AdminTeacherWindowController {
                                 t.getTablePosition().getRow())).setEmail(t.getNewValue());
                         //tblTeachers.getColumns().add(tbcEmail);
                         if (!ivTick.isVisible()) {
-                            Teacher teacher = ((Teacher) t.getTableView().getItems().get(
-                                    t.getTablePosition().getRow()));
-                            teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
-                            tblTeachers.refresh();
+                            try {
+                                Teacher teacher = ((Teacher) t.getTableView().getItems().get(
+                                        t.getTablePosition().getRow()));
+                                teacherManager.edit(teacher, String.valueOf(teacher.getIdUser()));
+                                tblTeachers.refresh();
+                            } catch (InternalServerErrorException e) {
+                                Alert alert = new Alert(AlertType.ERROR, "Email is already registered");
+                                alert.show();
+                            }
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);
                         tblTeachers.edit(t.getTablePosition().getRow(), tbcTelephone);
@@ -416,6 +449,7 @@ public class AdminTeacherWindowController {
         tbcBirthDate.setCellFactory(dateCellFactory);
         tbcBirthDate.setOnEditCommit(
                 (TableColumn.CellEditEvent<Teacher, Date> t) -> {
+
                     ((Teacher) t.getTableView().getItems()
                             .get(t.getTablePosition().getRow()))
                             .setBirthDate(t.getNewValue());
@@ -482,5 +516,25 @@ public class AdminTeacherWindowController {
                     }
                     // tblTeachers.getColumns().add(tbcTelephone);
                 });
+    }
+
+    private void textChanged(Observable observable, String oldValue, String newValue) {
+        if (tfFilter.getText().length() > 255) {
+            Alert alert = new Alert(AlertType.ERROR, "Maximun character limit arrived");
+            alert.show();
+        }
+    }
+
+    private void goToStudentWindow(MouseEvent event) {
+        try {
+            Parent root;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+            root = (Parent) loader.load();
+            WindowStudentAdminController controller = loader.getController();
+            controller.initStage(root);
+            stage.close();
+        } catch (IOException ex) {
+            Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
