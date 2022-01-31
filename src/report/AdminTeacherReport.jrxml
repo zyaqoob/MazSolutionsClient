@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="24282110-1c82-4d79-b5ce-552a777a7db3">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<field name="fullName" class="java.lang.String"/>
+	<field name="login" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="birthDate" class="java.util.Date"/>
+	<field name="teacherCourse.name" class="java.lang.String"/>
+	<field name="salary" class="java.lang.Float"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="37" width="146" height="42" uuid="d7256c8e-e608-4ab7-93d5-63eb1bd170d7"/>
+				<textElement>
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[TEACHERS]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="100" height="20" uuid="56fbc26f-e03d-4139-9c89-17080834debc"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FULL NAME]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="103" y="0" width="100" height="20" uuid="80bd5631-bcf8-4127-bdff-50a9557aa7f1"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Username]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="203" y="0" width="100" height="20" uuid="ab9b2672-0fc6-452f-88d2-4e70c55496a6"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Email]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="301" y="0" width="100" height="20" uuid="b8c7ea67-246f-4e02-a288-2fd3c9c25b49"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Birth Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="393" y="0" width="100" height="20" uuid="4f8b48b5-3eb9-4e71-bff2-efc1d46334e8"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Teacher Course]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="501" y="0" width="100" height="20" uuid="37276dc3-30af-4413-b5f5-8e746c98b93d"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Salary]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="20" width="100" height="20" uuid="25f6fff2-c17b-436e-8387-f393fd966127"/>
+				<textFieldExpression><![CDATA[$F{fullName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="101" y="20" width="100" height="20" uuid="7350710f-205f-4d4a-84f7-81da05392753"/>
+				<textFieldExpression><![CDATA[$F{login}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="201" y="20" width="100" height="20" uuid="06f44e7f-4591-4bad-b22e-351604a27e80"/>
+				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="301" y="20" width="100" height="20" uuid="481767cf-eaad-4e27-92ae-0a5ac44af0d9"/>
+				<textFieldExpression><![CDATA[$F{birthDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="401" y="20" width="100" height="20" uuid="7d6b7d4e-c331-49d4-acce-825b1eeb72c6"/>
+				<textFieldExpression><![CDATA[$F{teacherCourse.name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="501" y="20" width="100" height="20" uuid="f6bf22a6-81c2-4f43-9a64-97d62a89fb47"/>
+				<textFieldExpression><![CDATA[$F{salary}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

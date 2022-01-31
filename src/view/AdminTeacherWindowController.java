@@ -7,6 +7,7 @@ package view;
 
 import classes.Teacher;
 import classes.TeacherCourse;
+import classes.User;
 import classes.UserPrivilege;
 import classes.UserStatus;
 import crypto.Crypto;
@@ -19,8 +20,11 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -63,6 +67,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import restful.TeacherRESTClient;
 
 /**
@@ -138,6 +149,8 @@ public class AdminTeacherWindowController {
 
     public static Stage stage = new Stage();
 
+    private User user;
+
     private ObservableList<TeacherCourse> teacherCourses;
 
     private final TeacherManager teacherManager = (TeacherManager) new RESTfulFactory().getRESTClient(RESTfulClientType.TEACHER);
@@ -199,18 +212,23 @@ public class AdminTeacherWindowController {
             btnCreate.setDisable(false);
         });
         tblTeachers.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
-        /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/menu.fxml"));
-            Parent rootMenu = (Parent) loader.load();
-            MenuController controller = loader.getController();
-            controller.setStage(getStage());*/
         MenuData menuData = new MenuData();
         menuData.setStage(stage);
         tfFilter.textProperty().addListener(this::textChanged);
         lblStudents.setOnMouseClicked(this::goToStudentWindow);
+        btnPrint.setOnAction((ActionEvent action) -> {
+            try {
+                JasperReport report = JasperCompileManager.compileReport(AdminTeacherWindowController.class.getResourceAsStream("/report/AdminTeacherReport.jrxml"));
+                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource((Collection<Teacher>)tblTeachers.getItems());
+                Map<String, Object> parameters = new HashMap<>();
+                JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataSource);
+                JasperViewer jasperViewer = new JasperViewer(jasperPrint);
+                jasperViewer.setVisible(true);
+            } catch (JRException ex) {
+                Logger.getLogger(AdminTeacherWindowController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
         stage.show();
-        /* } catch (IOException ex) {
-            Logger.getLogger(AdminTeacherWindowController.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
     }
 
     private void creation(ActionEvent action) {
@@ -536,5 +554,13 @@ public class AdminTeacherWindowController {
         } catch (IOException ex) {
             Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

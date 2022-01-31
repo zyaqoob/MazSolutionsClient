@@ -52,6 +52,7 @@ public class MenuController extends MenuData implements Initializable{
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ChangePasswordWindow.fxml"));
                 root = (Parent) loader.load();
                 ChangePasswordWindowController controller = loader.getController();
+                controller.setUser(getUser());
                 controller.initStage(root);
             } catch (IOException ex) {
                 Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
