@@ -91,7 +91,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
     }
     
     
-    public void testA_variablesStart() throws Exception {
+    /*public void testA_variablesStart() throws Exception {
         //start JavaFX application to be tested    
         //new ApplicationMaz().start(stage);
         //lookup for some nodes to be used in testing
@@ -111,7 +111,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         btnSignIn=lookup("#btnSignIn").query();
         txtUserName=lookup("#txtUserName").query();
         txtPasswd=lookup("#txtPasswd").query();
-    }
+    }*/
     
     
     //@Ignore
@@ -291,6 +291,9 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         type(KeyCode.ENTER);
         type(KeyCode.TAB);
         write("3/3/1986");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("adama");
         type(KeyCode.ENTER);
         clickOn(ivTick);
         assertTrue("Error while creating the teacher", tblStudents.getItems().stream().filter(s -> s.getFullName().

@@ -127,7 +127,7 @@ public class WindowStudentAdminController {
     private ObservableList<Course> coursesData;
 
     public void initStage(Parent root) {
-        
+
         try {
             studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
             }));
@@ -243,7 +243,7 @@ public class WindowStudentAdminController {
                 restStudents.create(student);
                 ivTick.setVisible(false);
                 ivX.setVisible(false);
-                restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+                //restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
                 studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
                 }));
                 tblStudents.setItems(studentsData);
@@ -289,7 +289,9 @@ public class WindowStudentAdminController {
                     if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
-                        new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                        if (student.getFullName() != null) {
+                            new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
+                        }
                     }
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcCourse);
                     tblStudents.edit(s.getTablePosition().getRow(), tbcCourse);
@@ -319,8 +321,7 @@ public class WindowStudentAdminController {
                     ((Student) s.getTableView().getItems().get(
                             s.getTablePosition().getRow())).getCourse().setName(s.getNewValue());
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcYear);
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
@@ -339,8 +340,7 @@ public class WindowStudentAdminController {
                             .get(s.getTablePosition().getRow()))
                             .setYear(s.getNewValue());
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcEmail);
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
@@ -357,8 +357,7 @@ public class WindowStudentAdminController {
                         ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow())).setEmail(s.getNewValue());
                         tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcTelephone);
-                        if (((Student) s.getTableView().getItems().get(
-                                s.getTablePosition().getRow())).getIdUser() != null) {
+                        if (!ivTick.isVisible()) {
                             Student student = ((Student) s.getTableView().getItems().get(
                                     s.getTablePosition().getRow()));
                             try {
@@ -367,6 +366,10 @@ public class WindowStudentAdminController {
 
                             } catch (WebApplicationException e) {
 
+                                studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+                                }));
+                                tblStudents.setItems(studentsData);
+                                tblStudents.refresh();
                                 Alert alert = new Alert(Alert.AlertType.ERROR, "This email is already registered.", ButtonType.OK);
                                 alert.show();
 
@@ -389,8 +392,7 @@ public class WindowStudentAdminController {
                         ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow())).setTelephone(s.getNewValue());
                         tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcBirthDate);
-                        if (((Student) s.getTableView().getItems().get(
-                                s.getTablePosition().getRow())).getIdUser() != null) {
+                        if (!ivTick.isVisible()) {
                             Student student = ((Student) s.getTableView().getItems().get(
                                     s.getTablePosition().getRow()));
                             new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
@@ -414,8 +416,7 @@ public class WindowStudentAdminController {
                     ((Student) s.getTableView().getItems()
                             .get(s.getTablePosition().getRow()))
                             .setBirthDate(s.getNewValue());
-                    if (((Student) s.getTableView().getItems().get(
-                            s.getTablePosition().getRow())).getIdUser() != null) {
+                    if (!ivTick.isVisible()) {
                         Student student = ((Student) s.getTableView().getItems().get(
                                 s.getTablePosition().getRow()));
                         new StudentRESTClient().edit(student, String.valueOf(student.getIdUser()));
@@ -439,6 +440,10 @@ public class WindowStudentAdminController {
 
                         } catch (WebApplicationException e) {
 
+                            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+                            }));
+                            tblStudents.setItems(studentsData);
+                            tblStudents.refresh();
                             Alert alert = new Alert(Alert.AlertType.ERROR, "This login is already registered.", ButtonType.OK);
                             alert.show();
 
