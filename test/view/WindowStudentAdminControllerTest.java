@@ -89,31 +89,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         FxToolkit.setupApplication(ApplicationMaz.class);
 
     }
-    
-    
-    /*public void testA_variablesStart() throws Exception {
-        //start JavaFX application to be tested    
-        //new ApplicationMaz().start(stage);
-        //lookup for some nodes to be used in testing
-        lblSearchBy=lookup("#lblSearchBy").query();
-        btnCreate=lookup("#btnCreate").query();
-        btnDelete=lookup("#btnDelete").query();
-        btnPrint=lookup("#btnPrint").query();
-        
-        ivTick=lookup ("#ivTick").query();
-        ivX=lookup ("#ivX").query();
-        
-        
-        
-        studentsViewPane=lookup("#studentsViewPane").query();
-        
-        
-        btnSignIn=lookup("#btnSignIn").query();
-        txtUserName=lookup("#txtUserName").query();
-        txtPasswd=lookup("#txtPasswd").query();
-    }*/
-    
-    
+
     //@Ignore
     @Test
     public void testB_initialInteraction(){
@@ -293,10 +269,16 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         write("3/3/1986");
         type(KeyCode.ENTER);
         type(KeyCode.ENTER);
-        write("adama");
+        write("msanchez");
         type(KeyCode.ENTER);
         clickOn(ivTick);
-        assertTrue("Error while creating the teacher", tblStudents.getItems().stream().filter(s -> s.getFullName().
+        verifyThat("Error while creating the user.", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        type(KeyCode.ENTER);
+        write("adamito");
+        type(KeyCode.ENTER);
+        clickOn(ivTick);
+        assertTrue("Error while creating the student", tblStudents.getItems().stream().filter(s -> s.getFullName().
                 equalsIgnoreCase("Adama Traoré")).count() > 0);
         
         

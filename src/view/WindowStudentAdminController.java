@@ -252,7 +252,7 @@ public class WindowStudentAdminController {
                 ivSearch.setVisible(true);
             } catch (WebApplicationException e) {
 
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error while creating the user.\n" + e.getMessage(), ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.ERROR,"Error while creating the user.", ButtonType.OK);
                 alert.show();
 
             }
