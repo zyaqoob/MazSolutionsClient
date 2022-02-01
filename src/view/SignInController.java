@@ -5,15 +5,12 @@
  */
 package view;
 
-import classes.Teacher;
 import classes.User;
 import classes.UserPrivilege;
 import crypto.Crypto;
 import interfaces.UserManager;
 import java.io.IOException;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.Calendar;
+import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,19 +24,22 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import static javafx.scene.input.KeyCode.I;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.InternalServerErrorException;
+
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
-import restful.UserRESTClient;
 
 /**
  *
  * @author z332h
  */
 public class SignInController {
+
+    private static final Logger LOGGER = Logger.getLogger(SignInController.class.getName());
 
     @FXML
     private Label lblUserMax;
@@ -63,6 +63,7 @@ public class SignInController {
     private RESTfulFactory factory;
 
     public void initStage(Parent root) {
+        LOGGER.info("Sign in Window initiated");
         Scene scene = new Scene(root);
         stage = new Stage();
         stage.setScene(scene);
@@ -89,43 +90,62 @@ public class SignInController {
      *
      */
     public void signIn(ActionEvent action) {
-        User user = new User();
-        String username = txtUserName.getText();
-        String password = txtPasswd.getText();
+        LOGGER.info("Sign in request registered");
+        try {
+            User user = new User();
+            String username = txtUserName.getText();
+            String password = txtPasswd.getText();
 
-        password = Crypto.cifrar(password);
-        userManager = (UserManager) factory.getRESTClient(RESTfulClientType.USER);
-        user = userManager.login_XML(new GenericType<User>() {
-        }, username, password);
-        if (user.getPrivilege().equals(UserPrivilege.TEACHER)) {
-            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ExamSessionWindow.fxml"));
-            try {
-                Parent root = (Parent) loader.load();
-                ExamSessionController controller = loader.getController();
-                controller.setUser(user);
-                controller.initStage(root);
-            } catch (IOException ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+            password = Crypto.cifrar(password);
+            userManager = (UserManager) factory.getRESTClient(RESTfulClientType.USER);
+            user = userManager.login_XML(new GenericType<User>() {
+            }, username, password);
+            if (user.getPrivilege().equals(UserPrivilege.TEACHER)) {
+                stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ExamSessionWindow.fxml"));
+                try {
+                    Parent root = (Parent) loader.load();
+                    ExamSessionController controller = loader.getController();
+                    controller.setUser(user);
+                    controller.initStage(root);
+                } catch (IOException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+                    LOGGER.warning("Error while opening teacher window");
+                    LOGGER.warning(ex.getMessage());
+                    alert.show();
+                }
+            } else if (user.getPrivilege().equals(UserPrivilege.ADMIN)) {
+                stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+                try {
+                    Parent root = (Parent) loader.load();
+                    WindowStudentAdminController controller = loader.getController();
+                    //  controller.setUser(user);
+                    controller.initStage(root);
+                } catch (IOException ex) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+                    LOGGER.warning("Error while opening admin window");
+                    LOGGER.warning(ex.getMessage());
+                    alert.show();
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "You do not have permission to access the application", ButtonType.OK);
                 alert.show();
+                txtPasswd.setText("");
+                txtUserName.setText("");
             }
-        } else if (user.getPrivilege().equals(UserPrivilege.ADMIN)) {
-            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
-            try {
-                Parent root = (Parent) loader.load();
-                WindowStudentAdminController controller = loader.getController();
-                controller.initStage(root);
-            } catch (IOException ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
-                alert.show();
-            }
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "You do not have permission to access the application", ButtonType.OK);
+        } catch (ClientErrorException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Un expected error occured", ButtonType.OK);
             alert.show();
-            txtPasswd.setText("");
-            txtUserName.setText("");
+            LOGGER.warning("Error while signing in");
+            LOGGER.warning(e.getMessage());
+        } catch (InternalServerErrorException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "User name or password incorrect", ButtonType.OK);
+            alert.show();
+            LOGGER.warning("Error while signing in");
+            LOGGER.warning(e.getMessage());
         }
+
     }
 
     /**
@@ -135,8 +155,19 @@ public class SignInController {
      *
      */
     public void signUp(ActionEvent action) {
-
-    }
+     /*   stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUpWindow.fxml"));
+        try {
+            Parent root = (Parent) loader.load();
+            SignUpController controller = loader.getController();
+            controller.initStage(root);
+        } catch (IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
+            LOGGER.warning("Error while opening Sign up window");
+            LOGGER.warning(ex.getMessage());
+            alert.show();
+        }*/
+        }
 
     /**
      * This method observe the username and password texts to manage the state
@@ -178,7 +209,7 @@ public class SignInController {
     }
 
     public void handlePasswordRecoverAction(ActionEvent action) {
-
+        LOGGER.info("Password recover petition registered");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/PasswordRecoverWindow.fxml"));
         Stage passwordRecoverStage = new Stage();
         try {
@@ -189,6 +220,8 @@ public class SignInController {
         } catch (IOException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error while opening password recovery window");
+            LOGGER.warning(ex.getMessage());
         }
     }
 
