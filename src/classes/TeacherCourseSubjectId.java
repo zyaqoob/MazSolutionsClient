@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleLongProperty;
 
 /**
  *
- * @author Aitor Ruiz de Gauna,Miguel Sanchez,Zeeshan Yaqoob.
+ * @author Aitor Ruiz de Gauna
  */
 /**
  * Class that contains the id's of the CourseSubject.

@@ -171,6 +171,7 @@ public class AdminTeacherWindowController {
             }));
         } catch (ClientErrorException e) {
             Alert alert = new Alert(AlertType.ERROR, "Server Unavailable", ButtonType.OK);
+            alert.show();
         }
         List<String> filterValues = new ArrayList<>();
         filterValues.add("Full Name");
@@ -219,13 +220,14 @@ public class AdminTeacherWindowController {
         btnPrint.setOnAction((ActionEvent action) -> {
             try {
                 JasperReport report = JasperCompileManager.compileReport(AdminTeacherWindowController.class.getResourceAsStream("/report/AdminTeacherReport.jrxml"));
-                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource((Collection<Teacher>)tblTeachers.getItems());
+                JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource((Collection<Teacher>) tblTeachers.getItems());
                 Map<String, Object> parameters = new HashMap<>();
                 JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataSource);
                 JasperViewer jasperViewer = new JasperViewer(jasperPrint);
                 jasperViewer.setVisible(true);
             } catch (JRException ex) {
-                Logger.getLogger(AdminTeacherWindowController.class.getName()).log(Level.SEVERE, null, ex);
+                Alert alert=new Alert(AlertType.ERROR,"ERROR WHILE OPENING THE REPORT",ButtonType.OK);
+                alert.show();
             }
         });
         stage.show();
@@ -246,19 +248,24 @@ public class AdminTeacherWindowController {
     }
 
     private void delete(ActionEvent action) {
-        Teacher teacher = teacherManager.findTeachersByLogin(new GenericType<Teacher>() {
-        }, tblTeachers.getSelectionModel().getSelectedItem().getLogin());
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-        alert.setTitle("Confirmation");
-        alert.setContentText("You sure you want to erase this teacher?");
-        Optional<ButtonType> button = alert.showAndWait();
-        if (button.get() == ButtonType.OK) {
-            new TeacherRESTClient().remove(teacher.getLogin());
-            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
-            }));
-            tblTeachers.setItems(teachers);
-            tblTeachers.refresh();
+        try {
+            Teacher teacher = teacherManager.findTeachersByLogin(new GenericType<Teacher>() {
+            }, tblTeachers.getSelectionModel().getSelectedItem().getLogin());
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setHeaderText(null);
+            alert.setTitle("Confirmation");
+            alert.setContentText("You sure you want to erase this teacher?");
+            Optional<ButtonType> button = alert.showAndWait();
+            if (button.get() == ButtonType.OK) {
+                new TeacherRESTClient().remove(teacher.getLogin());
+                teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+                }));
+                tblTeachers.setItems(teachers);
+                tblTeachers.refresh();
+            }
+        } catch (InternalServerErrorException e) {
+            Alert alert = new Alert(AlertType.ERROR, "Error while deleting", ButtonType.OK);
+            alert.show();
         }
     }
 
@@ -359,15 +366,11 @@ public class AdminTeacherWindowController {
             ivTick.setVisible(false);
             ivX.setVisible(false);
             tblTeachers.refresh();
-        } catch (InternalServerErrorException | NotAuthorizedException e) {
+        } catch (WebApplicationException e) {
             Alert alert;
-            if (e instanceof NotAuthorizedException) {
-                alert = new Alert(Alert.AlertType.ERROR, "Exisiting teacher", ButtonType.OK);
-                alert.show();
-            } else {
-                alert = new Alert(Alert.AlertType.ERROR, "Missing Data", ButtonType.OK);
-                alert.show();
-            }
+            alert = new Alert(Alert.AlertType.ERROR, "Unexpected error ocurred while creation\n"
+                    + "Username/Email alredy in use or Missing Data", ButtonType.OK);
+            alert.show();
         }
     }
 
@@ -410,6 +413,10 @@ public class AdminTeacherWindowController {
                         } catch (InternalServerErrorException e) {
                             Alert alert = new Alert(AlertType.ERROR, "Login is already registered");
                             alert.show();
+                            teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+                            }));
+                            tblTeachers.setItems(teachers);
+                            tblTeachers.refresh();
                         }
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcEmail);
@@ -432,6 +439,10 @@ public class AdminTeacherWindowController {
                             } catch (InternalServerErrorException e) {
                                 Alert alert = new Alert(AlertType.ERROR, "Email is already registered");
                                 alert.show();
+                                teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
+                                }));
+                                tblTeachers.setItems(teachers);
+                                tblTeachers.refresh();
                             }
                         }
                         tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcTelephone);

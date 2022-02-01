@@ -26,7 +26,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import javafx.stage.Stage;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -54,6 +53,11 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
     private TextField tfFilter;
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private ChoiceBox chBox;
+    private String limitCharacter = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+            + "";
 
     @BeforeClass
     public static void setUpClass() throws TimeoutException {
@@ -94,11 +98,20 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
 
     @Test
     public void testC_FilterSearch() {
+        int count;
         tblTeachers = lookup("#tblTeachers").query();
         tfFilter = lookup("#tfFilter").query();
+        clickOn(tfFilter);
+        write(limitCharacter);
+        verifyThat("Maximun character limit arrived", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        doubleClickOn(tfFilter);
+        eraseText(1);
         tfFilter.setText("Lorea Mendieta Lastia");
         clickOn("#ivSearch");
-        assertEquals("Not filtered by name correctly", 1, tblTeachers.getItems().size());
+        count = (int) tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getFullName().equalsIgnoreCase(tfFilter.getText())).count();
+        assertEquals("Not filtered by name correctly", count, tblTeachers.getItems().size());
         assertTrue("The fullname value does not match with the one of the filter", tblTeachers.getItems().stream().
                 filter(teacher -> teacher.getFullName().equalsIgnoreCase(tfFilter.getText())).count() > 0);
         resetTableValues();
@@ -107,7 +120,9 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         tfFilter.setText("2dam");
         clickOn("#ivSearch");
-        assertEquals("Not filtered by course correctly", 1, tblTeachers.getItems().size());
+        count = (int) tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getTeacherCourse().getName().equalsIgnoreCase(tfFilter.getText())).count();
+        assertEquals("Not filtered by course correctly", count, tblTeachers.getItems().size());
         assertTrue("The course value does not match with the one of the filter", tblTeachers.getItems().stream().
                 filter(teacher -> teacher.getTeacherCourse().getName().equalsIgnoreCase(tfFilter.getText())).count() > 0);
         resetTableValues();
@@ -117,7 +132,9 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         tfFilter.setText("lmendiet");
         clickOn("#ivSearch");
-        assertEquals("Not filtered by username correctly", 1, tblTeachers.getItems().size());
+        count = (int) tblTeachers.getItems().stream().
+                filter(teacher -> teacher.getLogin().equalsIgnoreCase(tfFilter.getText())).count();
+        assertEquals("Not filtered by username correctly", count, tblTeachers.getItems().size());
         assertTrue("The username value does not match with the one of the filter", tblTeachers.getItems().stream().
                 filter(teacher -> teacher.getLogin().equalsIgnoreCase(tfFilter.getText())).count() > 0);
         resetTableValues();
@@ -128,7 +145,9 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         tfFilter.setText("1980-03-07");
         clickOn("#ivSearch");
-        assertEquals("Not filtered by birthdate correctly", 1, tblTeachers.getItems().size());
+        count = (int) tblTeachers.getItems().stream().
+                filter(teacher -> dateFormatter.format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).count();
+        assertEquals("Not filtered by birthdate correctly", count, tblTeachers.getItems().size());
         assertTrue("The birth date value does not match with the one of the filter", tblTeachers.getItems().stream().
                 filter(teacher -> dateFormatter.format(teacher.getBirthDate()).equalsIgnoreCase(tfFilter.getText())).count() > 0);
         resetTableValues();
@@ -139,10 +158,12 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.DOWN);
         type(KeyCode.ENTER);
         tfFilter.setText("2500");
+        count = (int) tblTeachers.getItems().stream().filter(teacher
+                -> Objects.equals(teacher.getSalary(), Float.valueOf(tfFilter.getText()))).count();
         assertTrue("The salary value does not match with the one of the filter", tblTeachers.getItems().stream().filter(teacher
                 -> Objects.equals(teacher.getSalary(), Float.valueOf(tfFilter.getText()))).count() > 0);
         clickOn("#ivSearch");
-        assertEquals("Not filtered by salary correctly", 2, tblTeachers.getItems().size());
+        assertEquals("Not filtered by salary correctly", count, tblTeachers.getItems().size());
     }
 
     @Test
@@ -196,7 +217,47 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
     }
 
     @Test
-    public void testE_ModificationOfTheCreatedTeacher() {
+    public void testE_DuplicatedTeacherCreation() {
+        tblTeachers = lookup("#tblTeachers").query();
+        int row = tblTeachers.getItems().size();
+        clickOn("#btnCreate");
+        assertEquals("Row not added on creation!", row + 1, tblTeachers.getItems().size());
+        // tblTeachers.getSelectionModel().select(row + 1, tbcFullName);
+        verifyThat("#btnDelete", isDisabled());
+        verifyThat("#ivTick", isVisible());
+        verifyThat("#ivX", isVisible());
+        write("Federico Fernandez");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("ffernandez");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("fedefer@gmail.com");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("676956879");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.TAB);
+        write("3/3/1986");
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        type(KeyCode.DOWN);
+        type(KeyCode.ENTER);
+        type(KeyCode.ENTER);
+        write("1000");
+        type(KeyCode.ENTER);
+        clickOn("#ivTick");
+        verifyThat("Unexpected error ocurred while creation\n"
+                + "Username/Email alredy in use or Missing Data", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        clickOn("#ivX");
+        assertEquals("Creation cancel didn't worked", row, tblTeachers.getItems().size());
+    }
+
+    @Test
+    public void testF_ModificationOfTheCreatedTeacher() {
         tblTeachers = lookup("#tblTeachers").query();
         doubleClickOn("Federico Fernandez");
         eraseText(20);
@@ -204,8 +265,22 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         type(KeyCode.ENTER);
         doubleClickOn("ffernandez");
         eraseText(20);
+        write("lmendiet");
+        type(KeyCode.ENTER);
+        verifyThat("Login is already registered", NodeMatchers.isVisible());
+        clickOn("Aceptar");
+        doubleClickOn("ffernandez");
+        eraseText(20);
         write("fgarcia");
         type(KeyCode.ENTER);
+        doubleClickOn("fedefer@gmail.com");
+        doubleClickOn("fedefer@gmail.com");
+        clickOn("fedefer@gmail.com");
+        eraseText(1);
+        write("javi.martin@tartanga.eus");
+        type(KeyCode.ENTER);
+        verifyThat("Email is already registered", NodeMatchers.isVisible());
+        clickOn("Aceptar");
         doubleClickOn("fedefer@gmail.com");
         doubleClickOn("fedefer@gmail.com");
         clickOn("fedefer@gmail.com");
@@ -248,7 +323,7 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
 
     @Test
     //@Ignore
-    public void testF_DeleteTheCreatedTeacher() {
+    public void testG_DeleteTheCreatedTeacher() {
         tblTeachers = lookup("#tblTeachers").query();
         int row = tblTeachers.getItems().size();
         clickOn("Federico Garcia");
@@ -258,18 +333,21 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         clickOn("#btnDelete");
         verifyThat("You sure you want to erase this teacher?", NodeMatchers.isVisible());
         clickOn("Aceptar");
-        assertEquals("Teacher not deleted!", row - 1,tblTeachers.getItems().size());
+        assertEquals("Teacher not deleted!", row - 1, tblTeachers.getItems().size());
         assertTrue("Teacher is still in the table", tblTeachers.getItems().stream().
                 filter(teacher -> teacher.getFullName().equalsIgnoreCase("Federico Garcia")).count() == 0);
         verifyThat("#btnDelete", isDisabled());
     }
+
     @Test
-    public void testG_CreateEmptyTeacher(){
+    public void testH_CreateEmptyTeacher() {
         clickOn("#btnCreate");
         clickOn("#ivTick");
-        verifyThat("Missing Data",NodeMatchers.isVisible());
+        verifyThat("Unexpected error ocurred while creation\n"
+                + "Username/Email alredy in use or Missing Data", NodeMatchers.isVisible());
         clickOn("Aceptar");
     }
+
     public void resetTableValues() {
         clickOn("#chBox");
         clickOn("All");
