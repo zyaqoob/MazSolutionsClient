@@ -375,4 +375,26 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         clickOn("Aceptar");
     }
     
+    @Test
+    //@Ignore
+    public void testJ_cancelOnDeleteUser() {
+        tblStudents=lookup ("#tblStudents").queryTableView();
+        btnDelete=lookup ("#btnDelete").query();
+        //get row count
+        int rowCount=tblStudents.getItems().size();
+        assertNotEquals("Table has no data: Cannot test.",
+                        rowCount,0);
+        //look for 1st row in table view and click it
+        Node row=lookup(".table-row-cell").nth(0).query();
+        assertNotNull("Row is null: table has not that row. ",row);
+        clickOn(row);
+        verifyThat(btnDelete, isEnabled());
+        clickOn(btnDelete);
+        verifyThat("Are you sure that you want to erase this student?", NodeMatchers.isVisible());    
+        clickOn("Cancelar");
+        assertEquals("A row has been deleted!!!",rowCount,tblStudents.getItems().size());
+    }
+    
+    
+    
 }

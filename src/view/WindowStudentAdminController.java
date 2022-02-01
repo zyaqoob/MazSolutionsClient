@@ -152,8 +152,8 @@ public class WindowStudentAdminController {
 
         } catch (Exception e) {
 
-            //Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable" + e.getMessage(), ButtonType.OK);
-            //alert.show();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable." + e.getMessage(), ButtonType.OK);
+            alert.show();
         }
 
         stage = new Stage();
@@ -562,9 +562,9 @@ public class WindowStudentAdminController {
     public void setUser(User user) {
         this.user = user;
     }
-    
+
     public void printReport(MouseEvent event) {
-        
+
         try {
             JasperReport report = JasperCompileManager.compileReport(getClass().getResourceAsStream("/view/AdminStudentReport.jrxml"));
             JRBeanCollectionDataSource dataItems = new JRBeanCollectionDataSource((Collection<Student>) this.tblStudents.getItems());
@@ -574,8 +574,9 @@ public class WindowStudentAdminController {
             jasperViewer.setVisible(true);
         } catch (JRException ex) {
             Logger.getLogger(WindowStudentAdminController.class.getName()).log(Level.SEVERE, null, ex);
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error while loading the Report.", ButtonType.OK);
         }
-        
+
     }
 
 }
