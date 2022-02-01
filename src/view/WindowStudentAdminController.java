@@ -52,6 +52,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.GenericType;
@@ -67,206 +68,310 @@ import net.sf.jasperreports.view.JasperViewer;
 import restful.StudentRESTClient;
 
 /**
+ * Controller class for students management view . It contains event handlers
+ * and initialization code for the view defined in WindowStudentAdmin.fmxl file.
  *
  * @author Miguel Sanchez
  */
 public class WindowStudentAdminController {
 
+    /**
+     * Label to go to Students stage.
+     */
     @FXML
     private Label lblStudents;
-
+    /**
+     * Label to go to Teachers stage.
+     */
     @FXML
     private Label lblTeachers;
-
+    /**
+     * Label to go to Subjects stage.
+     */
     @FXML
     private Label lblSubjects;
-
+    /**
+     * Label to go to Courses stage.
+     */
     @FXML
     private Label lblCourses;
-
+    /**
+     * Label to go to TeacherCourses stage.
+     */
     @FXML
     private Label lblTeacherCourses;
-
+    /**
+     * Create Student data button.
+     */
     @FXML
     private Button btnCreate;
-
+    /**
+     * Delete Student data button.
+     */
     @FXML
     private Button btnDelete;
-
+    /**
+     * Print Student button to see the report.
+     */
     @FXML
     private Button btnPrint;
-
+    /**
+     * Apply filter image view.
+     */
     @FXML
     private ImageView ivSearch;
-
+    /**
+     * Press this image view to accept the Students creation.
+     */
     @FXML
     private ImageView ivTick;
-
+    /**
+     * Press this image view to cancel the Students creation.
+     */
     @FXML
     private ImageView ivX;
-
+    /**
+     * Students data table view.
+     */
     @FXML
     private TableView<Student> tblStudents;
-
+    /**
+     * Students full name data table column.
+     */
     @FXML
     private TableColumn<Student, String> tbcFullName;
-
+    /**
+     * Students course data table column.
+     */
     @FXML
     private TableColumn<Student, String> tbcCourse;
-
+    /**
+     * Students year data table column.
+     */
     @FXML
     private TableColumn<Student, Date> tbcYear;
-
+    /**
+     * Students email data table column.
+     */
     @FXML
     private TableColumn<Student, String> tbcEmail;
-
+    /**
+     * Students telephone data table column.
+     */
     @FXML
     private TableColumn<Student, String> tbcTelephone;
-
+    /**
+     * Students birth date data table column.
+     */
     @FXML
     private TableColumn<Student, Date> tbcBirthDate;
-
+    /**
+     * Students Login data table column.
+     */
     @FXML
     private TableColumn<Student, String> tbcLogin;
-
+    /**
+     * Filter choice box.
+     */
     @FXML
     private ChoiceBox chbFilterStudents;
-
+    /**
+     * Filter text field.
+     */
     @FXML
     private TextField tfSearch;
-
-    private final StudentManager restStudents = (StudentManager) new RESTfulFactory().getRESTClient(RESTfulClientType.STUDENT);
+    /**
+     * Students's data model.
+     */
     private ObservableList<Student> studentsData;
-    private final CourseManager restCourses = (CourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.COURSE);
+    /**
+     * Student manager to manage students.
+     */
+    private final StudentManager restStudents = (StudentManager) new RESTfulFactory().getRESTClient(RESTfulClientType.STUDENT);
+    /**
+     * Courses's data model.
+     */
     private ObservableList<Course> coursesData;
+    /**
+     * Course manager to manage students.
+     */
+    private final CourseManager restCourses = (CourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.COURSE);
+    /**
+     * User to set or get from other stages.
+     */
     private User user;
+    /**
+     * To work with stage methods.
+     */
     private Stage stage;
 
+    /**
+     * Method for initializing WindowStudentAdmin Stage.
+     *
+     * @param root The Parent object representing root node of view graph.
+     */
     public void initStage(Parent root) {
-
         try {
+            // studentsData inizialization.
             studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
             }));
+            // coursesData inizialization.
             coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {
             }));
-
-        } catch (Exception e) {
-
+            stage = new Stage();
+            Scene scene = new Scene(root);
+            //Set stage properties
+            stage.setScene(scene);
+            stage.setResizable(false);
+            // Table and controls inizialization.
+            tblStudents.setEditable(true);
+            ivTick.setVisible(false);
+            ivX.setVisible(false);
+            btnDelete.setDisable(true);
+            //Set factories for cell values in students table columns.
+            tbcFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFullName()));
+            tbcCourse.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCourse().getName()));
+            tbcYear.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getYear()));
+            tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
+            tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
+            tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
+            tbcLogin.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getLogin()));
+            //Set filter options combo data model.
+            ObservableList<String> name;
+            List<String> stringnames = new ArrayList<>();
+            stringnames.add("Reset");
+            stringnames.add("Student full name");
+            stringnames.add("Student courses");
+            stringnames.add("Student year");
+            stringnames.add("Student email");
+            stringnames.add("Student telephone");
+            stringnames.add("Student birth date");
+            name = FXCollections.observableArrayList(stringnames);
+            chbFilterStudents.setItems(name);
+            chbFilterStudents.getSelectionModel().selectFirst();
+            //Set cell factories.
+            tableCellInit();
+            //Set table model.
+            tblStudents.setItems(studentsData);
+            //Add property change listeners for controls
+            btnCreate.setOnAction(this::create);
+            btnDelete.setOnAction(this::delete);
+            ivTick.setOnMouseClicked(this::accept);
+            ivSearch.setOnMouseClicked(this::filterBySelectedValue);
+            tfSearch.textProperty().addListener(this::textChanged);
+            ivX.setOnMouseClicked(this::cancel);
+            tblStudents.getSelectionModel().selectedItemProperty().addListener(this::tableSelectionChanged);
+            lblTeacherCourses.setOnMouseClicked(this::changeToTeacherWindow);
+            btnPrint.setOnMouseClicked(this::printReport);
+            //Show window.
+            stage.show();
+        } catch (ClientErrorException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable." + e.getMessage(), ButtonType.OK);
             alert.show();
         }
-
-        stage = new Stage();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-
-        tblStudents.setEditable(true);
-        ivTick.setVisible(false);
-        ivX.setVisible(false);
-        btnDelete.setDisable(true);
-        tbcFullName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFullName()));
-        tbcCourse.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCourse().getName()));
-        tbcYear.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getYear()));
-        tbcEmail.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEmail()));
-        tbcTelephone.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTelephone()));
-        tbcBirthDate.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getBirthDate()));
-        tbcLogin.setCellValueFactory(cellData -> new SimpleObjectProperty(cellData.getValue().getLogin()));
-
-        ObservableList<String> name;
-        List<String> stringnames = new ArrayList<>();
-        stringnames.add("Reset");
-        stringnames.add("Student full name");
-        stringnames.add("Student courses");
-        stringnames.add("Student year");
-        stringnames.add("Student email");
-        stringnames.add("Student telephone");
-        stringnames.add("Student birth date");
-        name = FXCollections.observableArrayList(stringnames);
-        chbFilterStudents.setItems(name);
-        chbFilterStudents.getSelectionModel().selectFirst();
-
-        tableCellInit();
-
-        tblStudents.setItems(studentsData);
-        btnCreate.setOnAction(this::create);
-        btnDelete.setOnAction(this::delete);
-        ivTick.setOnMouseClicked(this::accept);
-        ivSearch.setOnMouseClicked(this::filterBySelectedValue);
-        tfSearch.textProperty().addListener(this::textChanged);
-        ivX.setOnMouseClicked(this::cancel);
-        tblStudents.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
-        lblTeacherCourses.setOnMouseClicked(this::changeToTeacherWindow);
-        btnPrint.setOnMouseClicked(this::printReport);
-        stage.show();
-
     }
 
+    /**
+     * Action event handler for create button. It creates a new student, set the
+     * focus into the table and update the status of some buttons.
+     *
+     * @param action The ActionEvent object for the event.
+     */
     public void create(ActionEvent action) {
+        //LOGGER.info("Creating user...");
+        //Set ivSearch invisible.
         ivSearch.setVisible(false);
+        //Create an student with a course.
         Student student = new Student();
         Course course = new Course();
         student.setCourse(course);
+        //Add the student to the students data model.
         studentsData.add(student);
+        //Set the focus in the correct cell.
         tblStudents.getSelectionModel().select(studentsData.size() - 1);
         tblStudents.getFocusModel().focus(studentsData.size() - 1, tbcFullName);
         tblStudents.layout();
         tblStudents.edit(studentsData.size() - 1, tbcFullName);
+        //Set new values for buttons.
         ivTick.setVisible(true);
         ivX.setVisible(true);
         btnCreate.setDisable(true);
     }
 
+    /**
+     * Action event handler for delete button. It asks user for confirmation on
+     * delete, sends delete message to the business logic tier and updates user
+     * table view.
+     *
+     * @param action The ActionEvent object for the event.
+     */
     public void delete(ActionEvent action) {
 
-        Alert deleteConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        deleteConfirmationAlert.setHeaderText(null);
-        deleteConfirmationAlert.setTitle("Confirmation");
-        deleteConfirmationAlert.setContentText("Are you sure that you want to erase this student?");
-        Optional<ButtonType> button = deleteConfirmationAlert.showAndWait();
-        if (button.get() == ButtonType.OK) {
-            try {
+        try {
+            //LOGGER.info("Deleting user...");
+            //Ask user for confirmation on delete.
+            Alert deleteConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            deleteConfirmationAlert.setHeaderText(null);
+            deleteConfirmationAlert.setTitle("Confirmation");
+            deleteConfirmationAlert.setContentText("Are you sure that you want to erase this student?");
+            Optional<ButtonType> button = deleteConfirmationAlert.showAndWait();
+            if (button.get() == ButtonType.OK) {
+                //delete user from server side.
                 restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+                //Updates studentsData value and removes selected item from table.
                 studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
                 }));
                 tblStudents.setItems(studentsData);
                 tblStudents.refresh();
-            } catch (InternalServerErrorException e) {
-
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error ocurred while deleting the student.", ButtonType.OK);
-                alert.show();
-                ivSearch.setVisible(true);
-                ivX.setVisible(false);
-                ivTick.setVisible(false);
-                studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
-                }));
-                tblStudents.setItems(studentsData);
-                tblStudents.refresh();
-                btnCreate.setDisable(false);
-
             }
+        } catch (InternalServerErrorException e) {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error ocurred while deleting the student.", ButtonType.OK);
+            alert.show();
+            //Update the value of the buttons if the delete fails.
+            ivSearch.setVisible(true);
+            ivX.setVisible(false);
+            ivTick.setVisible(false);
+            studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
+            }));
+            tblStudents.setItems(studentsData);
+            tblStudents.refresh();
+            btnCreate.setDisable(false);
+
         }
 
     }
 
+    /**
+     * Action event handler for acept image view. It validates new user data,
+     * send it to the business logic tier and updates user table view with new
+     * user data.
+     *
+     * @param event The ActionEvent object for the event.
+     */
     private void accept(MouseEvent event) {
+        //Get the student from the table.
         Student student = tblStudents.getSelectionModel().getSelectedItem();
-
         if (student != null) {
             try {
+                //Set the rest of the student information.
                 student.setPrivilege(UserPrivilege.STUDENT);
                 student.setStatus(UserStatus.ENABLED);
+                //Find the course whit the name in the table and set it into the student.
                 student.setCourse(restCourses.findCourseByName(new GenericType<Course>() {
                 }, student.getCourse().getName()));
                 student.setPassword(Crypto.cifrar(generatePassword()));
+                //Send student data to business logic tier
                 restStudents.create(student);
+                //Update the image views status.
                 ivTick.setVisible(false);
                 ivX.setVisible(false);
-                //restStudents.remove(String.valueOf(tblStudents.getSelectionModel().getSelectedItem().getIdUser()));
+                //Update the table whith all the students.
                 studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
                 }));
                 tblStudents.setItems(studentsData);
                 tblStudents.refresh();
+                //Update the buttons status.
                 btnCreate.setDisable(false);
                 ivSearch.setVisible(true);
             } catch (WebApplicationException e) {
@@ -278,17 +383,33 @@ public class WindowStudentAdminController {
         }
     }
 
+    /**
+     * Action event handler for cancel image view. It cancel the create action.
+     *
+     * @param event The ActionEvent object for the event.
+     */
     private void cancel(MouseEvent event) {
+        //Restart the students table and data values
         studentsData = FXCollections.observableArrayList(restStudents.findAllStudents(new GenericType<List<Student>>() {
         }));
         tblStudents.setItems(studentsData);
+        //Update the buttons status.
         ivTick.setVisible(false);
         ivX.setVisible(false);
         btnCreate.setDisable(false);
         ivSearch.setVisible(true);
     }
 
-    public void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
+    /**
+     * This method observes the table selection changes. It enables or disables
+     * buttons depending on selection state of the table to prevent posible
+     * erros.
+     *
+     * @param observable, object that has listener, being observed.
+     * @param oldValue indicates the old value(could be default).
+     * @param newValue indicates the newly introduced value.
+     */
+    public void tableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
 
         if (newValue == null || btnCreate.isDisabled()) {
             btnDelete.setDisable(true);
@@ -298,6 +419,9 @@ public class WindowStudentAdminController {
 
     }
 
+    /**
+     * This method set the cell factories and manages the table edition.
+     */
     public void tableCellInit() {
         //Table column FullName editable with textField
         tbcFullName.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
@@ -328,12 +452,10 @@ public class WindowStudentAdminController {
             public void startEdit() {
                 super.startEdit();
                 if (isEditing() && getGraphic() instanceof ChoiceBox) {
-                    // needs focus for proper working of esc/enter 
                     getGraphic().requestFocus();
                     ((ChoiceBox<String>) getGraphic()).show();
                 }
             }
-
         });
         tbcCourse.setOnEditCommit(
                 (CellEditEvent<Student, String> s) -> {
@@ -471,6 +593,11 @@ public class WindowStudentAdminController {
                 });
     }
 
+    /**
+     * This method generates a random password.
+     *
+     * @return
+     */
     public static String generatePassword() {
         String password;
         String charLow[] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
@@ -480,9 +607,18 @@ public class WindowStudentAdminController {
         return password;
     }
 
+    /**
+     * This method get the value of the choice box chbFilterStudents and the
+     * text field tfSearch to apply the filter.
+     *
+     * @param event
+     */
     public void filterBySelectedValue(MouseEvent event) {
+        //Apply a formatter to convert the posibles Dates in the text field.
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        //Get the students in the table
         ObservableList<Student> students = tblStudents.getItems();
+        //Analizes the value in the choice box and apply the filter.
         if (chbFilterStudents.getSelectionModel().getSelectedItem().equals("Student full name")) {
             studentsData = FXCollections.observableArrayList(students.stream()
                     .filter(s -> s.getFullName().equalsIgnoreCase(tfSearch.getText()))
@@ -527,21 +663,30 @@ public class WindowStudentAdminController {
 
     }
 
-    //this method observes the text changes
+    /**
+     * Method to check the character limit of the search text field.
+     *
+     * @param observable, object that has listener, being observed.
+     * @param oldValue indicates the old value(could be default).
+     * @param newValue indicates the newly introduced value.
+     */
     public void textChanged(ObservableValue observable, Object oldValue, Object newValue) {
 
         if (tfSearch.getText().length() > 255) {
-
             Alert alert = new Alert(Alert.AlertType.ERROR, "You have entered a value that is too large for this search.", ButtonType.OK);
             alert.show();
-            //tfSearch.setText("");
-
         }
 
     }
 
+    /**
+     * Method that close the current stage, and open a Teacher window.
+     *
+     * @param event The ActionEvent object for the event.
+     */
     public void changeToTeacherWindow(MouseEvent event) {
 
+        //LOGGER.info("Changing to teacher window.");
         stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
         try {
@@ -555,16 +700,33 @@ public class WindowStudentAdminController {
 
     }
 
+    /**
+     * This method return a User.
+     *
+     * @return
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * This method set a User.
+     *
+     * @param user
+     */
     public void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Action event handler for print button. It shows a JFrame containing a
+     * report. This JFrame allows to print the report.
+     *
+     * @param event The ActionEvent object for the event.
+     */
     public void printReport(MouseEvent event) {
 
+        //LOGGER.info("Beginning printing action...");
         try {
             JasperReport report = JasperCompileManager.compileReport(getClass().getResourceAsStream("/view/AdminStudentReport.jrxml"));
             JRBeanCollectionDataSource dataItems = new JRBeanCollectionDataSource((Collection<Student>) this.tblStudents.getItems());
