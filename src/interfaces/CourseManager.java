@@ -24,6 +24,7 @@ public interface CourseManager {
     public <T> T findAll(Class<T> responseType) throws ClientErrorException;
     public void remove(String id) throws ClientErrorException;
     public <T> T findCoursesBySubject(Class<T> responseType, String id) throws ClientErrorException;
+    public <T> T findCourseByName(GenericType<T> responseType, String name) throws ClientErrorException;
     public void close();
     
 }

@@ -5,6 +5,7 @@
  */
 package restful;
 
+import classes.Student;
 import interfaces.StudentManager;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
@@ -44,7 +45,6 @@ public class StudentRESTClient implements StudentManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-
     public <T> T findStudentByEmail(GenericType<T> responseType, String email) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{email}));
@@ -60,7 +60,8 @@ public class StudentRESTClient implements StudentManager {
 
     @Override
     public void edit(Object requestEntity, String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<Student>() {
+        });
     }
 
     @Override
@@ -86,7 +87,9 @@ public class StudentRESTClient implements StudentManager {
 
     @Override
     public void create(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML)
+                .post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<Student>() {
+                });
     }
 
     @Override
@@ -103,7 +106,8 @@ public class StudentRESTClient implements StudentManager {
 
     @Override
     public void remove(String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete(new GenericType<Student>() {
+        });
     }
 
     public void close() {

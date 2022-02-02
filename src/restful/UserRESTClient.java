@@ -5,6 +5,7 @@
  */
 package restful;
 
+import classes.User;
 import interfaces.UserManager;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
@@ -84,7 +85,9 @@ public class UserRESTClient implements UserManager {
 
     @Override
     public void create_XML(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML)
+                .post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<User>() {
+                });
     }
 
     @Override
