@@ -5,6 +5,7 @@
  */
 package view;
 
+import classes.UserPrivilege;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -21,14 +22,17 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import static view.AdminTeacherWindowController.stage;
+import static view.AdminTeacherWindowController.stageTeacher;
+import static view.ExamSessionController.stageExam;
+import static view.SignInController.user;
+import static view.WindowStudentAdminController.stageStudent;
 
 /**
  * FXML Controller class
  *
  * @author Aitor
  */
-public class MenuController extends MenuData implements Initializable{
+public class MenuController implements Initializable{
 
     /**
      * Initializes the controller class.
@@ -52,7 +56,7 @@ public class MenuController extends MenuData implements Initializable{
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ChangePasswordWindow.fxml"));
                 root = (Parent) loader.load();
                 ChangePasswordWindowController controller = loader.getController();
-                controller.setUser(getUser());
+                controller.setUser(user);
                 controller.initStage(root);
             } catch (IOException ex) {
                 Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
@@ -63,10 +67,15 @@ public class MenuController extends MenuData implements Initializable{
             alert.show();
         });
         menuLogOut.setOnAction((ActionEvent a) -> {
+            if(user.getPrivilege().equals(UserPrivilege.ADMIN)){
+                stageStudent.close();
+                stageTeacher.close();
+            }else if(user.getPrivilege().equals(UserPrivilege.TEACHER)){
+                stageExam.close();
+            }
             Parent root;
             FXMLLoader loader;
             try {            
-                stage.close();
                 loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
                 root = (Parent) loader.load();
                 SignInController signInController = loader.getController();

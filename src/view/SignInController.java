@@ -61,6 +61,8 @@ public class SignInController {
     private UserManager userManager;
 
     private RESTfulFactory factory;
+    
+    public static  User user;
 
     public void initStage(Parent root) {
         LOGGER.info("Sign in Window initiated");
@@ -92,7 +94,6 @@ public class SignInController {
     public void signIn(ActionEvent action) {
         LOGGER.info("Sign in request registered");
         try {
-            User user = new User();
             String username = txtUserName.getText();
             String password = txtPasswd.getText();
 
@@ -120,7 +121,6 @@ public class SignInController {
                 try {
                     Parent root = (Parent) loader.load();
                     WindowStudentAdminController controller = loader.getController();
-                    controller.setUser(user);
                     controller.initStage(root);
                 } catch (IOException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);
