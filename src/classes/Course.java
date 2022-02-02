@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Entity representing Course of the application. It contains the following fields:
  * name, dateStart, dateEnd, subjects, students.
- * @author Miguel Angel Sanchez
+ * @author Aitor Ruiz de Gauna
  */
 
 @XmlRootElement

@@ -19,7 +19,7 @@ public interface UserManager {
 
     public void edit_JSON(Object requestEntity, String id) throws ClientErrorException ;
 
-    public <T> T find_XML(Class<T> responseType, String id) throws ClientErrorException;
+    public <T> T find_XML(GenericType<T> responseType, String id) throws ClientErrorException;
 
     public <T> T find_JSON(Class<T> responseType, String id) throws ClientErrorException ;
 
@@ -39,5 +39,5 @@ public interface UserManager {
 
     public void remove(String id) throws ClientErrorException ;
 
-    public <T> T findUserByPassword_XML(Class<T> responseType, String login, String password, String newPassword) throws ClientErrorException ;
+    public <T> T findUserByPassword_XML(GenericType<T> responseType, String login, String password, String newPassword) throws ClientErrorException ;
 }

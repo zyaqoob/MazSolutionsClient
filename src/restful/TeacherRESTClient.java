@@ -5,12 +5,15 @@
  */
 package restful;
 
+import classes.Teacher;
 import interfaces.TeacherManager;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
 
 /**
  * Jersey REST client generated for REST resource:TeacherFacadeREST
@@ -46,7 +49,8 @@ public class TeacherRESTClient implements TeacherManager {
 
     @Override
     public void edit(Object requestEntity, String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<Teacher>() {
+        });
     }
 
     @Override
@@ -72,7 +76,9 @@ public class TeacherRESTClient implements TeacherManager {
 
     @Override
     public void create(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML)
+                .post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<Teacher>() {
+                });
     }
 
     @Override
@@ -96,7 +102,8 @@ public class TeacherRESTClient implements TeacherManager {
 
     @Override
     public void remove(String login) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{login})).request().delete();
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{login})).request().delete(new GenericType<Teacher>() {
+        });
     }
 
     @Override

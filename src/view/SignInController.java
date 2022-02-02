@@ -110,10 +110,10 @@ public class SignInController {
             }
         } else if (user.getPrivilege().equals(UserPrivilege.ADMIN)) {
             stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowStudentAdmin.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
             try {
                 Parent root = (Parent) loader.load();
-                WindowStudentAdminController controller = loader.getController();
+                AdminTeacherWindowController controller = loader.getController();
                 controller.initStage(root);
             } catch (IOException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);

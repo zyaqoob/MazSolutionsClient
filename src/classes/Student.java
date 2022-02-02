@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * Entity representing Student of the application. It contains the following
  * fields: year, sessions and courser.
  *
- * @author Miguel Ángel Sánchez
+ * @author Aitor Ruiz de Gauna
  */
 @XmlRootElement
 public class Student extends User implements Serializable {

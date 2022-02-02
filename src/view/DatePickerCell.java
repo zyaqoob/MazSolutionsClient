@@ -8,6 +8,7 @@ package view;
 import classes.Teacher;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
@@ -19,6 +20,7 @@ import javafx.scene.control.TableCell;
 public class DatePickerCell extends TableCell<Teacher, Date> {
 
     private DatePicker datePicker;
+    private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");  
 
     DatePickerCell() {
     }
@@ -39,8 +41,7 @@ public class DatePickerCell extends TableCell<Teacher, Date> {
 
     @Override
     public void updateItem(Date item, boolean empty) {
-        super.updateItem(item, empty);
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");     
+        super.updateItem(item, empty);  
         
         if (empty) {
             setText(null);

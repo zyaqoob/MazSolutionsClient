@@ -11,9 +11,9 @@
         <menus>
           <Menu mnemonicParsing="false" text="Menu">
             <items>
-              <MenuItem mnemonicParsing="false" text="Personal info" />
-                  <MenuItem mnemonicParsing="false" text="Change Password" />
-                  <MenuItem mnemonicParsing="false" text="Log Out" />
+              <MenuItem fx:id="menuPersonalInfo" mnemonicParsing="false" text="Personal info" />
+                  <MenuItem fx:id="menuChangePassword" mnemonicParsing="false" text="Change Password" />
+                  <MenuItem fx:id="menuLogOut" mnemonicParsing="false" text="Log Out" />
             </items>
           </Menu>
         </menus>
