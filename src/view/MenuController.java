@@ -66,7 +66,6 @@ public class MenuController extends MenuData implements Initializable{
             Parent root;
             FXMLLoader loader;
             try {            
-                
                 stage.close();
                 loader = new FXMLLoader(getClass().getResource("/view/SignInWindow.fxml"));
                 root = (Parent) loader.load();

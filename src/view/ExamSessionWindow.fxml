@@ -17,106 +17,88 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="examSessionPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="587.0" prefWidth="924.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.ExamSessionController">
-   <left>
-      <VBox prefHeight="190.0" prefWidth="100.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
-         <children>
-            <Label fx:id="lblCourse" alignment="CENTER" contentDisplay="CENTER" prefHeight="69.0" prefWidth="101.0" text="Courses" textFill="#d0c1c1">
-               <font>
-                  <Font name="System Bold" size="9.0" />
-               </font>
-            </Label>
-            <Label fx:id="lblExam" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="Exam" textFill="#d0c1c1">
-               <font>
-                  <Font name="System Bold" size="9.0" />
-               </font>
-            </Label>
-            <Label fx:id="lblExamSession" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="Exam Sessions" textFill="#d0c1c1">
-               <font>
-                  <Font name="System Bold" size="10.0" />
-               </font>
-            </Label>
-         </children>
-      </VBox>
-   </left>
-   <center>
-      <Pane prefHeight="474.0" prefWidth="778.0" BorderPane.alignment="CENTER">
-         <children>
-            <TableView fx:id="tblExamSession" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
-               <columns>
-                  <TableColumn fx:id="tcSubject" prefWidth="101.99996948242188" text="Subject" />
-                  <TableColumn fx:id="tcExam" prefWidth="234.00001525878906" text="Exam" />
-                  <TableColumn fx:id="tcStudent" prefWidth="120.00003051757812" text="Student" />
-                  <TableColumn fx:id="tcDateStart" prefWidth="115.3333740234375" text="Date Start" />
-                  <TableColumn fx:id="tcDateEnd" prefWidth="113.33331298828125" text="Date End" />
-                  <TableColumn id="tcMark" fx:id="tcMark" prefWidth="89.3333740234375" text="Mark" />
-               </columns>
-            </TableView>
-            <Button fx:id="btnCreate" layoutX="29.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="CREATE">
-               <font>
-                  <Font name="Arial Bold" size="12.0" />
-               </font>
-            </Button>
-            <ChoiceBox fx:id="chBoxFilters" layoutX="110.0" layoutY="29.0" prefHeight="25.0" prefWidth="164.0" style="-fx-background-radius: 100;" />
-            <Label layoutX="31.0" layoutY="34.0" text="SEARCH BY" />
-            <TextField fx:id="txtFilters" layoutX="293.0" layoutY="30.0" />
-            <ImageView fx:id="ivSearch" fitHeight="27.0" fitWidth="29.0" layoutX="459.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@search.png" />
-               </image>
-            </ImageView>
-            <ImageView fx:id="ivTick" fitHeight="26.0" fitWidth="31.0" layoutX="730.0" layoutY="387.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@tick.png" />
-               </image>
-            </ImageView>
-            <ImageView fx:id="ivCross" fitHeight="30.0" fitWidth="35.0" layoutX="767.0" layoutY="387.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@x.png" />
-               </image>
-            </ImageView>
-            <Button fx:id="btnDelete" layoutX="121.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="DELETE">
-               <font>
-                  <Font name="Arial Bold" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="btnPrint" layoutX="753.0" layoutY="29.0" mnemonicParsing="false" text="PRINT" />
-         </children>
-      </Pane>
-   </center>
-   <top>
-      <Pane prefHeight="96.0" prefWidth="700.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
-         <children>
-            <Button layoutY="16.0" mnemonicParsing="false" prefHeight="79.0" prefWidth="174.0" style="-fx-background-color: #3F2B63;" text="Maz Solutions" textFill="#d0c1c1">
-               <font>
-                  <Font name="System Italic" size="21.0" />
-               </font>
-            </Button>
-            <MenuBar layoutY="-2.0" prefHeight="26.0" prefWidth="924.0">
-               <menus>
-                  <Menu mnemonicParsing="false" text="File">
-                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
-                     </items>
-                  </Menu>
-                  <Menu mnemonicParsing="false" text="Edit">
-                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
-                     </items>
-                  </Menu>
-                  <Menu mnemonicParsing="false" text="Help">
-                     <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
-                     </items>
-                  </Menu>
-               </menus>
-            </MenuBar>
-            <Button fx:id="btnRound" layoutX="867.0" layoutY="42.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="37.0" style="-fx-background-radius: 100; -fx-background-color: #d0c1c1;" text="A" />
-            <ImageView fitHeight="38.0" fitWidth="36.0" layoutX="811.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../Downloads/setting.png" />
-               </image>
-            </ImageView>
-         </children>
-      </Pane>
-   </top>
+    <left>
+        <VBox prefHeight="190.0" prefWidth="100.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
+            <children>
+                <Label fx:id="lblCourse" alignment="CENTER" contentDisplay="CENTER" prefHeight="69.0" prefWidth="101.0" text="Courses" textFill="#d0c1c1">
+                    <font>
+                        <Font name="System Bold" size="9.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblExam" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="Exam" textFill="#d0c1c1">
+                    <font>
+                        <Font name="System Bold" size="9.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lblExamSession" alignment="CENTER" contentDisplay="CENTER" prefHeight="57.0" prefWidth="99.0" text="Exam Sessions" textFill="#d0c1c1">
+                    <font>
+                        <Font name="System Bold" size="10.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <Pane prefHeight="474.0" prefWidth="778.0" BorderPane.alignment="CENTER">
+            <children>
+                <TableView fx:id="tblExamSession" layoutX="29.0" layoutY="65.0" prefHeight="303.0" prefWidth="770.0">
+                    <columns>
+                        <TableColumn fx:id="tcSubject" prefWidth="101.99996948242188" text="Subject" />
+                        <TableColumn fx:id="tcExam" prefWidth="234.00001525878906" text="Exam" />
+                        <TableColumn fx:id="tcStudent" prefWidth="120.00003051757812" text="Student" />
+                        <TableColumn fx:id="tcDateStart" prefWidth="115.3333740234375" text="Date Start" />
+                        <TableColumn fx:id="tcDateEnd" prefWidth="113.33331298828125" text="Date End" />
+                        <TableColumn id="tcMark" fx:id="tcMark" prefWidth="89.3333740234375" text="Mark" />
+                    </columns>
+                </TableView>
+                <Button fx:id="btnCreate" layoutX="29.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="CREATE">
+                    <font>
+                        <Font name="Arial Bold" size="12.0" />
+                    </font>
+                </Button>
+                <ChoiceBox fx:id="chBoxFilters" layoutX="110.0" layoutY="29.0" prefHeight="25.0" prefWidth="164.0" style="-fx-background-radius: 100;" />
+                <Label layoutX="31.0" layoutY="34.0" text="SEARCH BY" />
+                <TextField fx:id="txtFilters" layoutX="293.0" layoutY="30.0" />
+                <ImageView fx:id="ivSearch" fitHeight="27.0" fitWidth="29.0" layoutX="459.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@search.png" />
+                    </image>
+                </ImageView>
+                <ImageView fx:id="ivTick" fitHeight="26.0" fitWidth="31.0" layoutX="730.0" layoutY="387.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@tick.png" />
+                    </image>
+                </ImageView>
+                <ImageView fx:id="ivCross" fitHeight="30.0" fitWidth="35.0" layoutX="767.0" layoutY="387.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@x.png" />
+                    </image>
+                </ImageView>
+                <Button fx:id="btnDelete" layoutX="121.0" layoutY="389.0" mnemonicParsing="false" prefHeight="22.0" prefWidth="71.0" text="DELETE">
+                    <font>
+                        <Font name="Arial Bold" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="btnPrint" layoutX="753.0" layoutY="29.0" mnemonicParsing="false" text="PRINT" />
+            </children>
+        </Pane>
+    </center>
+    <top>
+        <Pane prefHeight="96.0" prefWidth="700.0" style="-fx-background-color: #3F2B63;" BorderPane.alignment="CENTER">
+            <children>
+                <Button layoutY="16.0" mnemonicParsing="false" prefHeight="79.0" prefWidth="174.0" style="-fx-background-color: #3F2B63;" text="Maz Solutions" textFill="#d0c1c1">
+                    <font>
+                        <Font name="System Italic" size="21.0" />
+                    </font>
+                </Button>
+                <fx:include fx:id="menu" source="Menu.fxml" />
+                <Button fx:id="btnRound" layoutX="867.0" layoutY="42.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="37.0" style="-fx-background-radius: 100; -fx-background-color: #d0c1c1;" text="A" />
+                <ImageView fitHeight="38.0" fitWidth="36.0" layoutX="811.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../Downloads/setting.png" />
+                    </image>
+                </ImageView>
+            </children>
+        </Pane>
+    </top>
 </BorderPane>

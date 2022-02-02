@@ -66,6 +66,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import restful.StudentRESTClient;
+import static view.AdminTeacherWindowController.stage;
 
 /**
  * Controller class for students management view . It contains event handlers
@@ -203,7 +204,9 @@ public class WindowStudentAdminController {
     /**
      * To work with stage methods.
      */
-    private Stage stage;
+    private Stage stage = new Stage();
+
+    private static final Logger LOGGER = Logger.getLogger("view");
 
     /**
      * Method for initializing WindowStudentAdmin Stage.
@@ -218,10 +221,10 @@ public class WindowStudentAdminController {
             // coursesData inizialization.
             coursesData = FXCollections.observableArrayList(restCourses.findAllCourses(new GenericType<List<Course>>() {
             }));
-            stage = new Stage();
             Scene scene = new Scene(root);
             //Set stage properties
             stage.setScene(scene);
+            stage.setTitle("Student Crud");
             stage.setResizable(false);
             // Table and controls inizialization.
             tblStudents.setEditable(true);
@@ -261,9 +264,12 @@ public class WindowStudentAdminController {
             tfSearch.textProperty().addListener(this::textChanged);
             ivX.setOnMouseClicked(this::cancel);
             tblStudents.getSelectionModel().selectedItemProperty().addListener(this::tableSelectionChanged);
-            lblTeacherCourses.setOnMouseClicked(this::changeToTeacherWindow);
+            lblTeachers.setOnMouseClicked(this::changeToTeacherWindow);
             btnPrint.setOnMouseClicked(this::printReport);
             //Show window.
+            MenuData menuData = new MenuData();
+            menuData.setStage(stage);
+            menuData.setUser(user);
             stage.show();
         } catch (ClientErrorException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable." + e.getMessage(), ButtonType.OK);
@@ -278,7 +284,7 @@ public class WindowStudentAdminController {
      * @param action The ActionEvent object for the event.
      */
     public void create(ActionEvent action) {
-        //LOGGER.info("Creating user...");
+        LOGGER.info("Creating user...");
         //Set ivSearch invisible.
         ivSearch.setVisible(false);
         //Create an student with a course.
@@ -308,7 +314,7 @@ public class WindowStudentAdminController {
     public void delete(ActionEvent action) {
 
         try {
-            //LOGGER.info("Deleting user...");
+            LOGGER.info("Deleting user...");
             //Ask user for confirmation on delete.
             Alert deleteConfirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
             deleteConfirmationAlert.setHeaderText(null);
@@ -692,13 +698,13 @@ public class WindowStudentAdminController {
      */
     public void changeToTeacherWindow(MouseEvent event) {
 
-        //LOGGER.info("Changing to teacher window.");
+        LOGGER.info("Changing to teacher window.");
         stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
         try {
             Parent root = (Parent) loader.load();
             AdminTeacherWindowController controller = loader.getController();
-            //controller.setUser(user);
+            controller.setUser(user);
             controller.initStage(root);
         } catch (IOException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "ERROR WHILE SIGNING UP", ButtonType.OK);
@@ -732,9 +738,9 @@ public class WindowStudentAdminController {
      */
     public void printReport(MouseEvent event) {
 
-        //LOGGER.info("Beginning printing action...");
+        LOGGER.info("Beginning printing action...");
         try {
-            JasperReport report = JasperCompileManager.compileReport(getClass().getResourceAsStream("/view/AdminStudentReport.jrxml"));
+            JasperReport report = JasperCompileManager.compileReport(getClass().getResourceAsStream("/report/AdminStudentReport.jrxml"));
             JRBeanCollectionDataSource dataItems = new JRBeanCollectionDataSource((Collection<Student>) this.tblStudents.getItems());
             Map<String, Object> parameters = new HashMap<>();
             JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataItems);

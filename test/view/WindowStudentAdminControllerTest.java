@@ -133,7 +133,7 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         clickOn(chbFilterStudents);
         clickOn("Student full name");
         clickOn(tfSearch);
-        tfSearch.setText("Miguel Sanchez Herrero");
+        tfSearch.setText("Miguel Angel Sanchez Herrero");
         clickOn(ivSearch);
         assertEquals("The filter is not working."
                 , studentsData.stream().filter(u->u.getFullName().equals(tfSearch.getText())).count()
