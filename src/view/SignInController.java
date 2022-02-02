@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.ProcessingException;
 
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
@@ -144,6 +145,9 @@ public class SignInController {
             alert.show();
             LOGGER.warning("Error while signing in");
             LOGGER.warning(e.getMessage());
+        }catch(Exception e){
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unable to connect to server right now try again later", ButtonType.OK);
+            alert.show();
         }
 
     }
