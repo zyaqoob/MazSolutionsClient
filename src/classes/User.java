@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Entity representing generic user of the application. It contains the following fields:
  * userId, login, email, password, telephone, lastPasswordChange, status, birthDate, fullName.
- * @author Miguel Ángel Sánchez
+ * @author Aitor Ruiz de Gauna
  */
 
 

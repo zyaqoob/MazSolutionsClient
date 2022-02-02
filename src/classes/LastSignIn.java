@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author 2dam
+ * @author Aitor Ruiz de Gauna
  */
 @XmlRootElement
 public class LastSignIn implements Serializable {

@@ -78,13 +78,12 @@ import restful.TeacherRESTClient;
 
 /**
  *
- * @author Aitor
+ * @author Aitor Ruiz de Gauna
  */
 /**
  * Class that controlls the WindowTeacherAdmin, setting the actions to do to the
  * widgets, and setting the values of the table.
  *
- * @author Aitor
  */
 public class AdminTeacherWindowController {
 
@@ -474,7 +473,7 @@ public class AdminTeacherWindowController {
                             tblTeachers.refresh();
                         } catch (InternalServerErrorException e) {
                             LOGGER.severe("Window Teacher Admin: Unexpected error ocurred during modifying the fullname");
-                            Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during modifying");
+                            Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during the fullname modification");
                             alert.show();
                             teachers = FXCollections.observableArrayList(teacherManager.findAllTeacher(new GenericType<List<Teacher>>() {
                             }));
@@ -572,17 +571,17 @@ public class AdminTeacherWindowController {
                                 tblTeachers.refresh();
                             } catch (InternalServerErrorException e) {
                                 LOGGER.severe("Window Teacher Admin: Unexpected error ocurred during modifying the telephone");
-                                Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during modifying");
+                                Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during the telephone modification");
                                 alert.show();
                             }
-                            tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcBirthDate);
-                            tblTeachers.edit(t.getTablePosition().getRow(), tbcBirthDate);
                             // tblTeachers.getColumns().add(tbcTelephone);
                         }
+                        tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcBirthDate);
+                        tblTeachers.edit(t.getTablePosition().getRow(), tbcBirthDate);
                     }
                 });
         //Setting the cell factory for the table column birthDate
-        //The cell factory will be a TexFieldTableCell.
+        //The cell factory will be a DatePickerCell.
         //If the creation is active, at the time of commiting the edit the value will not be sent to the server to be updated.
         //This cellFactory is set with an instance of the DatePickerCell class.Which set the functioning of startEdit,updateItem,cancelEdit.
         Callback<TableColumn<Teacher, Date>, TableCell<Teacher, Date>> dateCellFactory
@@ -602,13 +601,16 @@ public class AdminTeacherWindowController {
                             tblTeachers.refresh();
                         } catch (InternalServerErrorException e) {
                             LOGGER.severe("Window Teacher Admin: Unexpected error ocurred during modifying the birthDate");
-                            Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during modifying");
+                            Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during the birthdate modification");
                             alert.show();
                         }
                     }
                     tblTeachers.getSelectionModel().select(t.getTablePosition().getRow(), tbcCourse);
                     tblTeachers.edit(t.getTablePosition().getRow(), tbcCourse);
                 });
+        tbcBirthDate.setOnEditCancel((TableColumn.CellEditEvent<Teacher, Date> t) -> {
+            tblTeachers.refresh();
+        });
         //Setting the cell factory for the table column salary
         //The cell factory will be a TexFieldTableCell.
         //If the creation is active, at the time of commiting the edit the value will not be sent to the server to be updated.
@@ -632,7 +634,7 @@ public class AdminTeacherWindowController {
                                 tblTeachers.refresh();
                             } catch (InternalServerErrorException e) {
                                 LOGGER.severe("Window Teacher Admin: Unexpected error ocurred during modifying the salary");
-                                Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during modifying");
+                                Alert alert = new Alert(AlertType.ERROR, "Unexpected error ocurred during the salary modification");
                                 alert.show();
                             }
                         }
@@ -664,7 +666,7 @@ public class AdminTeacherWindowController {
 
         });
         //Setting the cell factory for the table column course
-        //The cell factory will be a TexFieldTableCell.
+        //The cell factory will be a ChoiceBoxTableCell.
         //If the creation is active, at the time of commiting the edit the value will not be sent to the server to be updated.
         tbcCourse.setOnEditCommit(
                 (CellEditEvent<Teacher, String> t) -> {
@@ -688,11 +690,14 @@ public class AdminTeacherWindowController {
                     }
                 });
     }
+
     /**
-     * Listener that controls that the text field for filter has not reach the maximun character limit, if it does an alert will be shown.
+     * Listener that controls that the text field for filter has not reach the
+     * maximun character limit, if it does an alert will be shown.
+     *
      * @param observable
      * @param oldValue
-     * @param newValue 
+     * @param newValue
      */
     private void textChanged(Observable observable, String oldValue, String newValue) {
         if (tfFilter.getText().length() > 255) {
@@ -700,9 +705,11 @@ public class AdminTeacherWindowController {
             alert.show();
         }
     }
+
     /**
      * Method that close this window and open the window student admin.
-     * @param event 
+     *
+     * @param event
      */
     private void goToStudentWindow(MouseEvent event) {
         try {
@@ -716,16 +723,20 @@ public class AdminTeacherWindowController {
             Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     /**
      * Method that return the user.
+     *
      * @return user
      */
     public User getUser() {
         return user;
     }
+
     /**
      * Method that set the value of the user.
-     * @param user 
+     *
+     * @param user
      */
     public void setUser(User user) {
         this.user = user;
