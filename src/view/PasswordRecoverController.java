@@ -23,6 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.core.GenericType;
 import restful.UserRESTClient;
 
@@ -75,7 +76,7 @@ public class PasswordRecoverController {
             }, email);
                 txtEmail.setText("");
                 txtInfo.setVisible(true);
-            } catch (Exception e) {
+            } catch (InternalServerErrorException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Introduced Email does not belong to any account.", ButtonType.OK);
                 alert.show();
             }
