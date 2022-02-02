@@ -77,8 +77,7 @@ public class ExamSessionControllerTest extends ApplicationTest {
         clickOn("#txtPasswd");
         write("zF0yB1");
         clickOn("#btnSignIn");
-        verifyThat("Unable to connect to server right now, try again later after a while", isVisible());
-        clickOn("OK");
+        
     }
     @Test
     public void testA_initialInteraction() {
@@ -100,6 +99,8 @@ public class ExamSessionControllerTest extends ApplicationTest {
         write("zyaqoob");
         clickOn("#txtPasswd");
         write("uI7oU7");
+        
+       
         clickOn("#btnSignIn");
         verifyThat("#examSessionPane", isVisible());
     }
@@ -132,7 +133,7 @@ public class ExamSessionControllerTest extends ApplicationTest {
         assertTrue("No record matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getExam()
                 .getSubject().getName().equalsIgnoreCase(txtFilters.getText())).count() == 0);
-        txtFilters.setText("Acceso a Datos");
+        txtFilters.setText("Sistemas de Gestion Empresarial");
         clickOn("#ivSearch");
         assertTrue("Rocords matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getExam().getSubject().getName().equals(txtFilters.getText())).count() > 0);
@@ -148,7 +149,7 @@ public class ExamSessionControllerTest extends ApplicationTest {
         assertTrue("No record matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getExam().getExamStatement()
                 .equalsIgnoreCase(txtFilters.getText())).count() == 0);
-        txtFilters.setText("Third Exam Statement");
+        txtFilters.setText("First Exam Statement");
         clickOn("#ivSearch");
         assertTrue("Records matched to the given value",
                 tblExamSession.getItems().stream().filter(e -> e.getExam().getExamStatement()
@@ -196,27 +197,7 @@ public class ExamSessionControllerTest extends ApplicationTest {
         clickOn("#ivSearch");
     }
 
-   /* @Test
-    public void testD_CheckDelete() {
-        tblExamSession = lookup("#tblExamSession").query();
-        loadAllDataInTable();
-        int totalRows = tblExamSession.getItems().size();
-        Node row = lookup(".table-row-cell").nth(totalRows - 1).query();
-        clickOn(row);
-
-        verifyThat("#btnCreate", isEnabled());
-        verifyThat("#ivTick", isInvisible());
-        verifyThat("#ivCross", isInvisible());
-        verifyThat("#btnDelete", isEnabled());
-        clickOn("#btnDelete");
-        verifyThat("Are you sure you want to delete the record.?", isVisible());
-        clickOn("No");
-        assertEquals("Row have been deleted", totalRows, tblExamSession.getItems().size());
-        clickOn("#btnDelete");
-        clickOn("Yes");
-        assertEquals("Row have not been deleted correctly", totalRows - 1, tblExamSession.getItems().size());
-
-    }*/
+   
 
     @Test
 
@@ -319,9 +300,9 @@ public class ExamSessionControllerTest extends ApplicationTest {
         type(KeyCode.BACK_SPACE);
         write("13-01-2022 : 12:10 PM");
         type(KeyCode.ENTER);
-        Calendar cal = Calendar.getInstance();
+       /* Calendar cal = Calendar.getInstance();
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm aa");
-        /*assertTrue("Error while updating date Start", tblExamSession.getItems().
+        assertTrue("Error while updating date Start", tblExamSession.getItems().
                 stream().filter(e -> e.getStudent().getFullName().equalsIgnoreCase("Zeeshan Yaqoob")
                         && e.getDateTimeStart().equals(dateFormat.format("13-01-2022 : 12:10 PM"))).count() > 0);}*/
         type(KeyCode.ENTER);

@@ -78,7 +78,10 @@ public class PasswordRecoverController {
                 txtInfo.setVisible(true);
             } catch (InternalServerErrorException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Introduced Email does not belong to any account.", ButtonType.OK);
-                alert.show();
+                alert.show();             
+            }catch(Exception e ){
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error occured, unable to connect to server.", ButtonType.OK);
+                alert.show();   
             }
         } else {
             lblMax.setText("Not a valid email address");

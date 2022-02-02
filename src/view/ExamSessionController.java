@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -54,6 +55,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.GenericType;
 import logic.RESTfulClientType;
 import logic.RESTfulFactory;
@@ -68,11 +70,13 @@ import net.sf.jasperreports.view.JasperViewer;
 import restful.StudentRESTClient;
 
 /**
+ * Class that manages exam session controller.
  *
- * @author z332h
+ * @author Zeeshan
  */
 public class ExamSessionController {
 
+    private static final Logger LOGGER = Logger.getLogger(ExamSessionController.class.getName());
     //Choice box for the filters
     @FXML
     private ChoiceBox chBoxFilters;
@@ -198,6 +202,7 @@ public class ExamSessionController {
      * stage.
      */
     public void initStage(Parent root) {
+        LOGGER.info("Exam Session window started");
         Stage stage = new Stage();
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -218,7 +223,7 @@ public class ExamSessionController {
         btnDelete.setOnAction(this::handleDeleteEvent);
         btnRound.setText(user.getFullName().substring(0, 1));
         dateFormat = new SimpleDateFormat("dd-MM-yyyy : hh:mm aa");
-
+        txtFilters.textProperty().addListener(this::handleTextSize);
         factory = new RESTfulFactory();
         examSessionManager = (ExamSessionManager) factory.getRESTClient(RESTfulClientType.EXAM_SESSION);
 
@@ -241,12 +246,12 @@ public class ExamSessionController {
             //Fetching exam session data.
             examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));
-            
-        } catch (InternalServerErrorException e) {
+
+        } catch (InternalServerErrorException | ProcessingException e) {
             //In case of error occurs in server, exception is thrown.
             Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured", ButtonType.OK);
             alert.show();
-
+            LOGGER.warning("Error while fetching data from server to load in table");
         }
         //Setting cell data value.
         tcSubject.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getExam().getSubject().getName()));
@@ -255,8 +260,7 @@ public class ExamSessionController {
         tcDateStart.setCellValueFactory(cellData -> new SimpleStringProperty(dateFormat.format(cellData.getValue().getDateTimeStart().getTime())));
         tcDateEnd.setCellValueFactory(cellData -> new SimpleStringProperty(dateFormat.format(cellData.getValue().getDateTimeEnd().getTime())));
         tcMark.setCellValueFactory(cellData -> new SimpleObjectProperty(String.valueOf(cellData.getValue().getMark())));
-        
-        
+
         //Adding filters to choice box of filters.
         for (int i = 0; i < tblExamSession.getColumns().size(); i++) {
             if (!tblExamSession.getColumns().get(i).getText().equals(tcDateEnd.getText())
@@ -266,8 +270,7 @@ public class ExamSessionController {
         }
         chBoxFilters.getItems().add("Show all");
         chBoxFilters.getSelectionModel().selectFirst();
-        
-        
+
         //Adding subject to subject column cell choice box.
         //Table column subject setting cell value factory to choice box, and setting it on editcommit.
         ObservableList<String> subjectNames;
@@ -279,7 +282,7 @@ public class ExamSessionController {
         tcSubject.setCellFactory(ChoiceBoxTableCell.forTableColumn(subjectNames));
         tcSubject.setOnEditCommit(this::handleTcSubjectEdit);
         tcSubject.setEditable(false);
-        
+
         //Adding exams to exam column cell choice box.
         //Table column exam setting cell value factory to choice box, and setting it on editcommit.
         ObservableList<String> examNames;
@@ -290,7 +293,7 @@ public class ExamSessionController {
         examNames = FXCollections.observableArrayList(eNames);
         tcExam.setCellFactory(ChoiceBoxTableCell.forTableColumn(examNames));
         tcExam.setOnEditCommit(this::handleTcExamEdit);
-        
+
         //Adding Studnets to student column cell choice box.
         //Table column student setting cell value factory to choice box., and setting it on editcommit.
         ObservableList<String> studentNames;
@@ -301,8 +304,7 @@ public class ExamSessionController {
         studentNames = FXCollections.observableArrayList(names);
         tcStudent.setCellFactory(ChoiceBoxTableCell.forTableColumn(studentNames));
         tcStudent.setOnEditCommit(this::handleTcStudentEdit);
-        
-        
+
         //Table column dateTimeStart setting cell value factory to text field, and setting it on editcommit.
         tcDateStart.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcDateStart.setOnEditCommit(this::handleTcDateStartEdit);
@@ -314,13 +316,13 @@ public class ExamSessionController {
         //Table Column mark.setting cell value factory to text field, and setting it on editcommit.
         tcMark.setCellFactory(TextFieldTableCell.<ExamSession>forTableColumn());
         tcMark.setOnEditCommit(this::handleTcMarkEdit);
-        
+
         //Image view green tick set on mouse click.
         ivTick.setOnMouseClicked(this::handleAcceptEvent);
-        
+
         //Image view red cross set on mouse click.
         ivCross.setOnMouseClicked(this::handleCreateCancelEvent);
-        
+
         //Loading exam session data in table.
         tblExamSession.setItems(examSessionData);
         MenuData menuData = new MenuData();
@@ -333,10 +335,11 @@ public class ExamSessionController {
 
     /**
      * Method that handles to subject edit.
+     *
      * @param t event that rises after clicking on the subject cell.
      */
     private void handleTcSubjectEdit(CellEditEvent<ExamSession, String> t) {
-        
+        LOGGER.info("Subject edit commit");
         tcExam.setEditable(true);
         try {
             //Changed subject searched form subject data to update the record.
@@ -351,36 +354,42 @@ public class ExamSessionController {
                 try {
                     ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                     examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                } catch (InternalServerErrorException e) {
+                } catch (InternalServerErrorException | ProcessingException e) {
                     //In case of error occurs in server while updaing the record
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                     alert.show();
+                    LOGGER.warning("Error while editing subject");
+                    LOGGER.warning(e.getMessage());
                 }
 
             }
             //After submitting and hitting enter edit mode will be transefered to exam cell
             tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcExam);
-            
+
             tblExamSession.edit(t.getTablePosition().getRow(), tcExam);
         } catch (Exception e) {
             //In case of error occurs an exception is thrwon
             Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error in edit subject");
+            LOGGER.warning(e.getMessage());
         }
 
     }
-    
+
     /**
      * Method that handle edit of exam cell
+     *
      * @param t event that rises after clicking on exam cell.
      */
     private void handleTcExamEdit(CellEditEvent<ExamSession, String> t) {
+        LOGGER.info("Exam edit commit");
         boolean found = false;
         String examStatement = t.getOldValue();
         Exam exam;
         try {
             ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getExam().setExamStatement(t.getNewValue());
-             //Changed Exam searched form exam data and confirmation that change exam does belong to the selected subject to update the record.
+            //Changed Exam searched form exam data and confirmation that change exam does belong to the selected subject to update the record.
             for (int i = 0; i < examData.size(); i++) {
                 if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getExam().getExamStatement().equals(examData.get(i).getExamStatement())
                         && t.getTableView().getItems().get(t.getTablePosition().getRow()).getExam().getSubject().getName().equals(examData.get(i).getSubject().getName())) {
@@ -389,7 +398,7 @@ public class ExamSessionController {
                 }
             }
             if (!found) {
-               //in case of changed exam does not belong to selected subject alert is shown
+                //in case of changed exam does not belong to selected subject alert is shown
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid Exam for selected Subject.", ButtonType.OK);
                 alert.show();
                 t.consume();
@@ -402,10 +411,12 @@ public class ExamSessionController {
                     //If everything is correct record will get updated.
                     ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                     examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                } catch (InternalServerErrorException e) {
+                } catch (InternalServerErrorException | ProcessingException e) {
                     //In case of error occurs in server while updaing the record
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                     alert.show();
+                    LOGGER.warning("Error while editing exam");
+                    LOGGER.warning(e.getMessage());
                 }
 
             }
@@ -423,15 +434,17 @@ public class ExamSessionController {
             alert.show();
         }
     }
-    
+
     /**
      * Method that handles student cell edit
+     *
      * @param t event that rises after clicking on student cell to edit.
      */
     private void handleTcStudentEdit(CellEditEvent<ExamSession, String> t) {
+        LOGGER.info("Student edit commit");
         try {
             ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).getStudent().setFullName(t.getNewValue());
-             //Changed student searched form student data to update the record.
+            //Changed student searched form student data to update the record.
             for (int i = 0; i < studentData.size(); i++) {
                 if (t.getTableView().getItems().get(t.getTablePosition().getRow()).getStudent().getFullName().equals(studentData.get(i).getFullName())) {
                     t.getTableView().getItems().get(t.getTablePosition().getRow()).setStudent(studentData.get(i));
@@ -442,28 +455,31 @@ public class ExamSessionController {
                 try {
                     ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                     examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                } catch (InternalServerErrorException e) {
+                } catch (InternalServerErrorException | ProcessingException e) {
                     ///In case of error occurs in server while updaing the record
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                     alert.show();
+                    LOGGER.warning("Error while editing student");
+                    LOGGER.warning(e.getMessage());
                 }
-
             }
-            
-             //After submitting and hitting enter edit mode will be transefered to edate start cell
-            tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateStart);
-            tblExamSession.edit(t.getTablePosition().getRow(), tcDateStart);
-        } catch (Exception e) {
+                //After submitting and hitting enter edit mode will be transefered to edate start cell
+                tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcDateStart);
+                tblExamSession.edit(t.getTablePosition().getRow(), tcDateStart);
+            }catch (Exception e) {
             //in case of an error occurs.
             Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured", ButtonType.OK);
             alert.show();
+        
         }
-
-    }
-
-    
-
+        }
+        /**
+         * Method that handles the date start edit
+         *
+         * @param t event that rises on editing the date start edit commit.
+         */
     private void handleTcDateStartEdit(CellEditEvent<ExamSession, String> t) {
+        LOGGER.info("Date start edit commit");
         try {
             //An object of calendar. so that newly entered value parsed and formatted.
             Calendar cal = new GregorianCalendar();
@@ -472,7 +488,7 @@ public class ExamSessionController {
             cal.setTime(dateFormat.parse(dateFormat.format(date)));
             //Date end to compare with newly entered date
             Calendar calendar = t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeEnd();
-           
+
             if (calendar.getTime().before(date)) {
                 //If new date is after date end, error is shown
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Date Start should be before the Date End", ButtonType.OK);
@@ -480,18 +496,20 @@ public class ExamSessionController {
                 tblExamSession.refresh();
 
             } else {
-                
+
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeStart(cal);
                 if (!ivTick.isVisible()) {
-                    
+
                     //If image view tick is invisble, that we would be existing recod and record will get updated.
                     try {
                         ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                         examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                    } catch (InternalServerErrorException e) {
+                    } catch (InternalServerErrorException | ProcessingException e) {
                         //In case of error occurs in server while updaing the record
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                         alert.show();
+                        LOGGER.warning("Error while editing date start");
+                        LOGGER.warning(e.getMessage());
                     }
 
                 }
@@ -509,7 +527,13 @@ public class ExamSessionController {
         }
     }
 
+    /**
+     * method that handles date time end cell edit
+     *
+     * @param t that rises on the date cell edit commit.
+     */
     private void handleTcDateEndEdit(CellEditEvent<ExamSession, String> t) {
+        LOGGER.info("Date end edit commit");
         try {
             //An object of calendar. so that newly entered value parsed and formatted.
             Calendar cal = new GregorianCalendar();
@@ -519,7 +543,7 @@ public class ExamSessionController {
             Calendar calendar = t.getTableView().getItems().get(t.getTablePosition().getRow()).getDateTimeStart();
 
             if (calendar.getTime().after(date)) {
-                 //If new date is before date start, error is shown
+                //If new date is before date start, error is shown
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Date End should be after the Date Start", ButtonType.OK);
                 alert.show();
                 tblExamSession.refresh();
@@ -527,14 +551,16 @@ public class ExamSessionController {
             } else {
                 ((ExamSession) t.getTableView().getItems().get(t.getTablePosition().getRow())).setDateTimeEnd(cal);
                 if (!ivTick.isVisible()) {
-                     //If image view tick is invisble, that we would be existing recod and record will get updated.
+                    //If image view tick is invisble, that we would be existing recod and record will get updated.
                     try {
                         ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                         examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                    } catch (InternalServerErrorException e) {
+                    } catch (InternalServerErrorException | ProcessingException e) {
                         //In case of error occurs in server while updaing the record
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                         alert.show();
+                        LOGGER.warning("Error while editing date end");
+                        LOGGER.warning(e.getMessage());
                     }
 
                 }
@@ -550,7 +576,13 @@ public class ExamSessionController {
         }
     }
 
+    /**
+     * Method that handle mark edit.
+     *
+     * @param t event that rises on mark edit commit.
+     */
     private void handleTcMarkEdit(CellEditEvent<ExamSession, String> t) {
+        LOGGER.info("Mark edit commit");
         try {
             //Confirmation that value entered for mark only contains digits and its value is between 0 to 10, both included.
             if (!t.getNewValue().matches("\\d*") || Integer.parseInt(t.getNewValue().trim()) > 10) {
@@ -567,11 +599,19 @@ public class ExamSessionController {
                     try {
                         ExamSession examSession = t.getTableView().getItems().get(t.getTablePosition().getRow());
                         examSessionManager.edit(examSession, String.valueOf(examSession.getIdExamSession()));
-                    } catch (InternalServerErrorException e) {
+                    } catch (InternalServerErrorException | ProcessingException e) {
                         //In case of error occurs in server while updaing the record
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Error while submiting edited record", ButtonType.OK);
                         alert.show();
+                        LOGGER.warning("Error while editing mark");
+                        LOGGER.warning(e.getMessage());
+                    } catch (Exception e) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error, unable to connect to server", ButtonType.OK);
+                        alert.show();
+
                     }
+                    //In case of error occurs in server while updaing the record
+
                 }
                 tblExamSession.getSelectionModel().select(t.getTablePosition().getRow(), tcMark);
                 tblExamSession.edit(t.getTablePosition().getRow(), tcMark);
@@ -584,7 +624,14 @@ public class ExamSessionController {
 
     }
 
-    
+    /**
+     * Method that check if the selected row in table is new or it is an update
+     * so it can manage window controls.
+     *
+     * @param observable value that is being observed
+     * @param oldValue old state of value that is being observed.
+     * @param newValue new state of value that is being observed.
+     */
     private void handleTableSelectionChanged(ObservableValue observable, Object oldValue, Object newValue) {
         if (newValue == null) {
             btnDelete.setDisable(true);
@@ -593,8 +640,25 @@ public class ExamSessionController {
         }
     }
 
+    private void handleTextSize(ObservableValue observable, String oldValue, String newValue) {
+        if (newValue.trim().length() > 255) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "you have reached character limit", ButtonType.OK);
+            alert.show();
+            txtFilters.setText("");
+        }
+
+    }
+
+    /**
+     * Method that handle creation of new record, note that it just add a new
+     * row to table and assign it an object of exam session
+     *
+     * @param action action that took place on hitting create button.
+     */
     private void handleCreationEvent(ActionEvent action) {
+        LOGGER.info("new record for exam session");
         try {
+
             ExamSession eSession = new ExamSession();
             eSession.setStudent(new Student());
             eSession.getStudent().setCourse(new Course());
@@ -614,12 +678,21 @@ public class ExamSessionController {
             tcSubject.setEditable(true);
             tcExam.setEditable(false);
         } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured", ButtonType.OK);
+            alert.show();
         }
 
     }
 
+    /**
+     * Method that handle deletion of record from the table.
+     *
+     * @param action that took place after hitting the delete button.
+     */
     private void handleDeleteEvent(ActionEvent action) {
+        LOGGER.info("Delete a record of exam session");
         try {
+
             tblExamSession.getSelectionModel().getSelectedItem();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete the record.?", ButtonType.YES, ButtonType.NO);
             Optional<ButtonType> button = alert.showAndWait();
@@ -633,36 +706,56 @@ public class ExamSessionController {
 
                 tblExamSession.refresh();
             }
-        } catch (InternalServerErrorException e) {
+        } catch (InternalServerErrorException | ProcessingException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error while deleting ExamSession record", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error while deleting record");
+            LOGGER.warning(e.getMessage());
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error, unable to connect to server", ButtonType.OK);
+            alert.show();
+
         }
 
     }
 
+    /**
+     * Method that handle petition of creation action.
+     *
+     * @param event that took place after clicking on the tick image view,
+     */
     private void handleAcceptEvent(MouseEvent event) {
+        LOGGER.info("Exam Session record creat petition to the server");
         try {
 
+            //selected row set to an object of exam session
             ExamSession examSession = tblExamSession.getSelectionModel().getSelectedItem();
             Subject subject = null;
 
+            //student to set in exam session
             for (int i = 0; i < studentData.size(); i++) {
                 if (examSession.getStudent().getFullName().equals(studentData.get(i).getFullName())) {
                     examSession.setStudent(studentData.get(i));
                 }
             }
+
+            //Subject to set in exam sessions exam subject
             for (int i = 0; i < subjectData.size(); i++) {
                 if (examSession.getExam().getSubject().getName().equals(subjectData.get(i).getName())) {
                     subject = subjectData.get(i);
                 }
             }
+
+            //exam to set in exam session
             for (int i = 0; i < examData.size(); i++) {
                 if (tblExamSession.getSelectionModel().getSelectedItem().getExam().getExamStatement().equals(examData.get(i).getExamStatement())) {
                     examSession.setExam(examData.get(i));
+
+                    //found subject set in exam.
                     examSession.getExam().setSubject(subject);
                 }
             }
-
+            //Create petition to the server.
             examSessionManager.create(examSession);
             examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
             }));
@@ -670,15 +763,26 @@ public class ExamSessionController {
             tblExamSession.refresh();
             btnCreate.setDisable(false);
 
-        } catch (InternalServerErrorException e) {
+        } catch (InternalServerErrorException | ProcessingException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error while creating ExamSession record", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error while submitting exam session to the database");
+            LOGGER.warning(e.getMessage());
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected error, unable to connect to server", ButtonType.OK);
+            alert.show();
+
         }
 
     }
 
+    /**
+     * Method that handle cancelation of create action
+     *
+     * @param event that took place after click on cross image view.
+     */
     private void handleCreateCancelEvent(MouseEvent event) {
-
+        LOGGER.info("Exam Session create cancel");
         try {
 
             ExamSession selectedItem = tblExamSession.getSelectionModel().getSelectedItem();
@@ -693,11 +797,19 @@ public class ExamSessionController {
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "An error occured while canceling the creation of record", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error while canceling the creation of exam session");
+            LOGGER.warning(e.getMessage());
         }
 
     }
 
+    /**
+     * Method that handle the filters
+     *
+     * @param event that took place after click the image view lupa
+     */
     private void handleSearchEvent(MouseEvent event) {
+        LOGGER.info("Search");
         ObservableList<ExamSession> examSessionFilteredData = null;
 
         for (int j = 0; j < tblExamSession.getColumns().size(); j++) {
@@ -752,7 +864,16 @@ public class ExamSessionController {
             try {
                 examSessionData = FXCollections.observableArrayList(examSessionManager.findAllExamSession(new GenericType<List<ExamSession>>() {
                 }));
-            } catch (InternalServerErrorException e) {
+            } catch (InternalServerErrorException | ProcessingException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured", ButtonType.OK);
+                alert.show();
+                LOGGER.warning("Error while loading data");
+                LOGGER.warning(e.getMessage());
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occured, unable to connect to server", ButtonType.OK);
+                alert.show();
+                LOGGER.warning("Error while loading data");
+                LOGGER.warning(e.getMessage());
             }
 
             tblExamSession.setItems(examSessionData);
@@ -761,7 +882,13 @@ public class ExamSessionController {
 
     }
 
+    /**
+     * Method that handle the report generate request.
+     *
+     * @param action that took place after click on the print button.
+     */
     private void handlePrintEvent(ActionEvent action) {
+        LOGGER.info("Print report");
         try {
 
             JasperReport report
@@ -800,6 +927,8 @@ public class ExamSessionController {
 
             Alert alert = new Alert(Alert.AlertType.ERROR, "An error occured while creating report", ButtonType.OK);
             alert.show();
+            LOGGER.warning("Error while generating the report");
+            LOGGER.warning(ex.getMessage());
         }
     }
 
