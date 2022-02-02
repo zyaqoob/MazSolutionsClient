@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Aitor Ruiz de Gauna,Miguel Sanchez,Zeeshan Yaqoob.
+ * @author Aitor Ruiz de Gauna.
  */
 /**
  * Entity that represents the relationship between TeacherCourses and subjects.

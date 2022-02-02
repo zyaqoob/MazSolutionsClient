@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Entity representing Teacher that extends from user.
  *
- * @author Zeeshan Yaqoob
+ * @author Aitor Ruiz de Gauna
  */
 @XmlRootElement
 public class Teacher extends User implements Serializable {

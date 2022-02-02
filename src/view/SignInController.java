@@ -155,7 +155,7 @@ public class SignInController {
      *
      */
     public void signUp(ActionEvent action) {
-     /*   stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUpWindow.fxml"));
         try {
             Parent root = (Parent) loader.load();
@@ -166,9 +166,8 @@ public class SignInController {
             LOGGER.warning("Error while opening Sign up window");
             LOGGER.warning(ex.getMessage());
             alert.show();
-        }*/
         }
-
+        }
     /**
      * This method observe the username and password texts to manage the state
      * of signIn button.
@@ -224,5 +223,7 @@ public class SignInController {
             LOGGER.warning(ex.getMessage());
         }
     }
+    
+    
 
 }
