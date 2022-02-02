@@ -5,6 +5,7 @@
  */
 package restful;
 
+import classes.ExamSession;
 import interfaces.ExamSessionManager;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
@@ -25,14 +26,13 @@ import javax.ws.rs.core.GenericType;
  *
  * @author z332h
  */
-public class ExamSessionRESTClient implements ExamSessionManager{
+public class ExamSessionRESTClient implements ExamSessionManager {
 
     private WebTarget webTarget;
     private Client client;
     private static final String BASE_URI = ResourceBundle.getBundle("config.Config")
             .getString("BASE_URI");
 
-    
     public ExamSessionRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
         webTarget = client.target(BASE_URI).path("entities.examsession");
@@ -54,7 +54,7 @@ public class ExamSessionRESTClient implements ExamSessionManager{
 
     @Override
     public void edit(Object requestEntity, String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<ExamSession>(){});
     }
 
     @Override
@@ -73,12 +73,13 @@ public class ExamSessionRESTClient implements ExamSessionManager{
 
     @Override
     public void create(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML), new GenericType<ExamSession>(){});
     }
 
     @Override
     public <T> T findExamSessionsByStudent(Class<T> responseType, String fullname) throws ClientErrorException {
         WebTarget resource = webTarget;
+        
         resource = resource.path(java.text.MessageFormat.format("student/{0}", new Object[]{fullname}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
@@ -86,12 +87,12 @@ public class ExamSessionRESTClient implements ExamSessionManager{
     @Override
     public <T> T findAll(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get( responseType);
     }
 
     @Override
     public void remove(String id) throws ClientErrorException {
-        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
+        webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete(new GenericType<ExamSession>(){});
     }
 
     @Override
@@ -100,8 +101,10 @@ public class ExamSessionRESTClient implements ExamSessionManager{
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
+    
+
     public void close() {
         client.close();
     }
-    
+
 }

@@ -22,6 +22,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.core.GenericType;
 import restful.UserRESTClient;
 
@@ -64,21 +66,20 @@ public class PasswordRecoverController {
     }
 
     public void handleBtnAcceptAction(ActionEvent action) {
-
+        
         String email = txtEmail.getText();
         User user;
         if (checkEmailRegex(email)) {
-            UserRESTClient restUser = new UserRESTClient();
-            user = restUser.findUserByEmail_XML(new GenericType<User>() {
+            try {
+              UserRESTClient restUser = new UserRESTClient();
+            restUser.findUserByEmail_XML(new GenericType<User>() {
             }, email);
-            if (!user.getEmail().isEmpty()) {
                 txtEmail.setText("");
                 txtInfo.setVisible(true);
-            } else {
+            } catch (InternalServerErrorException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Introduced Email does not belong to any account.", ButtonType.OK);
                 alert.show();
             }
-
         } else {
             lblMax.setText("Not a valid email address");
             lblMax.setVisible(true);
