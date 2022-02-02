@@ -153,9 +153,8 @@ public class AdminTeacherWindowController {
     //ObservableList used to set the table values.
     private ObservableList<Teacher> teachers;
 
-    public static Stage stage = new Stage();
+    public static Stage stageTeacher = new Stage();
 
-    private User user;
     //ObservableList used to get the TeacherCourses name to the tbcCourse.
     private ObservableList<TeacherCourse> teacherCourses;
     //TeacherManager interface which will send the petitions about the teachers to the server side.
@@ -173,9 +172,9 @@ public class AdminTeacherWindowController {
     public void initStage(Parent root) {
         LOGGER.info("Window Teacher Admin: Stage initiated");
         Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Teacher Crud");
-        stage.setResizable(false);
+        stageTeacher.setScene(scene);
+        stageTeacher.setTitle("Teacher Crud");
+        stageTeacher.setResizable(false);
         try {
             //The values for the ObservableList teachers are charged by the method findAllTeacher of the teacherManager
             LOGGER.info("Window Teacher Admin: Getting teachers from the server");
@@ -230,9 +229,6 @@ public class AdminTeacherWindowController {
             btnCreate.setDisable(false);
         });
         tblTeachers.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
-        MenuData menuData = new MenuData();
-        menuData.setStage(stage);
-        menuData.setUser(user);
         tfFilter.textProperty().addListener(this::textChanged);
         lblStudents.setOnMouseClicked(this::goToStudentWindow);
         btnPrint.setOnAction((ActionEvent action) -> {
@@ -251,7 +247,7 @@ public class AdminTeacherWindowController {
                 alert.show();
             }
         });
-        stage.show();
+        stageTeacher.show();
     }
 
     /**
@@ -719,27 +715,9 @@ public class AdminTeacherWindowController {
             root = (Parent) loader.load();
             WindowStudentAdminController controller = loader.getController();
             controller.initStage(root);
-            stage.close();
+            stageTeacher.close();
         } catch (IOException ex) {
             Logger.getLogger(MenuController.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    /**
-     * Method that return the user.
-     *
-     * @return user
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * Method that set the value of the user.
-     *
-     * @param user
-     */
-    public void setUser(User user) {
-        this.user = user;
     }
 }

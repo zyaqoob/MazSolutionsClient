@@ -172,6 +172,8 @@ public class ExamSessionController {
 
     //An object of user that will be recieved after signing correctly.
     private User user;
+    
+    public static Stage stageExam=new Stage();
 
     /**
      * Method that return a user.
@@ -198,12 +200,11 @@ public class ExamSessionController {
      * stage.
      */
     public void initStage(Parent root) {
-        Stage stage = new Stage();
         Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Exam Sessions");
-        stage.setResizable(false);
-        stage.requestFocus();
+        stageExam.setScene(scene);
+        stageExam.setTitle("Exam Sessions");
+        stageExam.setResizable(false);
+        stageExam.requestFocus();
         tblExamSession.setEditable(true);
         tblExamSession.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         btnDelete.setDisable(true);
@@ -323,11 +324,8 @@ public class ExamSessionController {
         
         //Loading exam session data in table.
         tblExamSession.setItems(examSessionData);
-        MenuData menuData = new MenuData();
-        menuData.setStage(stage);
-        menuData.setUser(user);
         //Stage is shown.
-        stage.show();
+        stageExam.show();
 
     }
 
