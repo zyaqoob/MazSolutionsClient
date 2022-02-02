@@ -232,6 +232,7 @@ public class AdminTeacherWindowController {
         tblTeachers.getSelectionModel().selectedItemProperty().addListener(this::handleTableSelectionChanged);
         MenuData menuData = new MenuData();
         menuData.setStage(stage);
+        menuData.setUser(user);
         tfFilter.textProperty().addListener(this::textChanged);
         lblStudents.setOnMouseClicked(this::goToStudentWindow);
         btnPrint.setOnAction((ActionEvent action) -> {

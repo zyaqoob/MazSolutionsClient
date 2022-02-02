@@ -112,7 +112,7 @@
                   <Font name="System Italic" size="21.0" />
                </font>
             </Button>
-            <fx:include fx:id="menu" source="menu.fxml" />
+            <fx:include fx:id="menu" source="Menu.fxml" />
             <Button layoutX="867.0" layoutY="42.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="37.0" style="-fx-background-radius: 100; -fx-background-color: #d0c1c1;" text="A" />
             <ImageView fitHeight="38.0" fitWidth="36.0" layoutX="811.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true">
                <image>

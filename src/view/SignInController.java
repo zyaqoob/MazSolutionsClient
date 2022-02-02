@@ -120,7 +120,7 @@ public class SignInController {
                 try {
                     Parent root = (Parent) loader.load();
                     WindowStudentAdminController controller = loader.getController();
-                    //  controller.setUser(user);
+                    controller.setUser(user);
                     controller.initStage(root);
                 } catch (IOException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Unexpected Error Ocurred", ButtonType.OK);

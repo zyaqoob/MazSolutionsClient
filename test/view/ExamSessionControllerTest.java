@@ -99,7 +99,7 @@ public class ExamSessionControllerTest extends ApplicationTest {
         clickOn("#txtUserName");
         write("zyaqoob");
         clickOn("#txtPasswd");
-        write("zF0yB1");
+        write("uI7oU7");
         clickOn("#btnSignIn");
         verifyThat("#examSessionPane", isVisible());
     }

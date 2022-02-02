@@ -323,7 +323,9 @@ public class ExamSessionController {
         
         //Loading exam session data in table.
         tblExamSession.setItems(examSessionData);
-        
+        MenuData menuData = new MenuData();
+        menuData.setStage(stage);
+        menuData.setUser(user);
         //Stage is shown.
         stage.show();
 
@@ -764,7 +766,7 @@ public class ExamSessionController {
 
             JasperReport report
                     = JasperCompileManager.compileReport(getClass()
-                            .getResourceAsStream("ExamSessionReport.jrxml"));
+                            .getResourceAsStream("/report/ExamSessionReport.jrxml"));
             //Data for the report: a collection of UserBean passed as a JRDataSource 
             //implementation 
             ObservableList<ExamSessionReportAuxClass> examSessionReportData = FXCollections.observableArrayList();

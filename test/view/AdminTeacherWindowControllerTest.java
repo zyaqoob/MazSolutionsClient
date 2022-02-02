@@ -72,6 +72,8 @@ public class AdminTeacherWindowControllerTest extends ApplicationTest {
         clickOn("#txtPasswd");
         write("uA2fN7");
         clickOn("#btnSignIn");
+        verifyThat("#studentsViewPane", isVisible());
+        clickOn("TEACHERS");
         verifyThat("#adminTeacherPane", isVisible());
     }
 
