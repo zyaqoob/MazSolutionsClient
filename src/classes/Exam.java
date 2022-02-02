@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Entity representing Exam.
  *
- * @author Zeeshan Yaqoob
+ * @author Aitor Ruiz de Gauna
  */
 @XmlRootElement
 public class Exam implements Serializable {
