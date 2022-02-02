@@ -66,7 +66,6 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import restful.StudentRESTClient;
-import static view.AdminTeacherWindowController.stage;
 
 /**
  * Controller class for students management view . It contains event handlers
@@ -198,13 +197,9 @@ public class WindowStudentAdminController {
      */
     private final CourseManager restCourses = (CourseManager) new RESTfulFactory().getRESTClient(RESTfulClientType.COURSE);
     /**
-     * User to set or get from other stages.
-     */
-    private User user;
-    /**
      * To work with stage methods.
      */
-    private Stage stage = new Stage();
+    public static Stage stageStudent = new Stage();
 
     private static final Logger LOGGER = Logger.getLogger("view");
 
@@ -223,9 +218,9 @@ public class WindowStudentAdminController {
             }));
             Scene scene = new Scene(root);
             //Set stage properties
-            stage.setScene(scene);
-            stage.setTitle("Student Crud");
-            stage.setResizable(false);
+            stageStudent.setScene(scene);
+            stageStudent.setTitle("Student Crud");
+            stageStudent.setResizable(false);
             // Table and controls inizialization.
             tblStudents.setEditable(true);
             ivTick.setVisible(false);
@@ -267,10 +262,7 @@ public class WindowStudentAdminController {
             lblTeachers.setOnMouseClicked(this::changeToTeacherWindow);
             btnPrint.setOnMouseClicked(this::printReport);
             //Show window.
-            MenuData menuData = new MenuData();
-            menuData.setStage(stage);
-            menuData.setUser(user);
-            stage.show();
+            stageStudent.show();
         } catch (ClientErrorException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Service unavailable." + e.getMessage(), ButtonType.OK);
             alert.show();
@@ -699,37 +691,17 @@ public class WindowStudentAdminController {
     public void changeToTeacherWindow(MouseEvent event) {
 
         LOGGER.info("Changing to teacher window.");
-        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        stageStudent.fireEvent(new WindowEvent(stageStudent, WindowEvent.WINDOW_CLOSE_REQUEST));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/WindowTeacherAdmin.fxml"));
         try {
             Parent root = (Parent) loader.load();
             AdminTeacherWindowController controller = loader.getController();
-            controller.setUser(user);
             controller.initStage(root);
         } catch (IOException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "ERROR WHILE SIGNING UP", ButtonType.OK);
         }
 
     }
-
-    /**
-     * This method return a User.
-     *
-     * @return
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * This method set a User.
-     *
-     * @param user
-     */
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     /**
      * Action event handler for print button. It shows a JFrame containing a
      * report. This JFrame allows to print the report.
