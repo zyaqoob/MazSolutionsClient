@@ -321,7 +321,9 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         type(KeyCode.TAB);
         write("20/5/1966");
         type(KeyCode.ENTER);
-        
+        doubleClickOn("adamito");
+        write("ansuFati");
+        type(KeyCode.ENTER);
         clickOn(chbFilterStudents);
         clickOn("Reset");
         clickOn("#ivSearch");
@@ -334,6 +336,21 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
                 , tblStudents.getItems().size());
         assertTrue("The row was not updated."
                 , tblStudents.getItems().get(0).getFullName().equalsIgnoreCase(tfSearch.getText()));
+        
+        assertTrue("The full name was not modified.", tblStudents.getItems().stream().
+                filter(s -> s.getFullName().equalsIgnoreCase("Ansu Fati")).count() > 0);
+        assertTrue("The year was not modified.", tblStudents.getItems().stream().
+                filter(s -> dateFormatter.format(s.getYear()).equalsIgnoreCase("1966-05-20")).count() > 0);
+        assertTrue("The email was not modified.", tblStudents.getItems().stream().
+                filter(s -> s.getEmail().equalsIgnoreCase("fuerzaFati@gmail.com")).count() > 0);
+        assertTrue("The telephone was not modified.", tblStudents.getItems().stream().
+                filter(s -> s.getTelephone().equalsIgnoreCase("777777777")).count() > 0);
+        assertTrue("The course was not modified.", tblStudents.getItems().stream().
+                filter(s -> s.getCourse().getName().equalsIgnoreCase("2dam")).count() > 0);
+        assertTrue("The borth date was not modified.", tblStudents.getItems().stream().
+                filter(s -> dateFormatter.format(s.getBirthDate()).equalsIgnoreCase("1966-05-20")).count() > 0);
+        assertTrue("The login was not modified.", tblStudents.getItems().stream().
+                filter(s -> s.getLogin().equalsIgnoreCase("ansuFati")).count() > 0);
         
         
     }
@@ -393,6 +410,16 @@ public class WindowStudentAdminControllerTest extends ApplicationTest{
         verifyThat("Are you sure that you want to erase this student?", NodeMatchers.isVisible());    
         clickOn("Cancelar");
         assertEquals("A row has been deleted!!!",rowCount,tblStudents.getItems().size());
+    }
+    
+    @Test
+    public void testK_EmptyStudentCreation() {
+        btnDelete=lookup ("#btnCreate").query();
+        ivTick=lookup ("#ivTick").query();
+        clickOn(btnDelete);
+        clickOn(ivTick);
+        verifyThat("Error while creating the user.", NodeMatchers.isVisible());
+        clickOn("Aceptar");
     }
     
     

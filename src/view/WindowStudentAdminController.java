@@ -489,6 +489,9 @@ public class WindowStudentAdminController {
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcEmail);
                     tblStudents.edit(s.getTablePosition().getRow(), tbcEmail);
                 });
+        tbcYear.setOnEditCancel((TableColumn.CellEditEvent<Student, Date> s) -> {
+            tblStudents.refresh();
+        });
 
         //Table column Email editable with textField
         tbcEmail.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
@@ -565,6 +568,9 @@ public class WindowStudentAdminController {
                     tblStudents.getSelectionModel().select(s.getTablePosition().getRow(), tbcLogin);
                     tblStudents.edit(s.getTablePosition().getRow(), tbcLogin);
                 });
+        tbcBirthDate.setOnEditCancel((TableColumn.CellEditEvent<Student, Date> s) -> {
+            tblStudents.refresh();
+        });
 
         //Table column FullName editable with textField
         tbcLogin.setCellFactory(TextFieldTableCell.<Student>forTableColumn());
