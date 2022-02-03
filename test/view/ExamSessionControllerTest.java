@@ -96,9 +96,9 @@ public class ExamSessionControllerTest extends ApplicationTest {
         type(KeyCode.BACK_SPACE);
         verifyThat("#lblPasswdMax", isInvisible());
         clickOn("#txtUserName");
-        write("zyaqoob");
+        write("juria");
         clickOn("#txtPasswd");
-        write("uI7oU7");
+        write("uA2fN7");
         
        
         clickOn("#btnSignIn");
