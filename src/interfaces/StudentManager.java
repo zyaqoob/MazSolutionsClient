@@ -21,7 +21,6 @@ public interface StudentManager {
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
     public <T> T findRange(Class<T> responseType, String from, String to) throws ClientErrorException;
     public void create(Object requestEntity) throws ClientErrorException;
-    public <T> T findAll(GenericType<T> responseType) throws ClientErrorException;
     public <T> T findAllStudents(GenericType<T> responseType) throws ClientErrorException;
     public void remove(String id) throws ClientErrorException;
     public void close();

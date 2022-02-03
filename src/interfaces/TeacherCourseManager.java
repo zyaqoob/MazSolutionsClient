@@ -30,7 +30,6 @@ public interface TeacherCourseManager {
     
     public <T> T findTeacherCoursesBySubject(Class<T> responseType, String name) throws ClientErrorException;
     
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException;
     
     public <T> T findTeacherCourseByName(GenericType<T>responseType,String name)throws ClientErrorException;
     

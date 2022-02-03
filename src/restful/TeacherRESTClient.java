@@ -95,10 +95,7 @@ public class TeacherRESTClient implements TeacherManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
-    }
+    
 
     @Override
     public void remove(String login) throws ClientErrorException {

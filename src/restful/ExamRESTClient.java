@@ -81,11 +81,7 @@ public class ExamRESTClient implements ExamManager{
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    @Override
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
-    }
+    
 
     @Override
     public void remove(String id) throws ClientErrorException {

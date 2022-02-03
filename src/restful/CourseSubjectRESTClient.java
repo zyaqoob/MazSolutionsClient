@@ -61,9 +61,7 @@ public class CourseSubjectRESTClient {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    public void create_JSON(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_JSON));
-    }
+    
 
     public <T> T findAll(Class<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
