@@ -29,7 +29,6 @@ public interface ExamSessionManager {
 
     public <T> T findExamSessionsByStudent(Class<T> responseType, String fullname) throws ClientErrorException;
 
-    public <T> T findAll(GenericType<T> responseType) throws ClientErrorException ;
 
 
     public void remove(String id) throws ClientErrorException ;

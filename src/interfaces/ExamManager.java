@@ -27,7 +27,6 @@ public interface ExamManager {
 
     public void create(Object requestEntity) throws ClientErrorException ;
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException ;
 
     public void remove(String id) throws ClientErrorException ;
 

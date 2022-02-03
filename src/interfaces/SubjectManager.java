@@ -35,7 +35,6 @@ public interface SubjectManager {
 
     public <T> T findSubjectsByTeacherCourse(Class<T> responseType, String name) throws ClientErrorException;
 
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException;
 
     public void remove(String id) throws ClientErrorException;
 }

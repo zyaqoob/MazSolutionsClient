@@ -92,11 +92,7 @@ public class StudentRESTClient implements StudentManager {
                 });
     }
 
-    @Override
-    public <T> T findAll(GenericType<T> responseType) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
-    }
+   
 
     @Override
     public <T> T findAllStudents(GenericType<T> responseType) throws ClientErrorException {

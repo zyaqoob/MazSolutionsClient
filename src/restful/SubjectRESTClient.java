@@ -102,11 +102,7 @@ public class SubjectRESTClient implements SubjectManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    @Override
-    public <T> T findAll(Class<T> responseType) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
-    }
+    
 
     @Override
     public void remove(String id) throws ClientErrorException {
